@@ -117,12 +117,14 @@ const C = {
    zoeklocatie en competitie-markt
 ───────────────────────────────────────────── */
 const DOMAIN_CONFIG = {
-  nl: { base:"https://www.haarshop.nl",  location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.nl" },
-  de: { base:"https://www.haarshop.de",  location:"Germany",     market:"de", currency:"€", brand:"Haarshop.de" },
-  en: { base:"https://www.haarshop.com", location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.com" },
+  nl: { base:"https://www.haarshop.nl",  location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.nl", audience:"consumer", magentoCode:"haarshop_nl" },
+  de: { base:"https://www.haarshop.de",  location:"Germany",     market:"de", currency:"€", brand:"Haarshop.de", audience:"consumer", magentoCode:"haarshop_de" },
+  en: { base:"https://www.haarshop.com", location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.com", audience:"consumer", magentoCode:"haarshop_en" },
+  pro:{ base:"https://www.haarshoppro.nl",location:"Netherlands",market:"nl", currency:"€", brand:"Haarshoppro.nl", audience:"b2b", magentoCode:"haarshop_b2b" },
 };
 
 function domainFromUrl(url){
+  if(url.includes("haarshoppro.nl")) return "pro";
   if(url.includes("haarshop.de")) return "de";
   if(url.includes("haarshop.com")) return "en";
   return "nl";
@@ -132,6 +134,7 @@ function domainFromUrl(url){
    SITEMAP HAARSHOP.NL (Nederlands)
 ───────────────────────────────────────────── */
 const SITE_MAP_NL = [
+  // Haarverzorging (Verzorging)
   {label:"Haarverzorging",        url:"https://www.haarshop.nl/haarverzorging"},
   {label:"Shampoo",               url:"https://www.haarshop.nl/haarverzorging/shampoo"},
   {label:"Shampoo Bar",           url:"https://www.haarshop.nl/haarverzorging/shampoo/shampoo-bar"},
@@ -140,11 +143,12 @@ const SITE_MAP_NL = [
   {label:"Haarmasker",            url:"https://www.haarshop.nl/haarverzorging/haarmasker"},
   {label:"Haar Treatment",        url:"https://www.haarshop.nl/haarverzorging/treatment"},
   {label:"Haarolie",              url:"https://www.haarshop.nl/haarverzorging/haarolie"},
-  {label:"Hoofdhuid oplossingen", url:"https://www.haarshop.nl/haarverzorging/hoofdhuid-oplossingen"},
+  {label:"Hoofdhuidproblemen",    url:"https://www.haarshop.nl/haarverzorging/hoofdhuid-oplossingen"},
   {label:"Voordeelsets",          url:"https://www.haarshop.nl/haarverzorging/alle-voordeelsets"},
+  // Haarstyling
   {label:"Haarstyling",           url:"https://www.haarshop.nl/haarverzorging/haarstyling"},
   {label:"Krullen Creme",         url:"https://www.haarshop.nl/haarverzorging/haarstyling/krullen-creme"},
-  {label:"Styling Creme & Wax",   url:"https://www.haarshop.nl/haarverzorging/haarstyling/styling-creme-wax"},
+  {label:"Haarcreme",             url:"https://www.haarshop.nl/haarverzorging/haarstyling/styling-creme-wax"},
   {label:"Styling Paste",         url:"https://www.haarshop.nl/haarverzorging/haarstyling/haar-paste"},
   {label:"Haarwax",               url:"https://www.haarshop.nl/haarverzorging/haarstyling/wax"},
   {label:"Volume Poeder",         url:"https://www.haarshop.nl/haarverzorging/haarstyling/volume-poeder"},
@@ -152,33 +156,40 @@ const SITE_MAP_NL = [
   {label:"Pommade",               url:"https://www.haarshop.nl/haarverzorging/haarstyling/pommade"},
   {label:"Haarlak",               url:"https://www.haarshop.nl/haarverzorging/haarstyling/haarspray/haarlak"},
   {label:"Schuimverstevigers",    url:"https://www.haarshop.nl/haarverzorging/haarstyling/schuimverstevigers"},
+  // Haarkleuringen
   {label:"Haarkleuringen",        url:"https://www.haarshop.nl/haarverzorging/haarkleuringen"},
-  {label:"Haarverf",              url:"https://www.haarshop.nl/haarverzorging/haarkleuringen/haarverf"},
-  {label:"Haarspoelingen",        url:"https://www.haarshop.nl/haarverzorging/haarkleuringen/haarspoelingen"},
-  {label:"Blondeer Poeders",      url:"https://www.haarshop.nl/haarverzorging/haarkleuringen/blondeer-poeders"},
-  {label:"Kleur Opfrissers",      url:"https://www.haarshop.nl/haarverzorging/haarkleuringen/kleur-opfrissers-kleur-onderhoud"},
-  {label:"Kleurmousse",           url:"https://www.haarshop.nl/haarverzorging/haarkleuringen/kleurmousse"},
+  // Haarmode & extensions
   {label:"Haaraccessoires",       url:"https://www.haarshop.nl/haarverzorging/haaraccessoires"},
-  {label:"Haarelastiekjes",       url:"https://www.haarshop.nl/haarverzorging/haaraccessoires/haarelastiekjes"},
-  {label:"Scrunchies",            url:"https://www.haarshop.nl/haarverzorging/haaraccessoires/velvet-scrunchie"},
-  {label:"Hairextensions",        url:"https://www.haarshop.nl/professioneel/extensions"},
-  {label:"Haartools",             url:"https://www.haarshop.nl/haarverzorging/haartools"},
-  {label:"Föhns",                 url:"https://www.haarshop.nl/haarverzorging/haartools/fohn"},
-  {label:"Stijltangen",           url:"https://www.haarshop.nl/haarverzorging/haartools/stijltang"},
-  {label:"Krultangen",            url:"https://www.haarshop.nl/haarverzorging/haartools/krultang"},
-  {label:"Baby & Kind",           url:"https://www.haarshop.nl/baby-kind"},
+  {label:"Hair Extensions",       url:"https://www.haarshop.nl/haarverzorging/extensions"},
+  // Huidverzorging (Lichaam)
   {label:"Huidverzorging",        url:"https://www.haarshop.nl/huidverzorging"},
   {label:"Gezichtsverzorging",    url:"https://www.haarshop.nl/huidverzorging/gezicht"},
-  {label:"Gezichtsserum",         url:"https://www.haarshop.nl/huidverzorging/gezicht/serum"},
-  {label:"Gezichtsmasker",        url:"https://www.haarshop.nl/huidverzorging/gezicht/masker"},
   {label:"Lichaamsverzorging",    url:"https://www.haarshop.nl/huidverzorging/lichaam"},
-  {label:"Bodylotion",            url:"https://www.haarshop.nl/huidverzorging/lichaam/bodylotion"},
-  {label:"Douchegel",             url:"https://www.haarshop.nl/huidverzorging/lichaam/douchegel"},
   {label:"Tanning",               url:"https://www.haarshop.nl/huidverzorging/tanning"},
+  {label:"Ontharen",              url:"https://www.haarshop.nl/huidverzorging/ontharen"},
+  {label:"Oogverzorging",         url:"https://www.haarshop.nl/huidverzorging/oogverzorging"},
+  // Make-up
   {label:"Make-up",               url:"https://www.haarshop.nl/make-up"},
-  {label:"Man",                   url:"https://www.haarshop.nl/man"},
+  // Nagels
   {label:"Nagels",                url:"https://www.haarshop.nl/nagels"},
-  {label:"Parfum",                url:"https://www.haarshop.nl/parfum"},
+  // Man
+  {label:"Man",                   url:"https://www.haarshop.nl/man"},
+  {label:"Man Haarproducten",     url:"https://www.haarshop.nl/man/haarproducten"},
+  // Haartools — let op: /tools, NIET /haarverzorging/haartools
+  {label:"Haartools",             url:"https://www.haarshop.nl/tools"},
+  {label:"Stijltang",             url:"https://www.haarshop.nl/tools/stijltangen"},
+  {label:"Krultang",              url:"https://www.haarshop.nl/tools/krultangen-warme-fohnborstels"},
+  {label:"Föhn",                  url:"https://www.haarshop.nl/tools/fohns"},
+  {label:"Föhnborstel",           url:"https://www.haarshop.nl/tools/fohnborstel-krulborstel"},
+  {label:"Tondeuse",              url:"https://www.haarshop.nl/tools/tondeuses-trimmers"},
+  {label:"Trimmer",               url:"https://www.haarshop.nl/tools/trimmers"},
+  {label:"Kammen",                url:"https://www.haarshop.nl/tools/kammen"},
+  {label:"Borstels",              url:"https://www.haarshop.nl/tools/borstels"},
+  // Kappers (Professioneel)
+  {label:"Professioneel",         url:"https://www.haarshop.nl/professioneel"},
+  // Baby & Kind
+  {label:"Baby & Kind",           url:"https://www.haarshop.nl/baby-kind"},
+  // Merken
   {label:"Merken",                url:"https://www.haarshop.nl/merken"},
 ];
 
@@ -188,44 +199,58 @@ const SITE_MAP_NL = [
    Dezelfde URL-patronen maar in het Duits
 ───────────────────────────────────────────── */
 const SITE_MAP_DE = [
+  // Haarpflege
   {label:"Haarpflege",              url:"https://www.haarshop.de/haarpflege"},
   {label:"Shampoo",                 url:"https://www.haarshop.de/haarpflege/shampoo"},
-  {label:"Shampoo nach Haartypen",  url:"https://www.haarshop.de/haarpflege/shampoo/shampoo-nach-haartypen"},
-  {label:"Shampoo gegen Haarausfall",url:"https://www.haarshop.de/haarpflege/shampoo/shampoo-nach-haartypen/shampoo-gegen-haarausfall"},
-  {label:"Shampoo für coloriertes Haar",url:"https://www.haarshop.de/haarpflege/shampoo/shampoo-nach-haartypen/shampoo-fur-coloriertes-haar"},
-  {label:"Shampoo nach Inhaltsstoffen",url:"https://www.haarshop.de/haarpflege/shampoo/shampoo-nach-inhaltsstoffen"},
-  {label:"Shampoo ohne Sulfate",    url:"https://www.haarshop.de/haarpflege/shampoo/shampoo-nach-inhaltsstoffen/shampoo-ohne-sulfate"},
-  {label:"Reinigungsshampoo",       url:"https://www.haarshop.de/haarpflege/shampoo/shampoo-nach-produkttyp/reinigungsshampoo"},
+  {label:"Shampoo Bar",             url:"https://www.haarshop.de/haarpflege/shampoo/shampoo-bar"},
   {label:"Conditioner",             url:"https://www.haarshop.de/haarpflege/conditioner"},
-  {label:"Haarmaske",               url:"https://www.haarshop.de/haarpflege/haarmaske"},
-  {label:"Haaröl",                  url:"https://www.haarshop.de/haarpflege/haaroel"},
   {label:"Leave-in Conditioner",    url:"https://www.haarshop.de/haarpflege/leave-in-conditioner"},
-  {label:"Haarkur",                 url:"https://www.haarshop.de/haarpflege/haarkur"},
-  {label:"Kopfhaut Pflege",         url:"https://www.haarshop.de/haarpflege/kopfhaut-pflege"},
+  {label:"Haarmaske",               url:"https://www.haarshop.de/haarpflege/haarmaske"},
+  {label:"Haarkur",                 url:"https://www.haarshop.de/haarpflege/hair-treatment"},
+  {label:"Kopfhautprobleme",        url:"https://www.haarshop.de/haarpflege/kopfhautprobleme"},
+  {label:"Vorteilsets",             url:"https://www.haarshop.de/haarpflege/vorteilsangebot"},
+  // Styling
   {label:"Haarstyling",             url:"https://www.haarshop.de/haarpflege/haarstyling"},
-  {label:"Haargel",                 url:"https://www.haarshop.de/haarpflege/haarstyling/haargel"},
+  {label:"Haarcreme",               url:"https://www.haarshop.de/haarpflege/haarstyling/styling-creme-wax"},
+  {label:"Styling Paste",           url:"https://www.haarshop.de/haarpflege/haarstyling/styling-paste"},
   {label:"Haarwachs",               url:"https://www.haarshop.de/haarpflege/haarstyling/haarwachs"},
+  {label:"Haargel",                 url:"https://www.haarshop.de/haarpflege/haarstyling/haargel"},
+  {label:"Clay",                    url:"https://www.haarshop.de/haarpflege/haarstyling/hair-clay"},
   {label:"Pomade",                  url:"https://www.haarshop.de/haarpflege/haarstyling/pomade"},
-  {label:"Ölbasierte Pomade",       url:"https://www.haarshop.de/haarpflege/haarstyling/pomade/oelbasierte-pomade"},
-  {label:"Haarspray & Haarlack",    url:"https://www.haarshop.de/haarpflege/haarstyling/haarspray-haarlack"},
-  {label:"Haarlack",                url:"https://www.haarshop.de/haarpflege/haarstyling/haarspray-haarlack/haarlack"},
-  {label:"Lockencreme",             url:"https://www.haarshop.de/haarpflege/haarstyling/krullen-creme"},
-  {label:"Haarfestiger",            url:"https://www.haarshop.de/haarpflege/haarstyling/haarfestiger-fluessig"},
-  {label:"Styling Mousse",          url:"https://www.haarshop.de/haarpflege/haarstyling/styling-mousse"},
+  {label:"Haarspray",               url:"https://www.haarshop.de/haarpflege/haarstyling/haarspray-haarlack"},
+  {label:"Schaumfestiger",          url:"https://www.haarshop.de/haarpflege/haarstyling/schaumfestiger"},
+  // Haarfarben
   {label:"Haarfarben",              url:"https://www.haarshop.de/haarpflege/haarfarben"},
-  {label:"Pflege für coloriertes Haar",url:"https://www.haarshop.de/haarpflege/haarfarben/pflege-fur-coloriertes-haar"},
-  {label:"Haartönung",              url:"https://www.haarshop.de/haarpflege/haarfarben/haarsträhnen-haartonung"},
-  {label:"Haartools",               url:"https://www.haarshop.de/haartools"},
-  {label:"Haartrockner",            url:"https://www.haarshop.de/haartools/haartrockner"},
-  {label:"Glätteisen",              url:"https://www.haarshop.de/haartools/glatteisen"},
-  {label:"Lockenstab",              url:"https://www.haarshop.de/haartools/lockenstab"},
-  {label:"Friseurbedarf",           url:"https://www.haarshop.de/friseurbedarf"},
-  {label:"Hautpflege",              url:"https://www.haarshop.de/hautpflege"},
-  {label:"Gesichtspflege",          url:"https://www.haarshop.de/hautpflege/gesichtspflege"},
-  {label:"Körperpflege",            url:"https://www.haarshop.de/hautpflege/koerperpflege"},
+  {label:"Haarfärbemittel",         url:"https://www.haarshop.de/haarpflege/haarfarben/haarcoloration"},
+  {label:"Haarspülung",             url:"https://www.haarshop.de/haarpflege/haarfarben/haarspuelung"},
+  {label:"Wasserstoffperoxid",      url:"https://www.haarshop.de/haarpflege/haarfarben/wasserstoffperoxid"},
+  {label:"Farbauffrischung",        url:"https://www.haarshop.de/haarpflege/haarfarben/farbauffrischer"},
+  {label:"Farbmousse",              url:"https://www.haarshop.de/haarpflege/haarfarben/farbmousse"},
+  // Styling Tools
+  {label:"Styling Tools",           url:"https://www.haarshop.de/styling-tools"},
+  {label:"Haartrockner",            url:"https://www.haarshop.de/styling-tools/fohn"},
+  {label:"Glätteisen",              url:"https://www.haarshop.de/styling-tools/stijltang"},
+  {label:"Lockenstab",              url:"https://www.haarshop.de/styling-tools/krultang"},
+  // Beautypflege (Haut)
+  {label:"Beautypflege",            url:"https://www.haarshop.de/beautypflege"},
+  {label:"Gesichtspflege",          url:"https://www.haarshop.de/beautypflege/gesichtspflege"},
+  {label:"Gesichtsreinigung",       url:"https://www.haarshop.de/beautypflege/gesichtsreinigung"},
+  {label:"Gesichtsserum",           url:"https://www.haarshop.de/beautypflege/gesichtspflege/gesichtsserum"},
+  {label:"Gesichtsmaske",           url:"https://www.haarshop.de/beautypflege/gesichtspflege/gesichtsmaske"},
+  {label:"Körperpflege",            url:"https://www.haarshop.de/beautypflege/korperpflege"},
+  {label:"Duschgel",                url:"https://www.haarshop.de/beautypflege/korperpflege/duschgel"},
+  {label:"Bodylotion",              url:"https://www.haarshop.de/beautypflege/korperpflege/korperlotion"},
+  {label:"Bräunungsprodukte",       url:"https://www.haarshop.de/beautypflege/braunungsspray"},
+  // Make-up
   {label:"Make-up",                 url:"https://www.haarshop.de/make-up"},
-  {label:"Mann",                    url:"https://www.haarshop.de/mann"},
-  {label:"Nagelpflege",             url:"https://www.haarshop.de/nagelpflege"},
+  // Nägel
+  {label:"Nägel",                   url:"https://www.haarshop.de/nagel"},
+  // Männer
+  {label:"Männer",                  url:"https://www.haarshop.de/maenner"},
+  {label:"Männer Haarpflege",       url:"https://www.haarshop.de/maenner/haarpflege-fur-manner"},
+  // Friseurbedarf
+  {label:"Friseurbedarf",           url:"https://www.haarshop.de/friseurbedarf"},
+  // Marken
   {label:"Marken",                  url:"https://www.haarshop.de/marken"},
 ];
 
@@ -273,10 +298,90 @@ const SITE_MAP_EN = [
 ];
 
 /* ─────────────────────────────────────────────
+   SITEMAP HAARSHOPPRO.NL (B2B — Nederlands)
+   Doelgroep: kappers, nagelstylisten, make-up artists, salonhouders
+───────────────────────────────────────────── */
+const SITE_MAP_PRO = [
+  // Haarverzorging
+  {label:"Haarverzorging",          url:"https://www.haarshoppro.nl/haarverzorging"},
+  {label:"Shampoo",                 url:"https://www.haarshoppro.nl/haarverzorging/shampoo"},
+  {label:"Shampoo Bar",             url:"https://www.haarshoppro.nl/haarverzorging/shampoo/shampoo-bar"},
+  {label:"Conditioner",             url:"https://www.haarshoppro.nl/haarverzorging/conditioners"},
+  {label:"Leave-in Conditioner",    url:"https://www.haarshoppro.nl/haarverzorging/leave-in-conditioners"},
+  {label:"Haarmasker",              url:"https://www.haarshoppro.nl/haarverzorging/haarmasker"},
+  {label:"Haar Treatment",          url:"https://www.haarshoppro.nl/haarverzorging/treatment"},
+  {label:"Haarolie",                url:"https://www.haarshoppro.nl/haarverzorging/haarolie"},
+  {label:"Hoofdhuidproblemen",      url:"https://www.haarshoppro.nl/haarverzorging/hoofdhuid-oplossingen"},
+  {label:"Voordeelsets",            url:"https://www.haarshoppro.nl/haarverzorging/alle-voordeelsets"},
+  {label:"Haarvitamines",           url:"https://www.haarshoppro.nl/haarverzorging/haarvitamine"},
+  // Haarstyling
+  {label:"Haarstyling",             url:"https://www.haarshoppro.nl/haarverzorging/haarstyling"},
+  {label:"Krullen Creme",           url:"https://www.haarshoppro.nl/haarverzorging/haarstyling/krullen-creme"},
+  {label:"Haar Creme",              url:"https://www.haarshoppro.nl/haarverzorging/haarstyling/styling-creme-wax"},
+  {label:"Styling Paste",           url:"https://www.haarshoppro.nl/haarverzorging/haarstyling/haar-paste"},
+  {label:"Haar Wax",                url:"https://www.haarshoppro.nl/haarverzorging/haarstyling/wax"},
+  {label:"Gel",                     url:"https://www.haarshoppro.nl/haarverzorging/haarstyling/gel"},
+  {label:"Pommade",                 url:"https://www.haarshoppro.nl/haarverzorging/haarstyling/pommade"},
+  {label:"Haarlak",                 url:"https://www.haarshoppro.nl/haarverzorging/haarstyling/haarspray"},
+  {label:"Schuimverstevigers",      url:"https://www.haarshoppro.nl/haarverzorging/haarstyling/schuimverstevigers"},
+  // Haarkleuring
+  {label:"Haarkleuringen",          url:"https://www.haarshoppro.nl/haarverzorging/haarkleuringen"},
+  {label:"Permanente Haarverf",     url:"https://www.haarshoppro.nl/haarverzorging/haarkleuringen/haarverf"},
+  {label:"Semi Haarverf",           url:"https://www.haarshoppro.nl/haarverzorging/haarkleuringen/haarspoelingen"},
+  {label:"Blondeerpoeders",         url:"https://www.haarshoppro.nl/haarverzorging/haarkleuringen/blondeer-poeders"},
+  {label:"Waterstof Peroxide",      url:"https://www.haarshoppro.nl/haarverzorging/haarkleuringen/waterstof-peroxide"},
+  {label:"Kleur Opfrissers",        url:"https://www.haarshoppro.nl/haarverzorging/haarkleuringen/kleur-opfrissers-kleur-onderhoud"},
+  {label:"Kleurmousse",             url:"https://www.haarshoppro.nl/haarverzorging/haarkleuringen/kleurmousse"},
+  // Haaraccessoires & Extensions
+  {label:"Haaraccessoires",         url:"https://www.haarshoppro.nl/haarverzorging/haaraccessoires"},
+  {label:"Extensions",              url:"https://www.haarshoppro.nl/haarverzorging/extensions"},
+  // Kappersproducten (professioneel)
+  {label:"Kappersproducten",        url:"https://www.haarshoppro.nl/professioneel"},
+  {label:"Kappers Interieur",       url:"https://www.haarshoppro.nl/professioneel/kappers-interieur"},
+  {label:"Kappersstoelen",          url:"https://www.haarshoppro.nl/professioneel/kappers-interieur/kappersstoelen"},
+  {label:"Kapperskrukken",          url:"https://www.haarshoppro.nl/professioneel/kappers-interieur/kapperskruk"},
+  {label:"Werkwagens",              url:"https://www.haarshoppro.nl/professioneel/kappers-interieur/werkwagen-kapper"},
+  {label:"Kappersscharen",          url:"https://www.haarshoppro.nl/tools/kappers-scharen"},
+  {label:"Knipbenodigdheden",       url:"https://www.haarshoppro.nl/professioneel/knipbenodigdheden"},
+  {label:"Kleurbenodigdheden",      url:"https://www.haarshoppro.nl/professioneel/kleurbenodigdheden"},
+  {label:"Wegwerp Handschoenen",    url:"https://www.haarshoppro.nl/professioneel/wegwerp-handschoenen"},
+  {label:"Permanenten",             url:"https://www.haarshoppro.nl/professioneel/permanent"},
+  {label:"Oefenhoofden",            url:"https://www.haarshoppro.nl/professioneel/oefenmateriaal"},
+  // Tools
+  {label:"Tools",                   url:"https://www.haarshoppro.nl/tools"},
+  {label:"Stijltang",               url:"https://www.haarshoppro.nl/tools/stijltangen"},
+  {label:"Krultang",                url:"https://www.haarshoppro.nl/tools/krultangen-warme-fohnborstels"},
+  {label:"Föhn",                    url:"https://www.haarshoppro.nl/tools/haardrogers"},
+  {label:"Föhnborstel",             url:"https://www.haarshoppro.nl/tools/fohnborstel-krulborstel"},
+  {label:"Tondeuse",                url:"https://www.haarshoppro.nl/tools/tondeuses-trimmers"},
+  {label:"Trimmer",                 url:"https://www.haarshoppro.nl/tools/trimmers"},
+  {label:"Kammen",                  url:"https://www.haarshoppro.nl/tools/kammen"},
+  {label:"Borstels",                url:"https://www.haarshoppro.nl/tools/borstels"},
+  // Huidverzorging
+  {label:"Huidverzorging",          url:"https://www.haarshoppro.nl/huidverzorging"},
+  {label:"Gezichtsverzorging",      url:"https://www.haarshoppro.nl/huidverzorging/gezicht"},
+  {label:"Lichaamsverzorging",      url:"https://www.haarshoppro.nl/huidverzorging/lichaam"},
+  {label:"Tanning",                 url:"https://www.haarshoppro.nl/huidverzorging/tanning"},
+  {label:"Ontharen",                url:"https://www.haarshoppro.nl/huidverzorging/ontharen"},
+  // Make-up
+  {label:"Make-up",                 url:"https://www.haarshoppro.nl/make-up"},
+  {label:"Wenkbrauwverf",           url:"https://www.haarshoppro.nl/make-up/verf"},
+  // Nagels
+  {label:"Nagels",                  url:"https://www.haarshoppro.nl/nagels"},
+  {label:"Acrylnagels",             url:"https://www.haarshoppro.nl/nagels/acryl-nagels"},
+  {label:"Gelnagels",               url:"https://www.haarshoppro.nl/nagels/brisa-gel-nagels"},
+  {label:"Gellak / Shellac",        url:"https://www.haarshoppro.nl/nagels/shellac"},
+  {label:"Manicure",                url:"https://www.haarshoppro.nl/nagels/manicure"},
+  {label:"Pedicure",                url:"https://www.haarshoppro.nl/nagels/pedicure"},
+  // Merken
+  {label:"Merken",                  url:"https://www.haarshoppro.nl/merken"},
+];
+
+/* ─────────────────────────────────────────────
    SITEMAP SELECTOR + RELATED LINKS
 ───────────────────────────────────────────── */
 function getSiteMap(lang){
-  return lang==="de" ? SITE_MAP_DE : lang==="en" ? SITE_MAP_EN : SITE_MAP_NL;
+  return lang==="de" ? SITE_MAP_DE : lang==="en" ? SITE_MAP_EN : lang==="pro" ? SITE_MAP_PRO : SITE_MAP_NL;
 }
 
 function getRelated(url, lang){
@@ -286,13 +391,17 @@ function getRelated(url, lang){
   const path = url.replace(base,"");
   const segs = path.split("/").filter(Boolean);
 
-  // directe kinderen
+  // parent pagina (één niveau hoger)
+  const parentPath = segs.length>1 ? "/"+segs.slice(0,-1).join("/") : null;
+  const parent = parentPath ? map.find(p=>p.url.replace(base,"")===parentPath) : null;
+
+  // directe kinderen (subcategorieën)
   const kids = map.filter(p=>{
     const pp = p.url.replace(base,"");
     return pp.startsWith(path+"/") && pp.split("/").filter(Boolean).length===segs.length+1;
   });
 
-  // siblings: pagina's met hetzelfde parent-segment
+  // siblings: zustercategorieën met hetzelfde parent — DOMINANT voor SEO
   const parentSeg = segs.length>1 ? segs[segs.length-2] : null;
   const sibs = parentSeg ? map.filter(p=>{
     if(p.url===url) return false;
@@ -301,16 +410,83 @@ function getRelated(url, lang){
     return ps.length===segs.length && ps[segs.length-2]===parentSeg;
   }) : [];
 
-  return [...kids,...sibs].slice(0,5).map(p=>({
-    label:p.label, url:p.url,
-    relation:kids.includes(p)?"child":"sibling"
-  }));
+  // cross-category: alleen als er duidelijke routine/gebruikerslogica is
+  // bijv. shampoo ↔ conditioner, haarverzorging ↔ haartools
+  const crossMap = {
+    // NL — subcategorie-niveau koppelingen op basis van haarroutine
+    "shampoo":["haarverzorging/conditioners","haarverzorging/haarmasker"],
+    "conditioners":["haarverzorging/shampoo","haarverzorging/haarmasker"],
+    "leave-in-conditioners":["haarverzorging/conditioners","haarverzorging/haarmasker"],
+    "haarmasker":["haarverzorging/conditioners","haarverzorging/haarolie"],
+    "treatment":["haarverzorging/haarmasker","haarverzorging/hoofdhuid-oplossingen"],
+    "haarolie":["haarverzorging/haarmasker","haarverzorging/leave-in-conditioners"],
+    "hoofdhuid-oplossingen":["haarverzorging/shampoo","haarverzorging/treatment"],
+    "haarstyling":["haarverzorging/shampoo"],
+    "haarkleuringen":["haarverzorging/shampoo","haarverzorging/conditioners"],
+    "haaraccessoires":["haarverzorging/haarstyling"],
+    // DE — correct URLs from live haarshop.de
+    "conditioner":["haarpflege/shampoo","haarpflege/haarmaske"],
+    "haarmaske":["haarpflege/conditioner","haarpflege/leave-in-conditioner"],
+    "leave-in-conditioner":["haarpflege/conditioner","haarpflege/haarmaske"],
+    "hair-treatment":["haarpflege/haarmaske","haarpflege/kopfhautprobleme"],
+    "kopfhautprobleme":["haarpflege/shampoo","haarpflege/hair-treatment"],
+    "haarfarben":["haarpflege/shampoo","haarpflege/conditioner"],
+    // EN
+    "hair-mask":["hair-care/conditioner","hair-care/hair-oil"],
+    "hair-oil":["hair-care/hair-mask","hair-care/leave-in-conditioner"],
+    "scalp-care":["hair-care/shampoo","hair-care/treatment"],
+    "styling-finishing":["hair-care/shampoo"],
+    "hair-coloring":["hair-care/shampoo","hair-care/conditioner"],
+    // PRO (B2B) — professionele routine koppelingen
+    // Verzorging ↔ Kleuring (salonworkflow)
+    "haarkleuringen":["haarverzorging/shampoo","professioneel/kleurbenodigdheden"],
+    "kappers-interieur":["professioneel"],
+    "kappers-scharen":["professioneel/knipbenodigdheden"],
+    // Tools ↔ professioneel
+    "stijltangen":["tools/krultangen-warme-fohnborstels","tools/haardrogers"],
+    "tondeuses-trimmers":["tools/trimmers","tools/kappers-scharen"],
+    // Nagels crosslinks
+    "acryl-nagels":["nagels/brisa-gel-nagels","nagels/nagelverzorging"],
+    "shellac":["nagels/manicure","nagels/nagelverzorging"],
+  };
+  const currentSlug = segs[segs.length-1] || "";
+  const crossPaths = crossMap[currentSlug] || [];
+  const crossLinks = crossPaths.map(cp=>map.find(p=>p.url===base+"/"+cp)).filter(Boolean);
+
+  const result = [];
+  const seen = new Set([url]);
+  const add = (p, relation) => {
+    if(!seen.has(p.url)){seen.add(p.url); result.push({label:p.label, url:p.url, relation});}
+  };
+
+  // PRIORITEIT volgens SEO best practice voor categoriepagina's:
+  // 1. Siblings DOMINANT — sterkste semantisch signaal, zelfde intent cluster (2-4)
+  sibs.slice(0,4).forEach(p=>add(p,"sibling"));
+  // 2. Cross-category BEPERKT — alleen bij duidelijke routine/gebruikerslogica (max 2)
+  crossLinks.slice(0,2).forEach(p=>add(p,"cross-category"));
+  // 3. Parent — voor breadcrumb-achtige navigatie (1)
+  if(parent) add(parent, "parent");
+  // 4. Children — alleen bij brede categoriepagina's die subcategorieën hebben (max 3)
+  kids.slice(0,3).forEach(p=>add(p,"child"));
+
+  return result;
 }
 
 function getSystem(lang){
   const cfg=DOMAIN_CONFIG[lang||"nl"];
-  const nlRules=`VERBOD 1: Nooit een opsommingsteken of streepje gebruiken om zinnen te beginnen of te structureren. Schrijf altijd in lopende alinea's. Het enige geldige gebruik van een koppelteken is als grammaticaal verbindingsteken (bijv. "leave-in conditioner").
+  const nlRules=`VERBOD 1: Nooit een opsommingsteken, streepje (—, –, -) of bullet gebruiken om zinnen te beginnen, te scheiden of te structureren. Schrijf UITSLUITEND in lopende alinea's en volzinnen. Het enige geldige gebruik van een koppelteken is als grammaticaal verbindingsteken binnen een samengesteld woord (bijv. "leave-in conditioner", "B2B"). Geen enkel streepje als scheidingsteken tussen zinnen of ideeën.
 VERBOD 2: Nooit klinken als een AI. Vermijd: "Of je nu...", "Of het nu...", "Nicht nur... sondern auch...", "Whether you...", "Denk aan...", "Kortom...", "Bovendien", "Tevens", "Daarnaast", "Ten eerste", "Ten tweede", "In conclusie", "uitzonderlijk", "ideaal", "optimaal", "essentieel". Schrijf zoals een mens praat.`;
+  if(lang==="pro") return `Jij bent de senior SEO-copywriter van ${cfg.brand}, de online groothandel voor kappers, nagelstylisten, make-up artists en salonhouders in Nederland. Je schrijft als een ervaren vakredacteur die de professionele beauty-industrie door en door kent.
+
+DOELGROEP: Professionals die inkopen voor hun salon of praktijk. Dit zijn vakbekwame ondernemers die weten wat ze nodig hebben. Schrijf deskundig en zakelijk, maar niet stijf. Denk aan het taalgebruik van vakbladen zoals Kappersmagazine of het Vaktijdschrift voor de Huid- en Haarverzorging. Gebruik B2B terminologie waar passend: inkoopprijzen, groothandelprijzen, salonkwaliteit, professionele formule, literprijs, salonverpakking, meerwaarde voor je klant, omzetverhoging, klantenbinding, behandelresultaat, kleurresultaat, product met hoge doorloop, voorraadbeheer, vakkennis, saloninrichting.
+
+LOKALISATIE: Analyseer voor het primaire zoekwoord de top 3 pagina's op Google.nl. Focus op B2B concurrenten en professionele leveranciers (bijv. HairandBeautyOnline.com, Cosmetica-groothandel.nl, Probeauty.nl, Kapperskorting.com, Shopkapper.nl). Analyseer hun productpresentatie, USP's en taalgebruik.
+
+${nlRules}
+
+TONE OF VOICE: ${cfg.brand} spreekt professionals aan met "je" en "jouw". De toon is collegiaal en vakkundig. Je spreekt als branchegenoot, niet als verkoper. Vergelijk het met hoe een ervaren merkvertegenwoordiger met een salonhouder praat: je kent de producten, begrijpt de dagelijkse uitdagingen in de salon en geeft concreet advies. Benadruk meerwaarde voor de professional: hoe een product bijdraagt aan klanttevredenheid, efficiëntie in de salon, of een beter behandelresultaat.
+SEO BOLD-REGELS: Primair zoekwoord vet (<strong>keyword</strong>) in eerste of tweede zin van intro. Secundaire zoekwoorden één keer vet.
+KEYWORD VOLUMES: NL markt, focus op B2B zoekgedrag. Professionele kappers zoeken anders dan consumenten, denk aan "salon shampoo", "haarverf groothandel", "professionele stijltang", "kappersstoel kopen", "salonkleuring". CPC in euro. KD 0-100.`;
   if(lang==="de") return `Du bist der Senior-SEO-Texter von ${cfg.brand}. Du schreibst wie ein erfahrener Redakteur, der die Marke seit Jahren kennt — warm, fachkundig und direkt.
 
 LOKALISIERUNG: Bevor du schreibst, suche die Top-3-Seiten auf Google.de für das primäre Keyword. Analysiere deren Sprache, Terminologie und Ton. Schreibe wie ein nativer Muttersprachler aus der deutschen Beauty-Branche — keine wörtliche Übersetzung aus dem Niederländischen. Verwende deutsche Produktnamen, Markennamen und beauty-spezifische Begriffe wie sie in deutschen Magazinen und Blogs genutzt werden (z.B. "Haarpflegeritual", "Pflegekur", "Haarmaske", "Tiefenpflege", "Kämmbarkeit").
@@ -323,7 +499,7 @@ KEYWORD-VOLUMINA: DE-Markt. Haarpflege gesamt 80k-120k/Mon. Conditioner 18k-25k.
 ÜBERSETZUNG: Liefere zu jedem Textfeld auch eine natürliche niederländische Übersetzung im nl-Feld. Diese ist für niederländische Kollegen gedacht und muss flüssiges Niederländisch sein — keine wörtliche Übersetzung.`;
   if(lang==="en") return `You are the senior SEO copywriter for ${cfg.brand}. You write like an experienced editor who has known the brand for years — warm, expert and direct.
 
-LOCALISATION: Before writing, search the top 3 pages on Google.nl for the primary keyword in English. Study their language patterns, terminology and editorial tone. Write like a native English speaker in the international beauty industry — not translated Dutch. Use terminology familiar to English-speaking shoppers in the Netherlands (e.g. "hair mask", "leave-in conditioner", "curl cream", "frizz control", "heat protection"). Reference international beauty trends when relevant.
+LOCALISATION: Before writing, search the top 3 pages on Google.nl for the primary keyword in English. CRITICAL: The search location is the NETHERLANDS, not the US or France. Study Dutch and European webshops that rank in the Netherlands for English queries (e.g. lookfantastic.nl, beautycos.nl, parfumdreams.nl, notino.nl). Write like a native English speaker in the international beauty industry. Use terminology familiar to English-speaking shoppers IN THE NETHERLANDS. Do NOT analyse US-only (.com) or French (.fr) competitors unless they also rank on Google.nl.
 
 ${nlRules}
 
@@ -343,7 +519,6 @@ KEYWORD VOLUMES: NL markt. Haarverzorging totaal 60k-80k/mnd. Conditioner 22k-28
 }
 
 let _key=localStorage.getItem("hs_key")||"";
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function saveKey(k){_key=k;localStorage.setItem("hs_key",k);}
 
 async function claude(msg,tokens=4000,search=false,lang="nl"){
@@ -360,52 +535,206 @@ async function claude(msg,tokens=4000,search=false,lang="nl"){
   return(d.content||[]).map(b=>b.text||"").join("");
 }
 
-function xj(raw){const s=raw.indexOf("{"),e=raw.lastIndexOf("}");if(s<0||e<0)throw new Error("Geen JSON.");return JSON.parse(raw.slice(s,e+1));}
+function xj(raw){
+  // Try to find JSON block — look for the last { that starts a valid JSON
+  const s=raw.lastIndexOf('{"pageType"');
+  if(s>=0){const e=raw.lastIndexOf("}");if(e>s)return JSON.parse(raw.slice(s,e+1));}
+  const s2=raw.lastIndexOf('{"h1"');
+  if(s2>=0){const e=raw.lastIndexOf("}");if(e>s2)return JSON.parse(raw.slice(s2,e+1));}
+  // Fallback: first { to last }
+  const fs=raw.indexOf("{"),fe=raw.lastIndexOf("}");
+  if(fs<0||fe<0)throw new Error("Geen JSON gevonden in het antwoord.");
+  return JSON.parse(raw.slice(fs,fe+1));
+}
 
 async function analyse(url,lang){
   const cfg=DOMAIN_CONFIG[lang||domainFromUrl(url)||"nl"];
   const slug=url.replace(cfg.base,"").split("/").filter(Boolean).pop()||"";
   const rel=getRelated(url,lang);
-  const ll={nl:"Nederlands",de:"Duits",en:"Engels"}[lang];
+  const ll={nl:"Nederlands",de:"Duits",en:"Engels",pro:"Nederlands (B2B)"}[lang];
 
   const searchNote = lang==="de"
     ? "Voer de SERP-analyse uit op Google.de (Duitsland). Zoekers zijn Duits, concurrenten zijn Duitse webshops. Gebruik zoekvolumes voor de DE-markt."
     : lang==="en"
-    ? "Run SERP analysis on Google.nl (Netherlands) but in English. Searchers use English queries. Use NL search volumes."
+    ? "Run SERP analysis on Google.nl (Netherlands). Search location is the NETHERLANDS, not the US or France. Searchers use English queries but are located in the Netherlands. Find competitors that rank on Google.nl for English beauty queries. Use NL search volumes. Do NOT include US-only or French competitors."
+    : lang==="pro"
+    ? "Voer de SERP-analyse uit op Google.nl (Nederland). Dit is een B2B groothandel webshop voor kappers, nagelstylisten en make-up artists. Zoek naar B2B concurrenten en professionele leveranciers. Analyseer hoe zij productcategorieën beschrijven en welke B2B termen zij gebruiken. Focus op zoektermen met 'professioneel', 'salon', 'groothandel', 'kapper' etc."
     : "Voer de SERP-analyse uit op Google.nl (Nederland). Gebruik zoekvolumes voor de NL-markt.";
 
-  const siteLinks=getSiteMap(lang).slice(0,8).map(p=>`${p.label} → ${p.url}`).join(" | ");
+  const siteLinks=getSiteMap(lang).map(p=>`${p.label} → ${p.url}`).join(" | ");
 
   // gap altijd in het Nederlands, rankFactors in de doeltaal
-  const p=`URL: ${url}\nDomein: ${cfg.brand}\nTaal: ${ll}\nSlug: "${slug}"\nGerelateerde pagina's (gebruik ALLEEN deze URLs voor interne links): ${rel.map(r=>r.label+" → "+r.url).join(" | ")}\nTop-categorieën van dit domein: ${siteLinks}\n\n${searchNote}\n\nBELANGRIJK: Het veld "gap" moet ALTIJD in het Nederlands worden geschreven, ongeacht de taal. Het is bedoeld voor Nederlandse collega's die de kans willen begrijpen.\n\nRetourneer uitsluitend dit JSON:\n\n{"pageType":"categorie","slug":"${slug}","brand":null,"productTypes":["type1"],"hairNeeds":["behoefte1"],"internalLinks":[{"label":"naam","url":"${cfg.base}/juiste-pad","relation":"child"}],"keywords":[{"term":"primair","type":"primary","volumeMonthly":22400,"cpc":0.85,"kd":42,"intent":"transactioneel","trend":"stabiel"},{"term":"long-tail","type":"secondary","volumeMonthly":4800,"cpc":0.60,"kd":28,"intent":"transactioneel","trend":"stijgend"},{"term":"informatief","type":"secondary","volumeMonthly":2200,"cpc":0.40,"kd":18,"intent":"informatief","trend":"stabiel"},{"term":"variant4","type":"secondary","volumeMonthly":1600,"cpc":0.35,"kd":22,"intent":"transactioneel","trend":"stijgend"},{"term":"variant5","type":"secondary","volumeMonthly":890,"cpc":0.30,"kd":14,"intent":"transactioneel","trend":"stabiel"}],"competitors":[{"position":1,"domain":"domein.de","url":"https://url","da":82,"organicTraffic":95000,"rankFactors":["Reden in doeltaal als volledige zin","Reden twee"],"gap":"Kans voor ${cfg.brand} IN HET NEDERLANDS als volledige zin."},{"position":2,"domain":"domein2.de","url":"https://url2","da":75,"organicTraffic":60000,"rankFactors":["reden in doeltaal","reden"],"gap":"Kans in het Nederlands."},{"position":3,"domain":"domein3.de","url":"https://url3","da":68,"organicTraffic":40000,"rankFactors":["reden","reden"],"gap":"Kans in het Nederlands."}]}`;
-  return xj(await claude(p,2800,false,lang));
+  const relStr=rel.map(r=>`${r.label} → ${r.url} (${r.relation})`).join(" | ");
+  const p=`URL: ${url}\nDomein: ${cfg.brand}\nTaal: ${ll}\nSlug: "${slug}"\n\nVoorgeselecteerde interne links (op basis van sitestructuur): ${relStr}\n\nVOLLEDIG SITEMAP van ${cfg.brand} (gebruik ALLEEN URLs uit deze lijst voor interne links):\n${siteLinks}\n\n${searchNote}\n\nBELANGRIJK: Het veld "gap" moet ALTIJD in het Nederlands worden geschreven, ongeacht de taal. Het is bedoeld voor Nederlandse collega's die de kans willen begrijpen.\n\nINTERNE LINKS STRATEGIE:\nDETECTEER EERST: Als de URL een merk/brand bevat (bijv. /merken/kyone), is dit een MERKPAGINA. Link dan PRIMAIR naar productcategorieen die dit merk aanbiedt (cross-category BINNEN het merk). Voorbeeld: Kyone -> scharen, fohns, tondeuses.\nVOOR CATEGORIEPAGINA'S:\nSiblings zijn DOMINANT — zustercategorieën binnen hetzelfde parent dragen het sterkste semantische signaal en versterken de topical focus binnen hetzelfde intent cluster.\n- Kies 2-4 sibling links als hoofdlinks. Dit zijn je belangrijkste interne links.\nCross-category is BEPERKT EN STRATEGISCH — alleen als er een duidelijke routine- of gebruikerslogica is (bijv. shampoo → conditioner, styling → haartools).\n- Maximaal 1-2 cross-category links.\nParent en children zijn contextueel — 1 parent link voor navigatie, children alleen als de pagina brede subcategorieën heeft.\n\nGebruik ALLEEN URLs die EXACT in het sitemap voorkomen. Verzin NOOIT een URL.\nElke link moet een "relation" hebben: sibling, cross-category, parent, of child.\n\nRetourneer uitsluitend dit JSON:\n\n{"pageType":"categorie","slug":"${slug}","brand":null,"productTypes":["type1"],"hairNeeds":["behoefte1"],"internalLinks":[{"label":"sibling1","url":"${cfg.base}/...","relation":"sibling"},{"label":"sibling2","url":"${cfg.base}/...","relation":"sibling"},{"label":"sibling3","url":"${cfg.base}/...","relation":"sibling"},{"label":"cross-cat","url":"${cfg.base}/...","relation":"cross-category"}],"keywords":[{"term":"primair","type":"primary","volumeMonthly":22400,"cpc":0.85,"kd":42,"intent":"transactioneel","trend":"stabiel"},{"term":"long-tail","type":"secondary","volumeMonthly":4800,"cpc":0.60,"kd":28,"intent":"transactioneel","trend":"stijgend"},{"term":"informatief","type":"secondary","volumeMonthly":2200,"cpc":0.40,"kd":18,"intent":"informatief","trend":"stabiel"},{"term":"variant4","type":"secondary","volumeMonthly":1600,"cpc":0.35,"kd":22,"intent":"transactioneel","trend":"stijgend"},{"term":"variant5","type":"secondary","volumeMonthly":890,"cpc":0.30,"kd":14,"intent":"transactioneel","trend":"stabiel"}],"competitors":[{"position":1,"domain":"domein.de","url":"https://url","da":82,"organicTraffic":95000,"rankFactors":["Reden in doeltaal als volledige zin","Reden twee"],"gap":"Kans voor ${cfg.brand} IN HET NEDERLANDS als volledige zin."},{"position":2,"domain":"domein2.de","url":"https://url2","da":75,"organicTraffic":60000,"rankFactors":["reden in doeltaal","reden"],"gap":"Kans in het Nederlands."},{"position":3,"domain":"domein3.de","url":"https://url3","da":68,"organicTraffic":40000,"rankFactors":["reden","reden"],"gap":"Kans in het Nederlands."}]}`;
+  return xj(await claude(p,4096,true,lang));
 }
 
 async function genContent(a,lang){
   const cfg=DOMAIN_CONFIG[lang||"nl"];
-  const ll={nl:"Nederlands",de:"Duits",en:"Engels"}[lang];
+  const ll={nl:"Nederlands",de:"Duits",en:"Engels",pro:"Nederlands (B2B)"}[lang];
   const pk=a.keywords?.find(k=>k.type==="primary")||a.keywords?.[0];
   const sec=(a.keywords||[]).filter(k=>k.type==="secondary").map(k=>k.term);
   const validLinks=(a.internalLinks||[]).filter(l=>getSiteMap(lang).some(s=>s.url===l.url)||(l.url||"").startsWith(cfg.base));
-  const lnk=validLinks.map(l=>`${l.label} (${l.url})`).join(", ");
+  const lnk=validLinks.map(l=>`${l.label} (${l.url}) [${l.relation||"related"}]`).join(", ");
+  const fullSiteMap=getSiteMap(lang).map(p=>`${p.label} → ${p.url}`).join(" | ");
 
   const locNote = lang==="de"
     ? `LOKALISATIE VOOR DUITSLAND: Analyseer via web search de top 3 presterende pagina's op Google.de voor het primaire zoekwoord. Gebruik echte Duitse zoekintenties, terminologie en zinsconstructies die Duits publiek aanspreekt. Geen directe vertaling van Nederlands — schrijf zoals een native Duitser in de beauty-sector schrijft. Gebruik "Sie" NIET, gebruik "du/dein". Verwijs naar bekende Duitse beautycultuur waar relevant.`
     : lang==="en"
-    ? `LOCALISATION FOR NL-ENGLISH MARKET: Search top 3 performing pages on Google.nl for the primary keyword in English. Write in natural British/international English as used in professional beauty editorial — not translated Dutch. Reference international beauty trends and ingredient terminology that English-speaking shoppers in the Netherlands recognise.`
+    ? `LOCALISATION FOR NL-ENGLISH MARKET: Search top 3 performing pages on Google.nl (NETHERLANDS, not US or France) for the primary keyword in English. Find competitors that actually rank in the Netherlands. Write in natural British/international English as used in professional beauty editorial. Reference trends and terminology familiar to English-speaking shoppers in the Netherlands and Europe.`
+    : lang==="pro"
+    ? `B2B LOKALISATIE: Analyseer de top 3 B2B concurrenten op Google.nl voor het primaire zoekwoord. Focus op professionele leveranciers en groothandels (Shopkapper.nl, HairandBeautyOnline.com, Kapperskorting.com, Cosmetica-groothandel.nl, Probeauty.nl). Gebruik hun B2B taalgebruik als benchmark maar schrijf beter. Schrijf vanuit het perspectief van een branchegenoot die de dagelijkse realiteit in de salon begrijpt. Benadruk professionele meerwaarde: behandelresultaat, klanttevredenheid, efficiëntie, inkoopvoordeel, salonkwaliteit. Gebruik vakjargon waar passend maar houd het toegankelijk.`
     : `LOKALISATIE: Analyseer de top 3 presterende pagina's op Google.nl voor het primaire zoekwoord en gebruik hun taalpatronen als inspiratie voor een betere tekst.`;
 
   const translNote = lang!=="nl"
     ? `\n\nVERPLICHT EXTRA VELD: Voeg aan elke tekstsectie ook een "nl" veld toe met een natuurlijke Nederlandse vertaling van die tekst. Dit is voor Nederlandse collega's die de ${ll} tekst willen begrijpen en controleren. De Nederlandse vertaling moet vloeiend Nederlands zijn, niet letterlijk vertaald.\n\nJSON structuur voor mainContent blokken:\n{"heading":"Duits/Engels heading","body":"Duits/Engels body","nl":{"heading":"Nederlandse vertaling heading","body":"Nederlandse vertaling body"}}\n\nEn voor introText, h1, metaTitle, metaDescription ook een nlTranslation veld toevoegen:`
     : "";
 
-  const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\nInterne pagina's — gebruik ALLEEN deze URLs: ${lnk||"geen"}\n\nBELANGRIJK: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"h1":"Paginatitel max 60 tekens","h1Nl":"Nederlandse vertaling h1 (alleen bij DE/EN)","metaTitle":"Meta title max 60 tekens","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens","metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"2-3 zinnen max 55 woorden, primair zoekwoord vet.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"2-3 alineas gescheiden door \\n\\n","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"2-3 alineas","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"1-2 alineas","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"1-2 alineas met interne link naar ${cfg.base}/...","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"1 alinea","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
-  // web search OFF: sitemap embedded, Claude knows German/Dutch/English beauty market
-  return xj(await claude(p,5500,false,lang));
+  const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links uit analyse (verwerk deze in de tekst): ${lnk||"geen"}\n\nVOLLEDIG SITEMAP (gebruik ALLEEN URLs uit deze lijst — verzin NOOIT een URL):\n${fullSiteMap}\n\nBELANGRIJK: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen.\n\nINTERNE LINKS IN DE TEKST — VERPLICHT:\nVerwerk de interne links als natuurlijke <a href="...">anchor text</a> in de lopende tekst. Volg deze regels strikt:\n\n1. ALS DIT EEN MERKPAGINA IS: Link PRIMAIR naar productcategorieen die dit merk aanbiedt (scharen, fohns, tondeuses, stylingproducten). Verwerk 3-5 merkgebonden links verspreid over alle secties.\\n\\n2. ALS DIT EEN CATEGORIEPAGINA IS: SIBLINGS ZIJN DOMINANT (2-4 links). CROSS-CATEGORY IS BEPERKT (max 1-2 links).\n\n3. Gebruik beschrijvende anchor text met het zoekwoord van de doelpagina (bijv. <a href="${cfg.base}/haarverzorging/conditioners">conditioner</a>, NOOIT "klik hier" of "bekijk hier"). Gebruik ALTIJD correcte HTML syntax. Controleer dat elke <a> tag correct gesloten is.\n\n4. Totaal 3-5 interne links in de hele tekst. Niet meer. Niet alle links in één sectie.\n\n5. Elke link moet EXACT een URL uit het sitemap zijn. Controleer dit.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nHOOFDLETTERGEBRUIK: Gebruik NOOIT onnodige hoofdletters in titels of headings. Alleen eerste letter van een zin en eigennamen (merknamen) krijgen een hoofdletter. FOUT: \"Ontdek De Beste Shampoo\". CORRECT: \"Ontdek de beste shampoo\".\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"metaTitle":"Meta title max 60 tekens","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens, vermeld altijd: Gratis verzending vanaf EUR35,-","metaKeywords":["keyword1","keyword2","keyword3"],"metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"2-3 zinnen max 55 woorden, primair zoekwoord vet.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"2-3 alineas gescheiden door \\n\\n. Verwerk 1-2 sibling links.","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"2-3 alineas met 1 sibling link","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"1-2 alineas","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"2 alineas met 1 sibling link","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"1-2 alineas, hier eventueel 1 cross-category link als er routine-logica is","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"2 alineas, eventueel 1 cross-category link naar tools/routine","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"1 alinea","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
+  // web search ON: used for localization research (top performing pages in target market)
+  return xj(await claude(p,8000,true,lang));
+}
+
+/* ── Section-level regeneration with feedback ── */
+async function regenSection(sectionKey, feedback, currentContent, analysisData, lang){
+  const cfg=DOMAIN_CONFIG[lang||"nl"];
+  const ll={nl:"Nederlands",de:"Duits",en:"Engels",pro:"Nederlands (B2B)"}[lang];
+  const mc=currentContent.mainContent||{};
+  const pk=analysisData.keywords?.find(k=>k.type==="primary")||analysisData.keywords?.[0];
+  const sec=(analysisData.keywords||[]).filter(k=>k.type==="secondary").map(k=>k.term);
+  const validLinks=(analysisData.internalLinks||[]).filter(l=>getSiteMap(lang).some(s=>s.url===l.url)||(l.url||"").startsWith(cfg.base));
+  const lnk=validLinks.map(l=>`${l.label} (${l.url}) [${l.relation||"related"}]`).join(", ");
+
+  // Build context of all OTHER sections so the AI keeps the flow coherent
+  const otherSections = {};
+  for(const [k,v] of Object.entries(mc)){
+    if(k!==sectionKey) otherSections[k] = {heading:v.heading, bodyPreview:(v.body||"").slice(0,200)+"..."};
+  }
+
+  const sectionNames = {
+    introText: "Introductietekst (staat boven producten, 2-3 zinnen, max 55 woorden)",
+    h2_what: "H2 sectie: Wat is / Wat zijn (2-3 alinea's)",
+    h2_hairtype: "H2 sectie: Haartype / Doelgroep (2-3 alinea's + H3 tips)",
+    h2_why: "H2 sectie: Waarom / Voordelen (2 alinea's + H3 combineren)",
+    h2_howto: "H2 sectie: Hoe gebruik je / Toepassing (2 alinea's + H3 dagelijks)",
+    metaFields: "Meta Title + Meta Description + H1",
+    schemaFAQ: "Schema FAQ vragen en antwoorden",
+    aiSnippet: "AI Snippet voor Google SGE (60-75 woorden)"
+  };
+
+  const currentSection = sectionKey === "introText"
+    ? {introText: currentContent.introText}
+    : sectionKey === "metaFields"
+    ? {h1: currentContent.h1, metaTitle: currentContent.metaTitle, metaDescription: currentContent.metaDescription}
+    : sectionKey === "schemaFAQ"
+    ? {schemaFAQ: currentContent.schemaFAQ}
+    : sectionKey === "aiSnippet"
+    ? {aiSnippet: currentContent.aiSnippet}
+    : {[sectionKey]: mc[sectionKey]};
+
+  const p=`SECTIE HERSCHRIJVEN MET FEEDBACK
+
+Taal: ${ll}
+Domein: ${cfg.brand} (${cfg.base})
+Primair zoekwoord: "${pk?.term}"
+Secundaire zoekwoorden: ${sec.join(", ")}
+Interne links: ${lnk||"geen"}
+
+TE HERSCHRIJVEN SECTIE: ${sectionNames[sectionKey]||sectionKey}
+
+HUIDIGE INHOUD VAN DEZE SECTIE:
+${JSON.stringify(currentSection,null,2)}
+
+FEEDBACK VAN DE GEBRUIKER:
+${feedback}
+
+CONTEXT (andere secties — houd de flow coherent):
+${JSON.stringify(otherSections,null,2)}
+
+INSTRUCTIES:
+1. Herschrijf ALLEEN de gevraagde sectie op basis van de feedback
+2. Houd rekening met de andere secties zodat de tekst als geheel blijft kloppen
+3. Alle regels blijven gelden: geen streepjes, geen opsommingstekens, lopende zinnen, beschrijvende anchor text
+4. Interne links moeten EXACT uit het sitemap komen (${cfg.base}/...)
+5. Houd dezelfde JSON structuur aan als de huidige inhoud
+6. Schrijf in ${ll}
+
+Retourneer ALLEEN een JSON object met exact dezelfde keys als de huidige inhoud van deze sectie. Niets anders.`;
+
+  const raw = await claude(p, 3000, false, lang);
+  return xj(raw);
+}
+
+
+/* ── MAGENTO 2 HELPERS ── */
+function buildFaqWidgets(schemaFAQ){
+  if(!schemaFAQ||!schemaFAQ.length) return "";
+  return schemaFAQ.map(function(f){
+    var title=(f.question||"").replace(/"/g,"&quot;");
+    var text=(f.answer||"").replace(/"/g,"&quot;");
+    return '{{widget type="BigBridge\\Base\\Block\\Widget\\Faq" title="'+title+'" text="'+text+'"}}';
+  }).join("\n");
+}
+
+function buildDescriptionBottom(c){
+  var mc=c.mainContent||{};
+  var p=function(t){return(t||"").split(/\n\n+/).filter(Boolean).map(function(x){return"<p>"+x.trim()+"</p>";}).join("\n");};
+  var faqWidgets=buildFaqWidgets(c.schemaFAQ);
+  var faq={"@context":"https://schema.org","@type":"FAQPage",mainEntity:(c.schemaFAQ||[]).map(function(f){return{"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}};})};
+  var html="";
+  html+="<h2>"+(mc.h2_what?.heading||"")+"</h2>\n"+p(mc.h2_what?.body)+"\n\n";
+  html+="<h2>"+(mc.h2_hairtype?.heading||"")+"</h2>\n"+p(mc.h2_hairtype?.body)+"\n";
+  html+="<h3>"+(mc.h2_hairtype?.h3_tips?.heading||"")+"</h3>\n"+p(mc.h2_hairtype?.h3_tips?.body)+"\n\n";
+  html+="<h2>"+(mc.h2_why?.heading||"")+"</h2>\n"+p(mc.h2_why?.body)+"\n";
+  html+="<h3>"+(mc.h2_why?.h3_combine?.heading||"")+"</h3>\n"+p(mc.h2_why?.h3_combine?.body)+"\n\n";
+  html+="<h2>"+(mc.h2_howto?.heading||"")+"</h2>\n"+p(mc.h2_howto?.body)+"\n";
+  html+="<h3>"+(mc.h2_howto?.h3_daily?.heading||"")+"</h3>\n"+p(mc.h2_howto?.h3_daily?.body)+"\n\n";
+  html+='<div itemprop="description" style="display:none">'+(c.aiSnippet||"")+"</div>\n\n";
+  if(faqWidgets){html+=faqWidgets+"\n\n";}
+  html+='<script type="application/ld+json">\n'+JSON.stringify(faq,null,2)+'\n<\/script>';
+  return html.trim();
+}
+
+function buildDescriptionTop(c){
+  return '<p class="category-intro">'+(c.introText||"")+"</p>";
+}
+
+function buildMagentoPutPayload(categoryId,c){
+  var attrs=[];
+  attrs.push({attribute_code:"description_bottom",value:buildDescriptionBottom(c)});
+  attrs.push({attribute_code:"description_top",value:buildDescriptionTop(c)});
+  attrs.push({attribute_code:"meta_title",value:c.metaTitle||""});
+  attrs.push({attribute_code:"meta_keywords",value:(c.metaKeywords||[]).join(", ")});
+  attrs.push({attribute_code:"meta_description",value:c.metaDescription||""});
+  return{category:{id:categoryId,custom_attributes:attrs}};
+}
+
+async function magentoFetch(endpoint,magentoKey,options){
+  var resp=await fetch(endpoint,Object.assign({},options,{
+    headers:Object.assign({"Content-Type":"application/json","Authorization":"Bearer "+magentoKey},options&&options.headers||{}),
+  }));
+  if(!resp.ok){
+    var txt=await resp.text();
+    throw new Error("Magento API "+resp.status+": "+txt);
+  }
+  return resp.json();
+}
+
+function flattenCategories(node,path){
+  var results=[];
+  var currentPath=path?path+" > "+node.name:node.name;
+  results.push({id:node.id,name:node.name,path:currentPath,level:node.level,isActive:node.is_active,productCount:node.product_count});
+  if(node.children_data){
+    for(var i=0;i<node.children_data.length;i++){
+      results=results.concat(flattenCategories(node.children_data[i],currentPath));
+    }
+  }
+  return results;
 }
 
 function buildHTML(c,a){
   const mc=c.mainContent||{};
+  const mkw=(c.metaKeywords||[]).join(", ");
   const p=t=>(t||"").split(/\n\n+/).filter(Boolean).map(x=>`<p>${x.trim()}</p>`).join("\n");
   const faq={"@context":"https://schema.org","@type":"FAQPage",mainEntity:(c.schemaFAQ||[]).map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))};
   return`<!-- Haarshop.nl SEO — gegenereerd door SEO Content Machine -->\n\n<!-- INTRO: staat boven de producten via category-intro class -->\n<p class="category-intro">${c.introText||""}</p>\n\n<!-- HOOFDTEKST: staat onder de producten -->\n<h2>${mc.h2_what?.heading||""}</h2>\n${p(mc.h2_what?.body)}\n\n<h2>${mc.h2_hairtype?.heading||""}</h2>\n${p(mc.h2_hairtype?.body)}\n<h3>${mc.h2_hairtype?.h3_tips?.heading||""}</h3>\n${p(mc.h2_hairtype?.h3_tips?.body)}\n\n<h2>${mc.h2_why?.heading||""}</h2>\n${p(mc.h2_why?.body)}\n<h3>${mc.h2_why?.h3_combine?.heading||""}</h3>\n${p(mc.h2_why?.h3_combine?.body)}\n\n<h2>${mc.h2_howto?.heading||""}</h2>\n${p(mc.h2_howto?.body)}\n<h3>${mc.h2_howto?.h3_daily?.heading||""}</h3>\n${p(mc.h2_howto?.h3_daily?.body)}\n\n<!-- AI SNIPPET: verborgen voor bezoekers, zichtbaar voor Google SGE en AI-tools -->\n<div itemprop="description" style="display:none">${c.aiSnippet||""}</div>\n\n<!-- FAQ SCHEMA: structuurdata voor uitklapbare vragen in Google -->\n<script type="application/ld+json">\n${JSON.stringify(faq,null,2)}\n<\/script>`.trim();
@@ -449,7 +778,7 @@ function HtmlBtn({code, label="</> HTML"}){
 /* ── TRANSLATION TOGGLE ── */
 function TranslationToggle({lang, children}){
   const[showNl,sShowNl]=useState(false);
-  if(lang==="nl") return children(false);
+  if(lang==="nl"||lang==="pro") return children(false);
   return<div>
     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
       <div style={{display:"flex",background:"#f0ece8",borderRadius:20,padding:2,border:`1px solid #e0d5cb`}}>
@@ -491,6 +820,7 @@ function PagePreview({content,url,highlight}){
       <div style={{padding:"0 12px 5px",display:"flex",gap:8,fontSize:9,fontWeight:700,color:C.ink2,overflow:"hidden"}}>
         {["Merken","Haar","Lichaam","Make-up","Nagels","Man","Nieuw","Sale"].map(n=><span key={n} style={{whiteSpace:"nowrap"}}>{n}</span>)}
       </div>
+      <div style={{background:C.blush,padding:"4px 10px",textAlign:"center",fontSize:8.5,color:C.ink2,fontWeight:600}}>10% EXTRA korting op bestellingen* vanaf €50 met kortingscode: HAARSHOP10</div>
     </div>
     <div style={{padding:"11px 13px",maxHeight:500,overflowY:"auto"}}>
       <div style={{fontSize:9,color:C.ink3,marginBottom:8}}>Home › Haar › <strong style={{color:C.ink}}>{content?.h1||"Categorie"}</strong></div>
@@ -527,6 +857,39 @@ function PagePreview({content,url,highlight}){
 }
 
 /* ── API KEY SCREEN ── */
+
+/* -- PASSWORD GATE -- */
+const TOOL_PASSWORD = "SEOtoolvoorhaarshop123";
+function PasswordScreen({onSuccess}){
+  const[pw,sPw]=useState("");const[err,sErr]=useState("");const[show,sShow]=useState(false);
+  const go=()=>{if(pw===TOOL_PASSWORD){sessionStorage.setItem("hs_auth","1");onSuccess();}else{sErr("Verkeerd wachtwoord. Neem contact op met je beheerder.");}};
+  return<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:C.cream}}>
+    <div style={{background:"#fff",borderBottom:"1px solid "+C.bdr,padding:"14px 28px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <div style={{fontSize:16,fontWeight:900,color:C.ink}}>Haarshop</div>
+        <div style={{fontSize:12,fontWeight:800,color:C.ink3,textTransform:"uppercase",letterSpacing:".04em"}}>SEO Content Machine</div>
+      </div>
+    </div>
+    <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{background:"#fff",borderRadius:16,padding:"44px 48px",maxWidth:420,width:"100%",boxShadow:"0 8px 40px rgba(0,0,0,.1)",border:"1px solid "+C.bdr}}>
+        <div style={{textAlign:"center",marginBottom:28}}>
+          <div style={{fontSize:40,marginBottom:12}}>{String.fromCodePoint(0x1F512)}</div>
+          <div style={{fontSize:22,fontWeight:900,color:C.ink,marginBottom:10}}>Toegang tot de SEO tool</div>
+          <div style={{fontSize:13.5,color:C.ink3,lineHeight:1.7}}>Voer het wachtwoord in om verder te gaan.</div>
+        </div>
+        <div style={{marginBottom:16}}>
+          <div style={{position:"relative"}}>
+            <input type={show?"text":"password"} value={pw} onChange={e=>{sPw(e.target.value);sErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="Wachtwoord..." style={{borderColor:err?C.red:C.bdr}}/>
+            <button onClick={()=>sShow(x=>!x)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.ink3}}>{show?String.fromCodePoint(0x1F648):String.fromCodePoint(0x1F441)}</button>
+          </div>
+          {err&&<div style={{marginTop:6,fontSize:12,color:C.red,fontWeight:600}}>{err}</div>}
+        </div>
+        <button onClick={go} className="btn btn-primary" style={{width:"100%",padding:"14px",fontSize:14,borderRadius:24,justifyContent:"center"}}>Inloggen</button>
+      </div>
+    </div>
+  </div>;
+}
+
 function KeyScreen({onSave}){
   const[v,sv]=useState("");const[show,sShow]=useState(false);const[err,sErr]=useState("");
   const go=()=>{if(!v.trim().startsWith("sk-ant-")){sErr("Sleutel moet beginnen met sk-ant-  — zie je Anthropic dashboard.");return;}saveKey(v.trim());onSave();};
@@ -560,42 +923,143 @@ function KeyScreen({onSave}){
 
 /* ── APP ── */
 function App(){
+  const[authed,sAuthed]=useState(!!sessionStorage.getItem("hs_auth"));
   const[hasKey,sHasKey]=useState(!!localStorage.getItem("hs_key"));
-  const[url,sUrl]=useState("");
-  const[lang,sLang]=useState("nl");
-  const[phase,sPhase]=useState("idle");
+  const _saved=(()=>{try{const s=sessionStorage.getItem("hs_state");return s?JSON.parse(s):null;}catch(e){return null;}})();
+  const[url,sUrl]=useState(_saved?.url||"");
+  const[lang,sLang]=useState(_saved?.lang||"nl");
+  const[phase,sPhase]=useState(_saved?.content?"done":"idle");
   const[status,sStatus]=useState("");
-  const[a,sA]=useState(null);
-  const[c,sC]=useState(null);
-  const[html,sHtml]=useState("");
+  const[a,sA]=useState(_saved?.analysis||null);
+  const[c,sC]=useState(_saved?.content||null);
+  const[html,sHtml]=useState(_saved?.html||"");
   const[err,sErr]=useState(null);
   const[tab,sTab]=useState("intro");
   const[hl,sHl]=useState("intro");
-  const[prev,sPrev]=useState(false);
+  const[prev,sPrev]=useState(!!_saved?.content);
   const[pushed,sPushed]=useState(false);
+  const[magentoKey,sMagentoKey]=useState(sessionStorage.getItem("hs_mage_key")||"");
+  const[magentoHostUrl,sMagentoHostUrl]=useState(sessionStorage.getItem("hs_mage_host")||"https://www.haarshop.nl");
+  const[magentoCategories,sMagentoCategories]=useState(null);
+  const[magentoCatSearch,sMagentoCatSearch]=useState("");
+  const[magentoCatId,sMagentoCatId]=useState(null);
+  const[magentoCatName,sMagentoCatName]=useState("");
+  const[magentoLoading,sMagentoLoading]=useState(false);
+  const[magentoStatus,sMagentoStatus]=useState("");
+  const[magentoShowPayload,sMagentoShowPayload]=useState(false);
+  const[fbSection,sFbSection]=useState(null); // which section is getting feedback
+  const[fbText,sFbText]=useState(""); // feedback text
+  const[fbLoading,sFbLoading]=useState(false); // loading state for regen
 
   useEffect(()=>{const m={intro:"intro",main:"main",seo:"seo",ai:"ai",meta:"h1",faq:"h1",magento:"h1"};sHl(m[tab]||"intro");},[tab]);
 
   const doAnalyse=useCallback(async()=>{
-    if(!url.trim())return;sErr(null);sPhase("analyzing");sStatus("Pagina analyseren en zoekwoorden bepalen…");
-    try{
-      const r=await analyse(url.trim(),lang);
-      sA(r);
-      sPhase("generating");sStatus("SEO-content schrijven…");
-      const ct=await genContent(r,lang);
-      sC(ct);sHtml(buildHTML(ct,r));sPhase("done");sTab("intro");sPrev(true);
-    }
-    catch(e){sErr(e.message);sPhase("idle");}
+    if(!url.trim())return;sErr(null);sPhase("analyzing");sStatus("Live SERP-data ophalen…");
+    try{const r=await analyse(url.trim(),lang);sA(r);sPhase("reviewing");sessionStorage.setItem("hs_state",JSON.stringify({analysis:r,url:url.trim(),lang:lang}));}
+    catch(e){sErr("Analyse fout: "+e.message);sPhase("idle");console.error("Analyse error:",e);}
   },[url,lang]);
 
   const doGen=useCallback(async()=>{
-    if(!a)return;sErr(null);sPhase("generating");sStatus("SEO-content schrijven…");
-    try{const r=await genContent(a,lang);sC(r);sHtml(buildHTML(r,a));sPhase("done");sTab("intro");sPrev(true);}
-    catch(e){sErr(e.message);sPhase("idle");}
+    if(!a)return;sErr(null);sPhase("generating");sStatus("Menselijk klinkende SEO-teksten schrijven…");
+    try{const r=await genContent(a,lang);if(!r.metaKeywords)r.metaKeywords=[];sC(r);sHtml(buildHTML(r,a));sPhase("done");sTab("intro");sPrev(true);sessionStorage.setItem("hs_state",JSON.stringify({analysis:a,content:r,html:buildHTML(r,a),url,lang}));}
+    catch(e){sErr("Content fout: "+e.message);sPhase("reviewing");console.error("Content error:",e);}
   },[a,lang]);
 
-  const reset=()=>{sPhase("idle");sA(null);sC(null);sErr(null);sPrev(false);};
+  const doRegen=useCallback(async(sectionKey,feedback)=>{
+    if(!c||!a||!feedback.trim())return;
+    sFbLoading(true);sErr(null);
+    try{
+      const result=await regenSection(sectionKey,feedback,c,a,lang);
+      // Merge the regenerated section back into content
+      const updated={...c};
+      if(sectionKey==="introText"){
+        updated.introText=result.introText||result.intro||c.introText;
+        if(result.introTextNl) updated.introTextNl=result.introTextNl;
+      } else if(sectionKey==="metaFields"){
+        if(result.h1) updated.h1=result.h1;
+        if(result.metaTitle) updated.metaTitle=result.metaTitle;
+        if(result.metaDescription) updated.metaDescription=result.metaDescription;
+        if(result.metaKeywords) updated.metaKeywords=result.metaKeywords;
+        if(result.h1Nl) updated.h1Nl=result.h1Nl;
+        if(result.metaTitleNl) updated.metaTitleNl=result.metaTitleNl;
+        if(result.metaDescriptionNl) updated.metaDescriptionNl=result.metaDescriptionNl;
+      } else if(sectionKey==="schemaFAQ"){
+        updated.schemaFAQ=result.schemaFAQ||result;
+      } else if(sectionKey==="aiSnippet"){
+        updated.aiSnippet=result.aiSnippet||c.aiSnippet;
+        if(result.aiSnippetNl) updated.aiSnippetNl=result.aiSnippetNl;
+      } else {
+        // mainContent section (h2_what, h2_hairtype, etc.)
+        updated.mainContent={...c.mainContent,[sectionKey]:result[sectionKey]||result};
+      }
+      sC(updated);
+      sHtml(buildHTML(updated,a));
+      sFbSection(null);sFbText("");
+      sessionStorage.setItem("hs_state",JSON.stringify({analysis:a,content:updated,html:buildHTML(updated,a),url,lang}));
+    }catch(e){sErr("Herschrijf fout: "+e.message);console.error("Regen error:",e);}
+    finally{sFbLoading(false);}
+  },[c,a,lang]);
 
+  const reset=()=>{sPhase("idle");sA(null);sC(null);sErr(null);sPrev(false);sFbSection(null);sFbText("");sessionStorage.removeItem("hs_state");};
+
+  // Content editing handler
+  const updateField=useCallback((path,value)=>{
+    if(!c)return;
+    const updated=JSON.parse(JSON.stringify(c));
+    const parts=path.split(".");
+    let obj=updated;
+    for(let i=0;i<parts.length-1;i++){
+      if(!obj[parts[i]])obj[parts[i]]={};
+      obj=obj[parts[i]];
+    }
+    obj[parts[parts.length-1]]=value;
+    sC(updated);
+    sHtml(buildHTML(updated,a));
+    sessionStorage.setItem("hs_state",JSON.stringify({analysis:a,content:updated,html:buildHTML(updated,a),url,lang}));
+  },[c,a,url,lang]);
+
+  const EditableText=({value,path,multiline,style:cs})=>{
+    const[editing,setEditing]=useState(false);
+    const[draft,setDraft]=useState(value||"");
+    useEffect(()=>{setDraft(value||"");},[value]);
+    if(editing){
+      return<div style={{position:"relative"}}>{multiline
+        ?<textarea value={draft} onChange={e=>setDraft(e.target.value)} style={{width:"100%",minHeight:80,fontSize:13,padding:10,borderRadius:8,border:"1.5px solid "+C.beige,fontFamily:"var(--f)",resize:"vertical",boxSizing:"border-box"}}/>
+        :<input type="text" value={draft} onChange={e=>setDraft(e.target.value)} style={{fontSize:13}}/>}
+        <div style={{display:"flex",gap:6,marginTop:6}}>
+          <button onClick={()=>{updateField(path,draft);setEditing(false);}} className="btn btn-primary" style={{fontSize:11,padding:"5px 14px"}}>Opslaan</button>
+          <button onClick={()=>{setDraft(value||"");setEditing(false);}} className="btn btn-ghost" style={{fontSize:11,padding:"5px 14px"}}>Annuleer</button>
+        </div>
+      </div>;
+    }
+    return<div onClick={()=>setEditing(true)} style={{cursor:"pointer",position:"relative",borderRadius:6,padding:"2px 4px",margin:"-2px -4px",transition:"background .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(196,150,122,0.08)";}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";}} title="Klik om te bewerken">{multiline
+      ?<div style={cs||{}} dangerouslySetInnerHTML={{__html:value||""}}/>
+      :<span style={cs||{}}>{value||""}</span>}
+      <span style={{position:"absolute",top:2,right:2,fontSize:10,opacity:.4}}>{String.fromCodePoint(9999)}</span>
+    </div>;
+  };
+
+  // Inline feedback block for section-level regeneration
+  const FeedbackBlock = ({sectionKey, label}) => {
+    const isOpen = fbSection === sectionKey;
+    return <div style={{marginTop:10}}>
+      {!isOpen && <button onClick={()=>{sFbSection(sectionKey);sFbText("");}} style={{fontSize:11.5,fontWeight:700,padding:"6px 14px",borderRadius:20,cursor:"pointer",border:`1px solid ${C.bdr}`,background:"#fff",color:C.ink3,fontFamily:"var(--f)",transition:"all .15s"}} disabled={fbLoading}>
+        ✏️ Feedback op {label||sectionKey}
+      </button>}
+      {isOpen && <div style={{background:"#fef9f0",border:`1px solid #f0dbb8`,borderRadius:10,padding:14,marginTop:4}}>
+        <div style={{fontSize:12,fontWeight:800,color:C.ink,marginBottom:6}}>✏️ Feedback: {label||sectionKey}</div>
+        <textarea value={fbText} onChange={e=>sFbText(e.target.value)} placeholder="Beschrijf wat je wilt aanpassen... (bijv. 'meer focus op professioneel gebruik' of 'de tweede alinea klopt niet, het moet gaan over...')" style={{width:"100%",minHeight:70,fontSize:13,padding:10,borderRadius:8,border:`1px solid #e0d5cb`,fontFamily:"var(--f)",resize:"vertical",boxSizing:"border-box"}}/>
+        <div style={{display:"flex",gap:8,marginTop:8}}>
+          <button onClick={()=>doRegen(sectionKey,fbText)} disabled={fbLoading||!fbText.trim()} style={{fontSize:12,fontWeight:700,padding:"7px 18px",borderRadius:20,cursor:"pointer",border:"none",background:C.ink,color:"#fff",fontFamily:"var(--f)",opacity:fbLoading||!fbText.trim()?.5:1}}>
+            {fbLoading?"⏳ Herschrijven...":"🔄 Herschrijf deze sectie"}
+          </button>
+          <button onClick={()=>{sFbSection(null);sFbText("");}} style={{fontSize:12,fontWeight:600,padding:"7px 14px",borderRadius:20,cursor:"pointer",border:`1px solid ${C.bdr}`,background:"#fff",color:C.ink3,fontFamily:"var(--f)"}}>Annuleer</button>
+        </div>
+      </div>}
+    </div>;
+  };
+
+  if(!authed)return<PasswordScreen onSuccess={()=>sAuthed(true)}/>;
   if(!hasKey)return<KeyScreen onSave={()=>sHasKey(true)}/>;
 
   const TABS=[{k:"intro",l:"Introductie"},{k:"main",l:"Hoofdtekst"},{k:"meta",l:"Meta & H1"},{k:"faq",l:"FAQ Schema"},{k:"ai",l:"AI Snippet"},{k:"magento",l:"Magento 2"}];
@@ -610,11 +1074,11 @@ function App(){
         <div style={{flex:1}}/>
         {/* Taal */}
         <div style={{display:"flex",gap:2,background:C.cream,padding:"3px",borderRadius:24,border:`1px solid ${C.bdr}`}}>
-          {[{k:"nl",f:"🇳🇱"},{k:"de",f:"🇩🇪"},{k:"en",f:"🇬🇧"}].map(({k,f})=>(
+          {[{k:"nl",f:"🇳🇱"},{k:"de",f:"🇩🇪"},{k:"en",f:"🇬🇧"},{k:"pro",f:"🏢"}].map(({k,f})=>(
             <button key={k} onClick={()=>sLang(k)} style={{fontFamily:"var(--f)",fontSize:11.5,fontWeight:700,padding:"5px 14px",borderRadius:20,cursor:"pointer",border:"none",background:lang===k?C.beige:"transparent",color:lang===k?"#fff":C.ink3,transition:"all .18s"}}>{f} {k.toUpperCase()}</button>
           ))}
         </div>
-        <button onClick={()=>{localStorage.removeItem("hs_key");_key="";sHasKey(false);}} className="btn btn-ghost btn-sm">🔑 API-sleutel</button>
+        <button onClick={()=>{localStorage.removeItem("hs_key");_key="";sHasKey(false);sessionStorage.removeItem("hs_auth");sAuthed(false);}} className="btn btn-ghost btn-sm">🔑 API-sleutel</button>
       </div>
     </header>
 
@@ -632,16 +1096,16 @@ function App(){
           {(()=>{
             const detected=domainFromUrl(url);
             const cfg=DOMAIN_CONFIG[detected];
-            const labels={nl:"🇳🇱 haarshop.nl · Zoeklocatie: Nederland · Taal: NL",de:"🇩🇪 haarshop.de · Zoeklocatie: Duitsland · Taal: DE",en:"🇬🇧 haarshop.com · Zoeklocatie: Nederland · Taal: EN"};
+            const labels={nl:"🇳🇱 haarshop.nl · Zoeklocatie: Nederland · Taal: NL",de:"🇩🇪 haarshop.de · Zoeklocatie: Duitsland · Taal: DE",en:"🇬🇧 haarshop.com · Zoeklocatie: Nederland · Taal: EN",pro:"🏢 haarshoppro.nl · B2B Groothandel · Taal: NL"};
             return url.includes("haarshop")&&<div style={{display:"inline-flex",alignItems:"center",gap:7,background:"#fff",border:`1.5px solid ${C.beige}`,borderRadius:20,padding:"5px 14px",marginBottom:14,fontSize:12,fontWeight:700,color:C.ink}}>
               <span style={{color:C.green}}>✓</span> {labels[detected]}
               <span style={{color:C.ink3,fontWeight:600}}>· {cfg.location} SERP-analyse</span>
             </div>;
           })()}
           <div style={{display:"flex",gap:10,marginBottom:14}}>
-            <input type="url" value={url} onChange={e=>{const v=e.target.value;sUrl(v);const d=domainFromUrl(v);sLang(d);}} onKeyDown={e=>e.key==="Enter"&&phase==="idle"&&doAnalyse()} placeholder="https://www.haarshop.nl/haarverzorging/conditioners" style={{flex:1,fontSize:14,borderRadius:24,padding:"12px 20px"}}/>
+            <input type="url" value={url} onChange={e=>{const v=e.target.value;sUrl(v);const d=domainFromUrl(v);sLang(d);}} onKeyDown={e=>e.key==="Enter"&&phase==="idle"&&doAnalyse()} placeholder="https://www.haarshop.nl/haarverzorging/conditioners of https://www.haarshoppro.nl/..." style={{flex:1,fontSize:14,borderRadius:24,padding:"12px 20px"}}/>
             <button className="btn btn-primary" onClick={phase==="idle"?doAnalyse:reset} disabled={phase==="analyzing"||phase==="generating"} style={{padding:"12px 28px",fontSize:14,flexShrink:0}}>
-              {phase==="analyzing"?<><Spin s={15}/> Analyseren…</>:phase==="generating"?<><Spin s={15}/> Content schrijven…</>:phase==="idle"?"Genereer content →":"↺ Opnieuw"}
+              {phase==="analyzing"?<><Spin s={15}/> Analyseren…</>:phase==="idle"?"Analyseer →":"↺ Opnieuw"}
             </button>
           </div>
           {/* Snel starten per domein */}
@@ -650,6 +1114,7 @@ function App(){
               {domain:"haarshop.nl",base:"https://www.haarshop.nl/haarverzorging",slugs:["conditioners","haarmasker","shampoo","haarolie","haarstyling","haarkleuringen"]},
               {domain:"haarshop.de",base:"https://www.haarshop.de/haarpflege",slugs:["conditioner","haarmaske","shampoo","haaroel","haarstyling","haarfarben"]},
               {domain:"haarshop.com",base:"https://www.haarshop.com/hair-care",slugs:["conditioner","hair-mask","shampoo","hair-oil","styling-finishing","hair-coloring"]},
+              {domain:"haarshoppro.nl",base:"https://www.haarshoppro.nl",slugs:["haarverzorging/shampoo","haarverzorging/haarkleuringen","professioneel","tools/stijltangen","nagels","professioneel/kappers-interieur"]},
             ].map(({domain,base,slugs})=>(
               <div key={domain} style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
                 <span style={{fontSize:10.5,fontWeight:800,color:C.ink3,width:90,flexShrink:0}}>{domain}</span>
@@ -665,13 +1130,13 @@ function App(){
       </div>
 
       {/* REVIEW */}
-      {(phase==="generating"||phase==="done")&&a&&(
+      {(phase==="reviewing"||phase==="generating"||phase==="done")&&a&&(
         <div className="fu grid2">
           <div className="col">
             {/* Keyword tabel */}
             <div className="card fu">
               <div style={{padding:"16px 20px 12px",borderBottom:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <div><div style={{fontSize:16,fontWeight:900,color:C.ink}}>Keyword Research</div><div style={{fontSize:12,color:C.ink3,marginTop:2}}>Analyse op basis van sitestructuur · {new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long"})}</div></div>
+                <div><div style={{fontSize:16,fontWeight:900,color:C.ink}}>Keyword Research</div><div style={{fontSize:12,color:C.ink3,marginTop:2}}>Live SERP-analyse · Google Nederland · {new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long"})}</div></div>
                 <span className="pill" style={{background:C.blush2,color:C.beige,border:`1px solid ${C.blush}`}}>{(a.keywords||[]).length} zoekwoorden</span>
               </div>
               <div style={{overflowX:"auto"}}>
@@ -692,12 +1157,12 @@ function App(){
                   ))}</tbody>
                 </table>
               </div>
-              <div style={{padding:"9px 20px",fontSize:11,color:C.ink3,borderTop:`1px solid ${C.bdr}`,background:C.cream}}>Volumes gebaseerd op categorie en marktdata. Verbind Ahrefs voor exacte API-volumes.</div>
+              <div style={{padding:"9px 20px",fontSize:11,color:C.ink3,borderTop:`1px solid ${C.bdr}`,background:C.cream}}>Volumes op basis van live SERP-analyse en NL marktdata. Verbind Ahrefs voor exacte API-volumes.</div>
             </div>
 
             {/* Parameters */}
             <div className="card fu2">
-              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Parameters</div></div>
+              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Stap 2 — Controleer de parameters</div></div>
               <div style={{padding:"18px 20px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
                 {[["Paginatype",a.pageType],["Merk",a.brand||"Niet van toepassing"],["Producttypes",(a.productTypes||[]).join(", ")],["Haarbehoeften",(a.hairNeeds||[]).join(", ")]].map(([l,v])=>(
                   <div key={l}><div style={{fontSize:10.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:4}}>{l}</div><div style={{fontSize:14,fontWeight:700,color:C.ink}}>{v||"—"}</div></div>
@@ -707,24 +1172,29 @@ function App(){
 
             {/* Interne links */}
             <div className="card fu3">
-              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Interne Links</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>Gebaseerd op de sitestructuur van haarshop.nl</div></div>
+              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Interne Links</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>Gebaseerd op de volledige sitestructuur van {DOMAIN_CONFIG[lang]?.brand||"haarshop"}</div></div>
               <div style={{padding:"14px 20px",display:"flex",flexDirection:"column",gap:8}}>
-                {(a.internalLinks||getRelated(url)).map((lnk,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.cream,border:`1px solid ${C.bdr}`,borderRadius:10,padding:"10px 15px"}}>
+                {(a.internalLinks||getRelated(url,lang)).map((lnk,i)=>{
+                  const relColors={"parent":["#1a5276","#d4e6f1"],"child":[C.beige,C.blush2],"sibling":["#2d6a4f","#e8f5ee"],"cross-category":["#7d3c98","#f0e6f6"]};
+                  const[rc,rb]=relColors[(lnk.relation||"").toLowerCase()]||[C.ink3,C.cream];
+                  return <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.cream,border:`1px solid ${C.bdr}`,borderRadius:10,padding:"10px 15px"}}>
                     <div><div style={{fontSize:13,fontWeight:700,color:C.ink}}>{lnk.label}</div><a href={lnk.url} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:C.beige,textDecoration:"none"}}>{lnk.url}</a></div>
-                    <span className="tag" style={{background:C.blush2,color:C.ink3,border:`1px solid ${C.bdr}`}}>{lnk.relation||"gerelateerd"}</span>
-                  </div>
-                ))}
+                    <span className="tag" style={{background:rb,color:rc,border:`1px solid ${rc}22`,fontWeight:700}}>{lnk.relation||"gerelateerd"}</span>
+                  </div>;
+                })}
               </div>
             </div>
 
+            <button className="btn btn-dark fu4" onClick={doGen} disabled={phase==="generating"} style={{width:"100%",padding:"15px",fontSize:15,borderRadius:24,justifyContent:"center"}}>
+              {phase==="generating"?<><Spin s={17}/> Content schrijven…</>:"Genereer volledige SEO-paginacontent →"}
+            </button>
           </div>
 
           {/* Concurrenten */}
           <div className="card fu2 stick">
             <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}>
               <div style={{fontSize:15,fontWeight:900,color:C.ink}}>
-                {lang==="de"?"🇩🇪 Google.de Top 3":lang==="en"?"🇬🇧 Google.nl (EN) Top 3":"🇳🇱 Google.nl Top 3"}
+                {lang==="de"?"🇩🇪 Google.de Top 3":lang==="en"?"🇬🇧 Google.nl (EN) Top 3":lang==="pro"?"🏢 Google.nl (B2B) Top 3":"🇳🇱 Google.nl Top 3"}
               </div>
               <div style={{fontSize:12,color:C.ink3,marginTop:1}}>Live concurrentieanalyse · {lang==="de"?"rankFactors in het Duits":lang==="en"?"rankFactors in English":"rankfactoren in het Nederlands"}</div>
             </div>
@@ -740,7 +1210,7 @@ function App(){
                   <div style={{marginBottom:8}}>{(comp.rankFactors||[]).map((f,j)=><div key={j} style={{fontSize:11,color:C.ink2,marginBottom:3,paddingLeft:8,borderLeft:`2px solid ${C.blush}`}}>{f}</div>)}</div>
                   {/* gap: ALTIJD in het Nederlands */}
                   {comp.gap&&<div style={{background:C.blush2,border:`1px solid ${C.blush}`,borderRadius:7,padding:"8px 11px"}}>
-                    <div style={{fontSize:9.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.beige,marginBottom:2}}>🇳🇱 Kans voor Haarshop</div>
+                    <div style={{fontSize:9.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.beige,marginBottom:2}}>{lang==="pro"?"🏢":"🇳🇱"} Kans voor {lang==="pro"?"Haarshoppro":"Haarshop"}</div>
                     <div style={{fontSize:11.5,color:C.ink2,lineHeight:1.6}}>{comp.gap}</div>
                   </div>}
                 </div>
@@ -757,7 +1227,7 @@ function App(){
             <div style={{flex:1,minWidth:0}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>{c.h1}</div><div style={{fontSize:11.5,color:C.ink3}}>{url}</div></div>
             <button className="btn btn-ghost" onClick={()=>sPrev(v=>!v)} style={{fontSize:12}}>{prev?"Verberg preview":"👁 Toon pagina-preview"}</button>
             <CopyBtn text={html} label="Kopieer HTML"/>
-            <button className="btn btn-primary" onClick={()=>{sPushed(true);setTimeout(()=>sPushed(false),3000);}}>{pushed?"✓ Verzonden!":"⚡ Magento 2"}</button>
+            <button className="btn btn-primary" onClick={function(){sTab("magento");}}>{pushed?String.fromCodePoint(0x2713)+" Gepubliceerd":String.fromCodePoint(0x26A1)+" Magento 2"}</button>
           </div>
 
           <div className={prev?"fu grid2p":"fu col"}>
@@ -780,6 +1250,7 @@ function App(){
                       <div style={{marginTop:8,fontSize:11.5,color:C.ink3}}>{(text||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean).length} woorden</div>
                     </>;
                   }}</TranslationToggle>
+                  <FeedbackBlock sectionKey="introText" label="introductietekst"/>
                 </div>
               </div>}
 
@@ -822,6 +1293,7 @@ function App(){
                         </div>;
                       }}</TranslationToggle>
                     </div>
+                    <FeedbackBlock sectionKey={key} label={bl.heading?.replace(/<[^>]*>/g,"")||key}/>
                   </div>;
                 })}
               </div>}
@@ -863,11 +1335,12 @@ function App(){
                   </div>
                   <div style={{padding:22}}>
                     <TranslationToggle lang={lang}>{showNl=>{
-                      const h1val = showNl ? (c.h1Nl||c.h1) : c.h1;
+                      const h1val = "";
                       return<div style={{background:showNl?"#2d6a4f":C.ink,color:"#fff",borderRadius:10,padding:"15px 22px",fontSize:20,fontWeight:900}} dangerouslySetInnerHTML={{__html:h1val}}/>;
                     }}</TranslationToggle>
                   </div>
                 </div>
+                <div style={{padding:"0 22px 15px"}}><FeedbackBlock sectionKey="metaFields" label="H1, Meta Title & Description"/></div>
               </div>}
 
               {tab==="faq"&&<div className="card fu">
@@ -886,6 +1359,7 @@ function App(){
                     </div>
                   ))}</TranslationToggle>
                   <pre className="code-block">{JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:(c.schemaFAQ||[]).map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))},null,2)}</pre>
+                  <FeedbackBlock sectionKey="schemaFAQ" label="FAQ vragen"/>
                 </div>
               </div>}
 
@@ -906,42 +1380,152 @@ function App(){
                     <div style={{fontSize:11.5,fontWeight:800,color:C.ink,marginBottom:6}}>Hoe werkt dit in Magento 2?</div>
                     <div style={{fontSize:12.5,color:C.ink2,lineHeight:1.7}}>Deze tekst staat verborgen in de HTML via <code style={{background:C.blush,padding:"1px 6px",borderRadius:4,fontSize:11.5}}>style="display:none"</code> en <code style={{background:C.blush,padding:"1px 6px",borderRadius:4,fontSize:11.5}}>itemprop="description"</code>. Bezoekers zien hem niet, maar Google en AI-tools lezen hem wel als ze jouw pagina crawlen. Hij is al opgenomen in de volledige HTML in het Magento 2-tabblad.</div>
                   </div>
+                  <FeedbackBlock sectionKey="aiSnippet" label="AI snippet"/>
                 </div>
               </div>}
 
               {tab==="magento"&&<div className="card fu">
-                <div style={{padding:"15px 20px",borderBottom:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                  <div><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Magento 2 · Publicatieklaar</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>Plak direct in Category Name, Meta Title, Meta Description en Description van {DOMAIN_CONFIG[lang].brand}</div></div>
-                  <CopyBtn text={html} label="Alles"/>
+                <div style={{padding:"15px 20px",borderBottom:"1px solid "+C.bdr,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Magento 2 REST API</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>Publiceer direct naar {DOMAIN_CONFIG[lang].brand} via de Magento 2 API</div></div>
+                  <CopyBtn text={html} label="Alle HTML"/>
                 </div>
-                <div style={{padding:22,display:"flex",flexDirection:"column",gap:15}}>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:11}}>
-                    {[["Category Name / H1",c.h1],["Meta Title",c.metaTitle],["Meta Description",c.metaDescription]].map(([lbl,val])=>(
-                      <div key={lbl} style={{background:C.cream,border:`1px solid ${C.bdr}`,borderRadius:10,padding:14}}>
-                        <div style={{fontSize:10.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:5}}>{lbl}</div>
-                        <div style={{fontSize:13,color:C.ink,marginBottom:8,lineHeight:1.5}}>{val}</div>
-                        <CopyBtn text={val||""}/>
+                <div style={{padding:22,display:"flex",flexDirection:"column",gap:16}}>
+
+                  <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
+                    <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:12}}>API Configuratie</div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div>
+                        <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:5}}>Magento API Bearer Token</div>
+                        <input type="password" value={magentoKey} onChange={function(e){sMagentoKey(e.target.value);sessionStorage.setItem("hs_mage_key",e.target.value);}} placeholder="Voer je Magento 2 API key in..." style={{fontSize:13}}/>
                       </div>
-                    ))}
+                      <div>
+                        <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:5}}>Magento Host URL</div>
+                        <input type="text" value={magentoHostUrl} onChange={function(e){sMagentoHostUrl(e.target.value);sessionStorage.setItem("hs_mage_host",e.target.value);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} placeholder="https://staging.haarshop.nl" style={{fontSize:13}}/>
+                      </div>
+                    </div>
+                    <div style={{marginTop:8,fontSize:11,color:C.ink3}}>
+                      Endpoint: <code style={{background:C.blush,padding:"1px 6px",borderRadius:4,fontSize:10.5}}>{magentoHostUrl}/rest/{DOMAIN_CONFIG[lang].magentoCode}/V1/</code>
+                    </div>
+                    <div style={{marginTop:6,display:"flex",gap:6,alignItems:"center"}}>
+                      <button onClick={function(){sMagentoHostUrl("https://www.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://www.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":"#fff",color:magentoHostUrl==="https://www.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
+                      <button onClick={function(){if(window.confirm("Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?")){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
+                      {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px"}}>STAGING OMGEVING</span>}
+                    </div>
                   </div>
-                  {lang!=="nl"&&<div style={{background:"#f0f7f4",border:"1px solid #b8dccb",borderRadius:10,padding:"13px 16px"}}>
-                    <div style={{fontSize:11,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#2d6a4f",marginBottom:8}}>🇳🇱 Nederlandse vertalingen (ter controle — niet publiceren)</div>
+
+                  <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                      <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3}}>Categorie selecteren</div>
+                      <button className="btn btn-primary btn-sm" disabled={!magentoKey||magentoLoading} onClick={async function(){
+                        sMagentoLoading(true);sMagentoStatus("Categorieen ophalen...");
+                        try{
+                          var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
+                          var data=await magentoFetch(host+"/categories",magentoKey,{method:"GET"});
+                          var flat=flattenCategories(data,"");
+                          sMagentoCategories(flat);
+                          sMagentoStatus(flat.length+" categorieen geladen");
+                          var pageTitle=a&&(a.pageTitle||a.h1)||"";
+                          if(pageTitle){
+                            var match=flat.find(function(cat){return cat.name.toLowerCase()===pageTitle.toLowerCase();});
+                            if(match){sMagentoCatId(match.id);sMagentoCatName(match.name);sMagentoStatus(flat.length+" categorieen geladen - "+match.name+" (ID: "+match.id+") automatisch geselecteerd");}
+                          }
+                        }catch(e){sMagentoStatus("Fout: "+e.message);sMagentoCategories(null);}
+                        sMagentoLoading(false);
+                      }}>{magentoLoading?"Laden...":"Categorieen ophalen"}</button>
+                    </div>
+                    {magentoCatId&&<div style={{background:"#e8f5e9",border:"1px solid #a5d6a7",borderRadius:8,padding:"10px 14px",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <div><span style={{fontSize:12,fontWeight:800,color:"#2e7d32"}}>Geselecteerd:</span>{" "}<span style={{fontSize:13,fontWeight:700,color:"#1b5e20"}}>{magentoCatName}</span>{" "}<span style={{fontSize:11,color:"#4caf50"}}>(ID: {magentoCatId})</span></div>
+                      <button onClick={function(){sMagentoCatId(null);sMagentoCatName("");}} style={{fontSize:11,color:"#c62828",background:"none",border:"none",cursor:"pointer",fontFamily:"var(--f)",fontWeight:700}}>Wijzig</button>
+                    </div>}
+                    {magentoCategories&&!magentoCatId&&<div>
+                      <input value={magentoCatSearch} onChange={function(e){sMagentoCatSearch(e.target.value);}} placeholder="Zoek categorie op naam..." style={{fontSize:13,marginBottom:8}}/>
+                      <div style={{maxHeight:220,overflowY:"auto",border:"1px solid "+C.bdr,borderRadius:8,background:"#fff"}}>
+                        {magentoCategories.filter(function(cat){return!magentoCatSearch||cat.name.toLowerCase().includes(magentoCatSearch.toLowerCase())||cat.path.toLowerCase().includes(magentoCatSearch.toLowerCase());}).slice(0,50).map(function(cat){return(
+                          <div key={cat.id} onClick={function(){sMagentoCatId(cat.id);sMagentoCatName(cat.name);}} style={{padding:"8px 14px",cursor:"pointer",borderBottom:"1px solid "+C.bdr,fontSize:12,display:"flex",justifyContent:"space-between",alignItems:"center",background:"#fff",transition:"background .1s"}} onMouseEnter={function(e){e.currentTarget.style.background=C.blush;}} onMouseLeave={function(e){e.currentTarget.style.background="#fff";}}>
+                            <div><span style={{fontWeight:700,color:C.ink}}>{cat.name}</span>{cat.level>2&&<span style={{color:C.ink3,fontSize:11,marginLeft:6}}>{cat.path}</span>}</div>
+                            <div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{fontSize:10,color:C.ink3}}>{cat.productCount} prod.</span><span style={{fontSize:10,color:cat.isActive?"#4caf50":"#ef5350",fontWeight:700}}>{cat.isActive?"Actief":"Inactief"}</span></div>
+                          </div>
+                        );})}
+                      </div>
+                    </div>}
+                    {magentoStatus&&<div style={{marginTop:8,fontSize:11,color:magentoStatus.startsWith("Fout")?"#c62828":C.ink3}}>{magentoStatus}</div>}
+                  </div>
+
+                  <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
+                    <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:12}}>Velden mapping</div>
                     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-                      {[["H1 NL",c.h1Nl||c.h1],["Meta Title NL",c.metaTitleNl||c.metaTitle],["Meta Description NL",c.metaDescriptionNl||c.metaDescription]].map(([lbl,val])=>(
-                        <div key={lbl} style={{background:"#fff",border:"1px solid #b8dccb",borderRadius:8,padding:11}}>
-                          <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#3a7c5a",marginBottom:4}}>{lbl}</div>
-                          <div style={{fontSize:12.5,color:"#2d5a42",lineHeight:1.5}}>{val}</div>
+                      {[["meta_title",c.metaTitle],["meta_description",c.metaDescription],["meta_keywords",(c.metaKeywords||[]).join(", ")]].map(function(pair){return(
+                        <div key={pair[0]} style={{background:"#fff",border:"1px solid "+C.bdr,borderRadius:8,padding:12}}>
+                          <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:4}}>{pair[0]}</div>
+                          <div style={{fontSize:12.5,color:C.ink,lineHeight:1.5,wordBreak:"break-word"}}>{pair[1]||"—"}</div>
+                          <CopyBtn text={pair[1]||""}/>
                         </div>
-                      ))}
+                      );})}
+                    </div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
+                      <div style={{background:"#fff",border:"1px solid "+C.bdr,borderRadius:8,padding:12}}>
+                        <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:4}}>description_top <span style={{fontWeight:500,textTransform:"none"}}>(intro boven producten)</span></div>
+                        <div style={{fontSize:12,color:C.ink,lineHeight:1.5}} dangerouslySetInnerHTML={{__html:c.introText||"—"}}/>
+                        <CopyBtn text={buildDescriptionTop(c)}/>
+                      </div>
+                      <div style={{background:"#fff",border:"1px solid "+C.bdr,borderRadius:8,padding:12}}>
+                        <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:4}}>description_bottom <span style={{fontWeight:500,textTransform:"none"}}>(SEO + FAQ widgets + JSON-LD)</span></div>
+                        <div style={{fontSize:11,color:C.ink3}}>Hoofdtekst + AI snippet + {(c.schemaFAQ||[]).length} FAQ widget(s) + JSON-LD schema</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {(c.schemaFAQ||[]).length>0&&<div style={{background:"#fff8e1",border:"1px solid #ffcc02",borderRadius:12,padding:16}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                      <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#f57f17"}}>BigBridge FAQ Widgets ({(c.schemaFAQ||[]).length})</div>
+                      <CopyBtn text={buildFaqWidgets(c.schemaFAQ)} label="Kopieer widgets"/>
+                    </div>
+                    {(c.schemaFAQ||[]).map(function(f,i){return(
+                      <div key={i} style={{background:"#fff",border:"1px solid #ffe082",borderRadius:8,padding:"10px 14px",marginBottom:6,fontSize:12}}>
+                        <div style={{fontWeight:700,color:C.ink,marginBottom:3}}>{f.question}</div>
+                        <div style={{color:C.ink2,fontSize:11.5,lineHeight:1.5}}>{f.answer}</div>
+                      </div>
+                    );})}
+                    <div style={{fontSize:11,color:"#f57f17",marginTop:6}}>FAQ widgets worden zichtbaar op de pagina + JSON-LD schema voor Google</div>
+                  </div>}
+
+                  {lang!=="nl"&&lang!=="pro"&&<div style={{background:"#f0f7f4",border:"1px solid #b8dccb",borderRadius:10,padding:"13px 16px"}}>
+                    <div style={{fontSize:11,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#2d6a4f",marginBottom:8}}>Nederlandse vertalingen (ter controle)</div>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10}}>
+                      {[["Meta Title NL",c.metaTitleNl||c.metaTitle],["Meta Description NL",c.metaDescriptionNl||c.metaDescription]].map(function(pair){return(
+                        <div key={pair[0]} style={{background:"#fff",border:"1px solid #b8dccb",borderRadius:8,padding:11}}>
+                          <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#3a7c5a",marginBottom:4}}>{pair[0]}</div>
+                          <div style={{fontSize:12.5,color:"#2d5a42",lineHeight:1.5}}>{pair[1]}</div>
+                        </div>
+                      );})}
                     </div>
                   </div>}
+
                   <div>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}><span style={{fontSize:12,fontWeight:700,color:C.ink2}}>Category Description HTML</span><CopyBtn text={html} label="Kopieer alle HTML"/></div>
-                    <pre className="code-block">{html}</pre>
+                    <button onClick={function(){sMagentoShowPayload(function(x){return!x;});}} style={{fontSize:12,fontWeight:700,color:C.ink2,background:"none",border:"none",cursor:"pointer",fontFamily:"var(--f)",padding:0,marginBottom:6}}>{magentoShowPayload?"Verberg":"Bekijk"} PUT payload JSON</button>
+                    {magentoShowPayload&&<pre className="code-block" style={{fontSize:10.5,maxHeight:250}}>{JSON.stringify(buildMagentoPutPayload(magentoCatId||0,c),null,2)}</pre>}
                   </div>
-                  <button className="btn btn-dark" onClick={()=>{sPushed(true);setTimeout(()=>sPushed(false),3000);}} style={{fontSize:14,padding:"14px",borderRadius:24,justifyContent:"center",width:"100%"}}>
-                    {pushed?"✓ Succesvol gepubliceerd in Magento 2":"⚡ Verzend naar Magento 2 via REST API"}
+
+                  <div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}><span style={{fontSize:12,fontWeight:700,color:C.ink2}}>description_bottom HTML</span><CopyBtn text={buildDescriptionBottom(c)} label="Kopieer HTML"/></div>
+                    <pre className="code-block" style={{maxHeight:200}}>{buildDescriptionBottom(c)}</pre>
+                  </div>
+
+                  <button className="btn btn-dark" disabled={!magentoKey||!magentoCatId||magentoLoading} onClick={async function(){
+                    if(!magentoKey){sMagentoStatus("Voer eerst een API key in");return;}
+                    if(!magentoCatId){sMagentoStatus("Selecteer eerst een categorie");return;}
+                    var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";if(!window.confirm("Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+"\nCategorie: "+magentoCatName+" (ID: "+magentoCatId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?")){return;}sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
+                    try{
+                      var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
+                      var payload=buildMagentoPutPayload(magentoCatId,c);
+                      await magentoFetch(host+"/categories/"+magentoCatId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
+                      sPushed(true);sMagentoStatus("Succesvol gepubliceerd naar "+magentoCatName+" (ID: "+magentoCatId+") op "+magentoHostUrl+"!");
+                    }catch(e){sMagentoStatus("Fout bij publiceren: "+e.message);}
+                    sMagentoLoading(false);
+                  }} style={{fontSize:14,padding:"14px",borderRadius:24,justifyContent:"center",width:"100%",opacity:(!magentoKey||!magentoCatId)?.5:1}}>
+                    {magentoLoading?"Bezig met publiceren naar "+(magentoHostUrl.includes("staging")?"staging":"productie")+"...":(pushed?String.fromCodePoint(0x2713)+" Succesvol gepubliceerd!":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"+(magentoCatName?" — "+magentoCatName:""))}
                   </button>
+                  {(!magentoKey||!magentoCatId)&&<div style={{fontSize:11,color:C.ink3,textAlign:"center",marginTop:-8}}>{!magentoKey?"Voer eerst een API key in":"Selecteer eerst een categorie"}</div>}
                 </div>
               </div>}
             </div>
