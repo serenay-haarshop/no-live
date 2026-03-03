@@ -592,7 +592,7 @@ async function genContent(a,lang){
 
   const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links uit analyse (verwerk deze in de tekst): ${lnk||"geen"}\n\nVOLLEDIG SITEMAP (gebruik ALLEEN URLs uit deze lijst — verzin NOOIT een URL):\n${fullSiteMap}\n\nBELANGRIJK: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen.\n\nINTERNE LINKS IN DE TEKST — VERPLICHT:\nVerwerk de interne links als natuurlijke <a href="...">anchor text</a> in de lopende tekst. Volg deze regels strikt:\n\n1. ALS DIT EEN MERKPAGINA IS: Link PRIMAIR naar productcategorieen die dit merk aanbiedt (scharen, fohns, tondeuses, stylingproducten). Verwerk 3-5 merkgebonden links verspreid over alle secties.\\n\\n2. ALS DIT EEN CATEGORIEPAGINA IS: SIBLINGS ZIJN DOMINANT (2-4 links). CROSS-CATEGORY IS BEPERKT (max 1-2 links).\n\n3. Gebruik beschrijvende anchor text met het zoekwoord van de doelpagina (bijv. <a href="${cfg.base}/haarverzorging/conditioners">conditioner</a>, NOOIT "klik hier" of "bekijk hier"). Gebruik ALTIJD correcte HTML syntax. Controleer dat elke <a> tag correct gesloten is.\n\n4. Totaal 3-5 interne links in de hele tekst. Niet meer. Niet alle links in één sectie.\n\n5. Elke link moet EXACT een URL uit het sitemap zijn. Controleer dit.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nHOOFDLETTERGEBRUIK: Gebruik NOOIT onnodige hoofdletters in titels of headings. Alleen eerste letter van een zin en eigennamen (merknamen) krijgen een hoofdletter. FOUT: \"Ontdek De Beste Shampoo\". CORRECT: \"Ontdek de beste shampoo\".\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"metaTitle":"Meta title max 60 tekens","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens, vermeld altijd: Gratis verzending vanaf EUR35,-","metaKeywords":["keyword1","keyword2","keyword3"],"metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"2-3 zinnen max 55 woorden, primair zoekwoord vet.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"2-3 alineas gescheiden door \\n\\n. Verwerk 1-2 sibling links.","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"2-3 alineas met 1 sibling link","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"1-2 alineas","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"2 alineas met 1 sibling link","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"1-2 alineas, hier eventueel 1 cross-category link als er routine-logica is","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"2 alineas, eventueel 1 cross-category link naar tools/routine","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"1 alinea","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
   // web search ON: used for localization research (top performing pages in target market)
-  return xj(await claude(p,8000,true,lang));
+  return xj(await claude(p,6000,false,lang));
 }
 
 /* ── Section-level regeneration with feedback ── */
@@ -783,10 +783,10 @@ function TranslationToggle({lang, children}){
     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
       <div style={{display:"flex",background:"#f0ece8",borderRadius:20,padding:2,border:`1px solid #e0d5cb`}}>
         <button onClick={()=>sShowNl(false)} style={{fontSize:11.5,fontWeight:700,padding:"4px 14px",borderRadius:18,border:"none",cursor:"pointer",background:!showNl?"#fff":"transparent",color:!showNl?"#1a1a1a":"#999",transition:"all .15s",fontFamily:"var(--f)",boxShadow:!showNl?"0 1px 4px rgba(0,0,0,.12)":"none"}}>
-          {lang==="de"?"🇩🇪 Duits":"🇬🇧 English"}
+          {lang==="de"?"\ud83c\udde9\ud83c\uddea Duits":"\ud83c\uddec\ud83c\udde7 English"}
         </button>
         <button onClick={()=>sShowNl(true)} style={{fontSize:11.5,fontWeight:700,padding:"4px 14px",borderRadius:18,border:"none",cursor:"pointer",background:showNl?"#fff":"transparent",color:showNl?"#1a1a1a":"#999",transition:"all .15s",fontFamily:"var(--f)",boxShadow:showNl?"0 1px 4px rgba(0,0,0,.12)":"none"}}>
-          🇳🇱 Nederlands
+          \ud83c\uddf3\ud83c\uddf1 Nederlands
         </button>
       </div>
       {showNl&&<span style={{fontSize:10.5,color:"#c4967a",fontWeight:700,background:"#f5e8df",padding:"2px 10px",borderRadius:20,border:"1px solid #e8c9b8"}}>Vertaling — niet publiceren</span>}
@@ -848,7 +848,7 @@ function PagePreview({content,url,highlight}){
           </div>;
         })}
         <div style={{...hl("seo"),background:C.cream,border:`1px solid ${C.bdr}`,borderRadius:7,padding:10,marginTop:7,opacity:.5}}>
-          <div style={{background:"#f0ece8",border:`1px solid ${C.bdr}`,borderRadius:4,padding:"2px 7px",display:"inline-flex",fontSize:8.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".05em",color:C.ink3,marginBottom:5}}>👁 Verborgen voor bezoekers</div>
+          <div style={{background:"#f0ece8",border:`1px solid ${C.bdr}`,borderRadius:4,padding:"2px 7px",display:"inline-flex",fontSize:8.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".05em",color:C.ink3,marginBottom:5}}>\ud83d\udc41 Verborgen voor bezoekers</div>
           <div style={{fontSize:9,color:C.ink3,fontStyle:"italic"}}>AI Snippet · itemprop="description" · display:none</div>
         </div>
       </div>
@@ -902,7 +902,7 @@ function KeyScreen({onSave}){
     <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
       <div style={{background:"#fff",borderRadius:16,padding:"44px 48px",maxWidth:460,width:"100%",boxShadow:"0 8px 40px rgba(0,0,0,.1)",border:`1px solid ${C.bdr}`}}>
         <div style={{textAlign:"center",marginBottom:32}}>
-          <div style={{fontSize:36,marginBottom:12}}>🔑</div>
+          <div style={{fontSize:36,marginBottom:12}}>{String.fromCodePoint(0x1F511)}</div>
           <div style={{fontSize:22,fontWeight:900,color:C.ink,marginBottom:10}}>API-sleutel invoeren</div>
           <div style={{fontSize:13.5,color:C.ink3,lineHeight:1.7}}>Voer je Anthropic API-sleutel in om te beginnen. De sleutel wordt opgeslagen in je browser en nergens anders naartoe gestuurd.</div>
         </div>
@@ -910,7 +910,7 @@ function KeyScreen({onSave}){
           <div style={{fontSize:11,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:7}}>Anthropic API-sleutel</div>
           <div style={{position:"relative"}}>
             <input type={show?"text":"password"} value={v} onChange={e=>{sv(e.target.value);sErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="sk-ant-api03-..." style={{paddingRight:46,borderColor:err?C.red:C.bdr}}/>
-            <button onClick={()=>sShow(x=>!x)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.ink3}}>{show?"🙈":"👁"}</button>
+            <button onClick={()=>sShow(x=>!x)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.ink3}}>{show?"\ud83d\ude48":"\ud83d\udc41"}</button>
           </div>
           {err&&<div style={{marginTop:6,fontSize:12,color:C.red,fontWeight:600}}>{err}</div>}
         </div>
@@ -962,7 +962,7 @@ function App(){
   const doGen=useCallback(async()=>{
     if(!a)return;sErr(null);sPhase("generating");sStatus("Menselijk klinkende SEO-teksten schrijven…");
     try{const r=await genContent(a,lang);if(!r.metaKeywords)r.metaKeywords=[];sC(r);sHtml(buildHTML(r,a));sPhase("done");sTab("intro");sPrev(true);sessionStorage.setItem("hs_state",JSON.stringify({analysis:a,content:r,html:buildHTML(r,a),url,lang}));}
-    catch(e){sErr("Content fout: "+e.message);sPhase("reviewing");console.error("Content error:",e);}
+    catch(e){var msg=e.message||"";if(msg.includes("token")||msg.includes("too long")){sErr("Token limiet bereikt. De pagina-analyse is te groot. Probeer een minder complexe pagina.");}else{sErr("Content fout: "+msg);}sPhase("reviewing");console.error("Content error:",e);}
   },[a,lang]);
 
   const doRegen=useCallback(async(sectionKey,feedback)=>{
@@ -1051,7 +1051,7 @@ function App(){
         <textarea value={fbText} onChange={e=>sFbText(e.target.value)} placeholder="Beschrijf wat je wilt aanpassen... (bijv. 'meer focus op professioneel gebruik' of 'de tweede alinea klopt niet, het moet gaan over...')" style={{width:"100%",minHeight:70,fontSize:13,padding:10,borderRadius:8,border:`1px solid #e0d5cb`,fontFamily:"var(--f)",resize:"vertical",boxSizing:"border-box"}}/>
         <div style={{display:"flex",gap:8,marginTop:8}}>
           <button onClick={()=>doRegen(sectionKey,fbText)} disabled={fbLoading||!fbText.trim()} style={{fontSize:12,fontWeight:700,padding:"7px 18px",borderRadius:20,cursor:"pointer",border:"none",background:C.ink,color:"#fff",fontFamily:"var(--f)",opacity:fbLoading||!fbText.trim()?.5:1}}>
-            {fbLoading?"⏳ Herschrijven...":"🔄 Herschrijf deze sectie"}
+            {fbLoading?"⏳ Herschrijven...":"\ud83d\udd04 Herschrijf deze sectie"}
           </button>
           <button onClick={()=>{sFbSection(null);sFbText("");}} style={{fontSize:12,fontWeight:600,padding:"7px 14px",borderRadius:20,cursor:"pointer",border:`1px solid ${C.bdr}`,background:"#fff",color:C.ink3,fontFamily:"var(--f)"}}>Annuleer</button>
         </div>
@@ -1074,11 +1074,11 @@ function App(){
         <div style={{flex:1}}/>
         {/* Taal */}
         <div style={{display:"flex",gap:2,background:C.cream,padding:"3px",borderRadius:24,border:`1px solid ${C.bdr}`}}>
-          {[{k:"nl",f:"🇳🇱"},{k:"de",f:"🇩🇪"},{k:"en",f:"🇬🇧"},{k:"pro",f:"🏢"}].map(({k,f})=>(
+          {[{k:"nl",f:"\ud83c\uddf3\ud83c\uddf1"},{k:"de",f:"\ud83c\udde9\ud83c\uddea"},{k:"en",f:"\ud83c\uddec\ud83c\udde7"},{k:"pro",f:"\ud83c\udfe2"}].map(({k,f})=>(
             <button key={k} onClick={()=>sLang(k)} style={{fontFamily:"var(--f)",fontSize:11.5,fontWeight:700,padding:"5px 14px",borderRadius:20,cursor:"pointer",border:"none",background:lang===k?C.beige:"transparent",color:lang===k?"#fff":C.ink3,transition:"all .18s"}}>{f} {k.toUpperCase()}</button>
           ))}
         </div>
-        <button onClick={()=>{localStorage.removeItem("hs_key");_key="";sHasKey(false);sessionStorage.removeItem("hs_auth");sAuthed(false);}} className="btn btn-ghost btn-sm">🔑 API-sleutel</button>
+        <button onClick={()=>{localStorage.removeItem("hs_key");_key="";sHasKey(false);sessionStorage.removeItem("hs_auth");sAuthed(false);}} className="btn btn-ghost btn-sm">\ud83d\udd11 API-sleutel</button>
       </div>
     </header>
 
@@ -1096,7 +1096,7 @@ function App(){
           {(()=>{
             const detected=domainFromUrl(url);
             const cfg=DOMAIN_CONFIG[detected];
-            const labels={nl:"🇳🇱 haarshop.nl · Zoeklocatie: Nederland · Taal: NL",de:"🇩🇪 haarshop.de · Zoeklocatie: Duitsland · Taal: DE",en:"🇬🇧 haarshop.com · Zoeklocatie: Nederland · Taal: EN",pro:"🏢 haarshoppro.nl · B2B Groothandel · Taal: NL"};
+            const labels={nl:"\ud83c\uddf3\ud83c\uddf1 haarshop.nl · Zoeklocatie: Nederland · Taal: NL",de:"\ud83c\udde9\ud83c\uddea haarshop.de · Zoeklocatie: Duitsland · Taal: DE",en:"\ud83c\uddec\ud83c\udde7 haarshop.com · Zoeklocatie: Nederland · Taal: EN",pro:"\ud83c\udfe2 haarshoppro.nl · B2B Groothandel · Taal: NL"};
             return url.includes("haarshop")&&<div style={{display:"inline-flex",alignItems:"center",gap:7,background:"#fff",border:`1.5px solid ${C.beige}`,borderRadius:20,padding:"5px 14px",marginBottom:14,fontSize:12,fontWeight:700,color:C.ink}}>
               <span style={{color:C.green}}>✓</span> {labels[detected]}
               <span style={{color:C.ink3,fontWeight:600}}>· {cfg.location} SERP-analyse</span>
@@ -1126,6 +1126,10 @@ function App(){
           </div>
         </div>
         {(phase==="analyzing"||phase==="generating")&&<div style={{marginTop:18,display:"flex",alignItems:"center",gap:12,background:"rgba(255,255,255,.85)",borderRadius:10,padding:"12px 18px"}}><Spin s={18}/><span style={{fontSize:13,fontWeight:700,color:C.ink}}>{status}</span></div>}
+              {phase==="done"&&c&&<div style={{marginTop:18,display:"flex",alignItems:"center",gap:12,background:"#e8f5e9",padding:"14px 20px",borderRadius:14,border:"1px solid #a5d6a7"}}>
+                <div style={{width:36,height:36,borderRadius:"50%",background:"#2e7d32",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:"#fff",flexShrink:0}}>{String.fromCodePoint(0x2713)}</div>
+                <div><div style={{fontSize:14,fontWeight:800,color:"#1b5e20"}}>Content is klaar!</div><div style={{fontSize:12,color:"#388e3c",marginTop:2}}>Alle secties zijn gegenereerd. Controleer de tabs en publiceer via Magento 2.</div></div>
+              </div>}
         {err&&<div style={{marginTop:14,background:"#fef0ef",border:`1px solid #f5c6c2`,borderRadius:10,padding:"12px 18px",fontSize:13,color:C.red,fontWeight:700}}>⚠ {err}</div>}
       </div>
 
@@ -1194,7 +1198,7 @@ function App(){
           <div className="card fu2 stick">
             <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}>
               <div style={{fontSize:15,fontWeight:900,color:C.ink}}>
-                {lang==="de"?"🇩🇪 Google.de Top 3":lang==="en"?"🇬🇧 Google.nl (EN) Top 3":lang==="pro"?"🏢 Google.nl (B2B) Top 3":"🇳🇱 Google.nl Top 3"}
+                {lang==="de"?"\ud83c\udde9\ud83c\uddea Google.de Top 3":lang==="en"?"\ud83c\uddec\ud83c\udde7 Google.nl (EN) Top 3":lang==="pro"?"\ud83c\udfe2 Google.nl (B2B) Top 3":"\ud83c\uddf3\ud83c\uddf1 Google.nl Top 3"}
               </div>
               <div style={{fontSize:12,color:C.ink3,marginTop:1}}>Live concurrentieanalyse · {lang==="de"?"rankFactors in het Duits":lang==="en"?"rankFactors in English":"rankfactoren in het Nederlands"}</div>
             </div>
@@ -1210,7 +1214,7 @@ function App(){
                   <div style={{marginBottom:8}}>{(comp.rankFactors||[]).map((f,j)=><div key={j} style={{fontSize:11,color:C.ink2,marginBottom:3,paddingLeft:8,borderLeft:`2px solid ${C.blush}`}}>{f}</div>)}</div>
                   {/* gap: ALTIJD in het Nederlands */}
                   {comp.gap&&<div style={{background:C.blush2,border:`1px solid ${C.blush}`,borderRadius:7,padding:"8px 11px"}}>
-                    <div style={{fontSize:9.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.beige,marginBottom:2}}>{lang==="pro"?"🏢":"🇳🇱"} Kans voor {lang==="pro"?"Haarshoppro":"Haarshop"}</div>
+                    <div style={{fontSize:9.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.beige,marginBottom:2}}>{lang==="pro"?"\ud83c\udfe2":"\ud83c\uddf3\ud83c\uddf1"} Kans voor {lang==="pro"?"Haarshoppro":"Haarshop"}</div>
                     <div style={{fontSize:11.5,color:C.ink2,lineHeight:1.6}}>{comp.gap}</div>
                   </div>}
                 </div>
@@ -1225,7 +1229,7 @@ function App(){
         <div className="fu">
           <div className="card" style={{padding:"13px 20px",display:"flex",alignItems:"center",gap:13,marginBottom:18,flexWrap:"wrap"}}>
             <div style={{flex:1,minWidth:0}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>{c.h1}</div><div style={{fontSize:11.5,color:C.ink3}}>{url}</div></div>
-            <button className="btn btn-ghost" onClick={()=>sPrev(v=>!v)} style={{fontSize:12}}>{prev?"Verberg preview":"👁 Toon pagina-preview"}</button>
+            <button className="btn btn-ghost" onClick={()=>sPrev(v=>!v)} style={{fontSize:12}}>{prev?"Verberg preview":"\ud83d\udc41 Toon pagina-preview"}</button>
             <CopyBtn text={html} label="Kopieer HTML"/>
             <button className="btn btn-primary" onClick={function(){sTab("magento");}}>{pushed?String.fromCodePoint(0x2713)+" Gepubliceerd":String.fromCodePoint(0x26A1)+" Magento 2"}</button>
           </div>
@@ -1551,7 +1555,7 @@ function App(){
         <div style={{fontSize:28,fontWeight:900,color:C.ink,marginBottom:10}}>Haarshop SEO Content Machine</div>
         <div style={{fontSize:15,color:C.ink3,maxWidth:500,margin:"0 auto 38px",lineHeight:1.8}}>Plak een URL, de tool analyseert de Google NL SERP, berekent zoekvolumes en schrijft publiceerbare content die menselijk klinkt.</div>
         <div style={{display:"flex",gap:13,justifyContent:"center",flexWrap:"wrap"}}>
-          {[["📊","Keyword Research","Live SERP-analyse voor NL"],["🏆","Concurrentieanalyse","DA, verkeer en rangoorzaken"],["✍️","Menselijke copy","Geen AI-uitstraling, geen opsommingen"],["👁","Pagina-preview","Zie exact waar tekst staat"],["⚡","Magento 2","Direct publiceren via REST API"]].map(([icon,title,sub])=>(
+          {[["\ud83d\udcca","Keyword Research","Live SERP-analyse voor NL"],["\ud83c\udfc6","Concurrentieanalyse","DA, verkeer en rangoorzaken"],["✍️","Menselijke copy","Geen AI-uitstraling, geen opsommingen"],["\ud83d\udc41","Pagina-preview","Zie exact waar tekst staat"],["⚡","Magento 2","Direct publiceren via REST API"]].map(([icon,title,sub])=>(
             <div key={title} style={{background:"#fff",border:`1px solid ${C.bdr}`,borderRadius:12,padding:"17px 19px",width:180,textAlign:"left",boxShadow:"0 2px 8px rgba(0,0,0,.04)"}}>
               <div style={{fontSize:21,marginBottom:7}}>{icon}</div>
               <div style={{fontSize:13.5,fontWeight:800,color:C.ink,marginBottom:3}}>{title}</div>
