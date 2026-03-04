@@ -117,9 +117,9 @@ const C = {
    zoeklocatie en competitie-markt
 ───────────────────────────────────────────── */
 const DOMAIN_CONFIG = {
-  nl: { base:"https://www.haarshop.nl",  location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.nl",  freeShipping:"Gratis verzending vanaf €35,-" },
-  de: { base:"https://www.haarshop.de",  location:"Germany",     market:"de", currency:"€", brand:"Haarshop.de",  freeShipping:"Gratis verzending vanaf €39,-" },
-  en: { base:"https://www.haarshop.com", location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.com", freeShipping:"Gratis verzending vanaf €35,-" },
+  nl: { base:"https://www.haarshop.nl",  location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.nl",  freeShipping:"Gratis verzending vanaf €35,-", magentoCode:"haarshop_nl" },
+  de: { base:"https://www.haarshop.de",  location:"Germany",     market:"de", currency:"€", brand:"Haarshop.de",  freeShipping:"Gratis verzending vanaf €39,-", magentoCode:"haarshop_de" },
+  en: { base:"https://www.haarshop.com", location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.com", freeShipping:"Gratis verzending vanaf €35,-", magentoCode:"haarshop_en" },
   pro:{ base:"https://www.haarshoppro.nl",location:"Netherlands",market:"nl", currency:"€", brand:"Haarshoppro.nl", magentoCode:"haarshop_b2b", freeShipping:"Gratis verzending vanaf €50,- ex btw", audience:"b2b" },
 };
 
@@ -945,7 +945,7 @@ function App(){
       )}
 
       {/* DONE */}
-      {phase==="done"&&c&&(
+      {phase==="done"&&c&&(<>
         <div className="fu">
           <div className="card" style={{padding:"13px 20px",display:"flex",alignItems:"center",gap:13,marginBottom:18,flexWrap:"wrap"}}>
             <div style={{flex:1,minWidth:0}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>{c.h1}</div><div style={{fontSize:11.5,color:C.ink3}}>{url}</div></div>
@@ -1269,7 +1269,7 @@ function App(){
               </div>}
 
 
-      )}
+      </>)}
 
       {/* IDLE */}
       {phase==="idle"&&<div className="fu" style={{textAlign:"center",padding:"60px 20px 80px"}}>
