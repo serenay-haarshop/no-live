@@ -95,7 +95,9 @@
     .dot { display:inline-block;width:9px;height:9px;border-radius:50%; }
 
     @media(max-width:900px){.grid2,.grid2p{grid-template-columns:1fr;}}
-  </style>
+  [contenteditable]:hover{background-color:rgba(0,0,0,.02)!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);border-radius:6px;}
+      [contenteditable]:focus{background-color:#fff!important;box-shadow:inset 0 0 0 2px #c4956a!important;border-radius:6px;}
+    </style>
 </head>
 <body>
 <div id="app"></div>
@@ -437,6 +439,11 @@ async function claude(msg,tokens=4000,search=false,lang="nl"){
 
 function xj(raw){const s=raw.indexOf("{"),e=raw.lastIndexOf("}");if(s<0||e<0)throw new Error("Geen JSON.");return JSON.parse(raw.slice(s,e+1));}
 
+
+function addTargetBlank(html){
+  if(!html)return html;
+  return html.replace(/<a\s+href=/g,'<a target="_blank" rel="noopener noreferrer" href=');
+}
 function buildFaqWidgets(schemaFAQ){
   if(!schemaFAQ||!schemaFAQ.length) return "";
   return schemaFAQ.map(function(f){
@@ -650,7 +657,7 @@ function PagePreview({content,url,highlight}){
           const bl=mc[bk];if(!bl)return null;
           return<div key={bk} style={{...hl("main"),marginBottom:11}}>
             <div style={{fontSize:11.5,fontWeight:900,color:C.ink,marginBottom:3}} dangerouslySetInnerHTML={{__html:bl.heading}}/>
-            <div style={{fontSize:10.5,color:C.ink2,lineHeight:1.65}} dangerouslySetInnerHTML={{__html:(bl.body||"").replace(/\n\n/g,"<br/>")}}/>
+            <div style={{fontSize:10.5,color:C.ink2,lineHeight:1.65}} dangerouslySetInnerHTML={{__html:addTargetBlank((bl.body||"").replace(/\n\n/g,"<br/>"))}}/>
             {h3&&bl[h3]&&<div style={{marginTop:6,paddingLeft:9,borderLeft:`2px solid ${C.blush}`}}>
               <div style={{fontSize:10.5,fontWeight:800,color:C.ink2,marginBottom:2}} dangerouslySetInnerHTML={{__html:bl[h3].heading}}/>
               <div style={{fontSize:10,color:C.ink3,lineHeight:1.65}} dangerouslySetInnerHTML={{__html:(bl[h3].body||"").replace(/\n\n/g,"<br/>")}}/>
@@ -749,6 +756,32 @@ function App(){
   const[magentoShowPayload,sMagentoShowPayload]=useState(false);
 
 
+
+
+  // Helper to update content fields and auto-rebuild HTML
+  const updateC = (path, value) => {
+    sC(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const keys = path.split(".");
+      let obj = next;
+      for(let i=0; i<keys.length-1; i++) obj = obj[keys[i]];
+      obj[keys[keys.length-1]] = value;
+      return next;
+    });
+  };
+
+  // Auto-rebuild HTML when content changes
+  useEffect(()=>{
+    if(c && a){ sHtml(buildHTML(c, a)); }
+  },[c, a]);
+
+  // Add target="_blank" to all internal links in content
+  useEffect(()=>{
+    document.querySelectorAll('.rich a, .card a[href*="haarshop"]').forEach(a=>{
+      if(!a.getAttribute('target')){a.setAttribute('target','_blank');a.setAttribute('rel','noopener noreferrer');}
+    });
+  });
+
   // Persist state to sessionStorage on changes
   useEffect(()=>{sessionStorage.setItem("hs_url",url);},[url]);
   useEffect(()=>{sessionStorage.setItem("hs_lang",lang);},[lang]);
@@ -777,7 +810,7 @@ function App(){
   if(!authed)return<PasswordGate onPass={()=>{sessionStorage.setItem("hs_auth","1");sAuthed(true);}}/>;
   if(!hasKey)return<KeyScreen onSave={()=>sHasKey(true)}/>;
 
-  const TABS=[{k:"intro",l:"Introductie"},{k:"main",l:"Hoofdtekst"},{k:"meta",l:"Meta & H1"},{k:"faq",l:"FAQ Schema"},{k:"ai",l:"AI Snippet"},{k:"magento",l:"Magento 2"}];
+  const TABS=[{k:"intro",l:"Introductie"},{k:"main",l:"Hoofdtekst"},{k:"meta",l:"Meta"},{k:"faq",l:"FAQ Schema"},{k:"ai",l:"AI Snippet"},{k:"magento",l:"Magento 2"}];
 
   return<>
     {/* Header */}
@@ -889,14 +922,6 @@ function App(){
             </div>
 
             {/* Parameters */}
-            <div className="card fu2">
-              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Analyse-parameters</div></div>
-              <div style={{padding:"18px 20px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-                {[["Paginatype",a.pageType],["Merk",a.brand||"Niet van toepassing"],["Producttypes",(a.productTypes||[]).join(", ")],["Haarbehoeften",(a.hairNeeds||[]).join(", ")]].map(([l,v])=>(
-                  <div key={l}><div style={{fontSize:10.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:4}}>{l}</div><div style={{fontSize:14,fontWeight:700,color:C.ink}}>{v||"—"}</div></div>
-                ))}
-              </div>
-            </div>
 
             {/* Interne links */}
             <div className="card fu3">
@@ -951,6 +976,7 @@ function App(){
             <div style={{flex:1,minWidth:0}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>{c.h1}</div><div style={{fontSize:11.5,color:C.ink3}}>{url}</div></div>
             <button className="btn btn-ghost" onClick={()=>sPrev(v=>!v)} style={{fontSize:12}}>{prev?"Verberg preview":"👁 Toon pagina-preview"}</button>
             <CopyBtn text={html} label="Kopieer HTML"/>
+            <span style={{fontSize:11,color:C.ink3,fontWeight:600,display:"flex",alignItems:"center",gap:4}}>{String.fromCodePoint(0x270F)} Alle velden zijn bewerkbaar</span>
             <button className="btn btn-primary" onClick={()=>{sPushed(true);setTimeout(()=>sPushed(false),3000);}}>{pushed?"✓ Verzonden!":"⚡ Magento 2"}</button>
           </div>
 
@@ -970,7 +996,7 @@ function App(){
                   <TranslationToggle lang={lang}>{showNl=>{
                     const text = showNl ? (c.introTextNl||c.introText||"") : (c.introText||"");
                     return<>
-                      <div className="rich" style={{background:showNl?"#f0f7f4":C.cream,border:`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:"17px 22px",fontSize:15,lineHeight:1.85,color:C.ink}} dangerouslySetInnerHTML={{__html:text}}/>
+                      <div className="rich" contentEditable suppressContentEditableWarning style={{background:showNl?"#f0f7f4":C.cream,border:`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:"17px 22px",fontSize:15,lineHeight:1.85,color:C.ink,outline:"none",cursor:"text"}} dangerouslySetInnerHTML={{__html:text}} onBlur={e=>updateC(showNl?"introTextNl":"introText",e.target.innerHTML)}/>
                       <div style={{marginTop:8,fontSize:11.5,color:C.ink3}}>{(text||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean).length} woorden</div>
                     </>;
                   }}</TranslationToggle>
@@ -1002,16 +1028,16 @@ function App(){
                         const h3Body  = showNl ? (h3Obj?.nl?.body||h3Obj?.body)       : h3Obj?.body;
                         return<div style={{flex:1,minWidth:0}}>
                           <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,marginBottom:10}}>
-                            <h2 style={{fontSize:17,fontWeight:900,color:showNl?"#2d6a4f":C.ink,margin:0}} dangerouslySetInnerHTML={{__html:heading}}/>
+                            <h2 contentEditable suppressContentEditableWarning style={{fontSize:17,fontWeight:900,color:showNl?"#2d6a4f":C.ink,margin:0,outline:"none",borderBottom:"1px dashed "+C.bdr,paddingBottom:4}} dangerouslySetInnerHTML={{__html:heading}} onBlur={e=>updateC("mainContent."+key+(showNl?".nl.heading":".heading"),e.target.innerHTML)}/>
                             <div style={{display:"flex",gap:6,flexShrink:0}}>
                               {!showNl&&<HtmlBtn code={blockHtml}/>}
                               <CopyBtn text={[heading,body,h3Obj?h3Head+"\n"+h3Body:""].join("\n")} label="Tekst"/>
                             </div>
                           </div>
-                          <div className="rich" style={{fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2,background:showNl?"#f0f7f4":"transparent",borderRadius:showNl?8:0,padding:showNl?"12px 16px":0}} dangerouslySetInnerHTML={{__html:(body||"").replace(/\n\n/g,"</p><p>")}}/>
+                          <div className="rich" contentEditable suppressContentEditableWarning style={{fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2,background:showNl?"#f0f7f4":"transparent",borderRadius:showNl?8:0,padding:showNl?"12px 16px":"4px 0",outline:"none",cursor:"text",minHeight:40}} dangerouslySetInnerHTML={{__html:(body||"").replace(/\n\n/g,"</p><p>")}} onBlur={e=>updateC("mainContent."+key+(showNl?".nl.body":".body"),e.target.innerText)}/>
                           {h3Obj&&<div style={{marginTop:15,paddingLeft:17,borderLeft:`3px solid ${showNl?"#b8dccb":C.blush}`}}>
-                            <h3 style={{fontSize:14,fontWeight:800,color:showNl?"#2d6a4f":C.ink2,marginBottom:7}} dangerouslySetInnerHTML={{__html:h3Head}}/>
-                            <div className="rich" style={{fontSize:13.5,lineHeight:1.85,color:showNl?"#2d5a42":C.ink3,background:showNl?"#f0f7f4":"transparent",borderRadius:showNl?6:0,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:(h3Body||"").replace(/\n\n/g,"</p><p>")}}/>
+                            <h3 contentEditable suppressContentEditableWarning style={{fontSize:14,fontWeight:800,color:showNl?"#2d6a4f":C.ink2,marginBottom:7,outline:"none",borderBottom:"1px dashed "+C.bdr,paddingBottom:3}} dangerouslySetInnerHTML={{__html:h3Head}} onBlur={e=>updateC("mainContent."+key+"."+h3+(showNl?".nl.heading":".heading"),e.target.innerHTML)}/>
+                            <div className="rich" contentEditable suppressContentEditableWarning style={{fontSize:13.5,lineHeight:1.85,color:showNl?"#2d5a42":C.ink3,background:showNl?"#f0f7f4":"transparent",borderRadius:showNl?6:0,padding:showNl?"10px 14px":"4px 0",outline:"none",cursor:"text",minHeight:30}} dangerouslySetInnerHTML={{__html:(h3Body||"").replace(/\n\n/g,"</p><p>")}} onBlur={e=>updateC("mainContent."+key+"."+h3+(showNl?".nl.body":".body"),e.target.innerText)}/>
                           </div>}
                         </div>;
                       }}</TranslationToggle>
@@ -1039,7 +1065,7 @@ function App(){
                           {[["Meta Title",mt,60],["Meta Description",md,155]].map(([lbl,val,max])=>(
                             <div key={lbl} style={{background:showNl?"#f0f7f4":C.cream,border:`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:14}}>
                               <div style={{fontSize:10.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:5}}>{lbl}</div>
-                              <div style={{fontSize:13.5,color:showNl?"#2d5a42":C.ink,marginBottom:8,lineHeight:1.5}}>{val}</div>
+                              <input type="text" value={val||""} onChange={e=>{const f=lbl.includes("Title")?(showNl?"metaTitleNl":"metaTitle"):(showNl?"metaDescriptionNl":"metaDescription");updateC(f,e.target.value);}} style={{width:"100%",boxSizing:"border-box",fontSize:13,color:showNl?"#2d5a42":C.ink,marginBottom:8,lineHeight:1.5,padding:"8px 10px",border:"1px solid "+C.bdr,borderRadius:8,fontFamily:"var(--f)",background:showNl?"#f0f7f4":"#fff",outline:"none"}}/>
                               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                                 <span style={{fontSize:11.5,fontWeight:700,color:(val?.length||0)>max?C.red:C.green}}>{val?.length||0}/{max} {(val?.length||0)>max?"⚠ te lang":"✓ OK"}</span>
                                 <CopyBtn text={val||""}/>
@@ -1051,17 +1077,7 @@ function App(){
                     }}</TranslationToggle>
                   </div>
                 </div>
-                <div className="card fu2">
-                  <div style={{padding:"15px 20px",borderBottom:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                    <div style={{fontSize:15,fontWeight:900,color:C.ink}}>H1 Paginatitel</div><CopyBtn text={c.h1||""}/>
-                  </div>
-                  <div style={{padding:22}}>
-                    <TranslationToggle lang={lang}>{showNl=>{
-                      const h1val = showNl ? (c.h1Nl||c.h1) : c.h1;
-                      return<div style={{background:showNl?"#2d6a4f":C.ink,color:"#fff",borderRadius:10,padding:"15px 22px",fontSize:20,fontWeight:900}} dangerouslySetInnerHTML={{__html:h1val}}/>;
-                    }}</TranslationToggle>
-                  </div>
-                </div>
+                  
               </div>}
 
               {tab==="faq"&&<div className="card fu">
@@ -1094,7 +1110,7 @@ function App(){
                 <div style={{padding:22,display:"flex",flexDirection:"column",gap:14}}>
                   <TranslationToggle lang={lang}>{showNl=>{
                     const snip = showNl ? (c.aiSnippetNl||c.aiSnippet||"") : (c.aiSnippet||"");
-                    return<div style={{background:showNl?"#f0f7f4":"#f0f7f4",border:showNl?"1px solid #b8dccb":"1px solid #b8dccb",borderLeft:`4px solid ${showNl?"#2d6a4f":"#3a7c5a"}`,borderRadius:"0 10px 10px 0",padding:"17px 22px",fontSize:15,fontStyle:"italic",lineHeight:1.85,color:showNl?"#1a4a30":"#2d5a42"}} dangerouslySetInnerHTML={{__html:snip}}/>;
+                    return<div style={{background:showNl?"#f0f7f4":"#f0f7f4",border:showNl?"1px solid #b8dccb":"1px solid #b8dccb",borderLeft:`4px solid ${showNl?"#2d6a4f":"#3a7c5a"}`,borderRadius:"0 10px 10px 0",padding:"17px 22px",fontSize:15,fontStyle:"italic",lineHeight:1.85,color:showNl?"#1a4a30":"#2d5a42"}} contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:snip}} onBlur={e=>updateC(showNl?"aiSnippetNl":"aiSnippet",e.target.innerText)}/>;
                   }}</TranslationToggle>
                   <div style={{background:C.blush2,border:`1px solid ${C.blush}`,borderRadius:10,padding:"14px 18px"}}>
                     <div style={{fontSize:11.5,fontWeight:800,color:C.ink,marginBottom:6}}>Hoe werkt dit in Magento 2?</div>
