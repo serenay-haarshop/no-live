@@ -104,6 +104,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script>
+window.onerror = function(msg, url, line, col, error) {
+  document.getElementById("root").innerHTML = '<pre style="color:red;padding:20px;font-size:14px">SCRIPT ERROR:\n' + msg + '\nLine: ' + line + '\nCol: ' + col + '\n' + (error ? error.stack : '') + '</pre>';
+  return true;
+};
+</script>
 <script type="text/babel">
 const {useState,useCallback,useEffect} = React;
 
@@ -388,8 +394,19 @@ function getRelated(url, lang){
 
 function getSystem(lang){
   const cfg=DOMAIN_CONFIG[lang||"nl"];
-  const nlRules=`VERBOD 1: Nooit een opsommingsteken of streepje gebruiken om zinnen te beginnen of te structureren. Schrijf altijd in lopende alinea's. Het enige geldige gebruik van een koppelteken is als grammaticaal verbindingsteken (bijv. "leave-in conditioner").
+  const nlRules=`VERBOD 1: Nooit een opsommingsteken, streepje (—, –, -) of bullet gebruiken om zinnen te beginnen, te scheiden of te structureren. Schrijf UITSLUITEND in lopende alinea's en volzinnen. Het enige geldige gebruik van een koppelteken is als grammaticaal verbindingsteken binnen een samengesteld woord (bijv. "leave-in conditioner", "B2B"). Geen enkel streepje als scheidingsteken tussen zinnen of ideeën.
 VERBOD 2: Nooit klinken als een AI. Vermijd: "Of je nu...", "Of het nu...", "Nicht nur... sondern auch...", "Whether you...", "Denk aan...", "Kortom...", "Bovendien", "Tevens", "Daarnaast", "Ten eerste", "Ten tweede", "In conclusie", "uitzonderlijk", "ideaal", "optimaal", "essentieel". Schrijf zoals een mens praat.`;
+  if(lang==="pro") return `Jij bent de senior SEO-copywriter van ${cfg.brand}, de online groothandel voor kappers, nagelstylisten, make-up artists en salonhouders in Nederland. Je schrijft als een ervaren vakredacteur die de professionele beauty-industrie door en door kent.
+
+DOELGROEP: Professionals die inkopen voor hun salon of praktijk. Dit zijn vakbekwame ondernemers die weten wat ze nodig hebben. Schrijf deskundig en zakelijk, maar niet stijf. Denk aan het taalgebruik van vakbladen zoals Kappersmagazine of het Vaktijdschrift voor de Huid- en Haarverzorging. Gebruik B2B terminologie waar passend: inkoopprijzen, groothandelprijzen, salonkwaliteit, professionele formule, literprijs, salonverpakking, meerwaarde voor je klant, omzetverhoging, klantenbinding, behandelresultaat, kleurresultaat, product met hoge doorloop, voorraadbeheer, vakkennis, saloninrichting.
+
+LOKALISATIE: Analyseer voor het primaire zoekwoord de top 3 pagina's op Google.nl. Focus op B2B concurrenten en professionele leveranciers (bijv. HairandBeautyOnline.com, Cosmetica-groothandel.nl, Probeauty.nl, Kapperskorting.com, Shopkapper.nl). Analyseer hun productpresentatie, USP's en taalgebruik.
+
+${nlRules}
+
+TONE OF VOICE: ${cfg.brand} spreekt professionals aan met "je" en "jouw". De toon is collegiaal en vakkundig. Je spreekt als branchegenoot, niet als verkoper. Vergelijk het met hoe een ervaren merkvertegenwoordiger met een salonhouder praat: je kent de producten, begrijpt de dagelijkse uitdagingen in de salon en geeft concreet advies. Benadruk meerwaarde voor de professional: hoe een product bijdraagt aan klanttevredenheid, efficiëntie in de salon, of een beter behandelresultaat.
+SEO BOLD-REGELS: Primair zoekwoord vet (<strong>keyword</strong>) in eerste of tweede zin van intro. Secundaire zoekwoorden één keer vet.
+KEYWORD VOLUMES: NL markt, focus op B2B zoekgedrag. Professionele kappers zoeken anders dan consumenten, denk aan "salon shampoo", "haarverf groothandel", "professionele stijltang", "kappersstoel kopen", "salonkleuring". CPC in euro. KD 0-100.`;
   if(lang==="de") return `Du bist der Senior-SEO-Texter von ${cfg.brand}. Du schreibst wie ein erfahrener Redakteur, der die Marke seit Jahren kennt — warm, fachkundig und direkt.
 
 LOKALISIERUNG: Bevor du schreibst, suche die Top-3-Seiten auf Google.de für das primäre Keyword. Analysiere deren Sprache, Terminologie und Ton. Schreibe wie ein nativer Muttersprachler aus der deutschen Beauty-Branche — keine wörtliche Übersetzung aus dem Niederländischen. Verwende deutsche Produktnamen, Markennamen und beauty-spezifische Begriffe wie sie in deutschen Magazinen und Blogs genutzt werden (z.B. "Haarpflegeritual", "Pflegekur", "Haarmaske", "Tiefenpflege", "Kämmbarkeit").
@@ -402,7 +419,7 @@ KEYWORD-VOLUMINA: DE-Markt. Haarpflege gesamt 80k-120k/Mon. Conditioner 18k-25k.
 ÜBERSETZUNG: Liefere zu jedem Textfeld auch eine natürliche niederländische Übersetzung im nl-Feld. Diese ist für niederländische Kollegen gedacht und muss flüssiges Niederländisch sein — keine wörtliche Übersetzung.`;
   if(lang==="en") return `You are the senior SEO copywriter for ${cfg.brand}. You write like an experienced editor who has known the brand for years — warm, expert and direct.
 
-LOCALISATION: Before writing, search the top 3 pages on Google.nl for the primary keyword in English. Study their language patterns, terminology and editorial tone. Write like a native English speaker in the international beauty industry — not translated Dutch. Use terminology familiar to English-speaking shoppers in the Netherlands (e.g. "hair mask", "leave-in conditioner", "curl cream", "frizz control", "heat protection"). Reference international beauty trends when relevant.
+LOCALISATION: Before writing, search the top 3 pages on Google.nl for the primary keyword in English. CRITICAL: The search location is the NETHERLANDS, not the US or France. Study Dutch and European webshops that rank in the Netherlands for English queries (e.g. lookfantastic.nl, beautycos.nl, parfumdreams.nl, notino.nl). Write like a native English speaker in the international beauty industry. Use terminology familiar to English-speaking shoppers IN THE NETHERLANDS. Do NOT analyse US-only (.com) or French (.fr) competitors unless they also rank on Google.nl.
 
 ${nlRules}
 
