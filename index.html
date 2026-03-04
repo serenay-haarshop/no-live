@@ -539,7 +539,7 @@ async function genContent(a,lang){
     ? `\n\nVERPLICHT EXTRA VELD: Voeg aan elke tekstsectie ook een "nl" veld toe met een natuurlijke Nederlandse vertaling van die tekst. Dit is voor Nederlandse collega's die de ${ll} tekst willen begrijpen en controleren. De Nederlandse vertaling moet vloeiend Nederlands zijn, niet letterlijk vertaald.\n\nJSON structuur voor mainContent blokken:\n{"heading":"Duits/Engels heading","body":"Duits/Engels body","nl":{"heading":"Nederlandse vertaling heading","body":"Nederlandse vertaling body"}}\n\nEn voor introText, h1, metaTitle, metaDescription ook een nlTranslation veld toevoegen:`
     : "";
 
-  const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\nInterne pagina's — gebruik ALLEEN deze URLs: ${lnk||"geen"}\n\n=== STRIKTE REGELS (NOOIT OVERTREDEN) ===\n\nREGEL 1 — VERZENDKOSTEN: De meta description MOET altijd eindigen met "${cfg.freeShipping}". Dit is VERPLICHT en mag NOOIT ontbreken of afwijken. Gebruik exact deze tekst: "${cfg.freeShipping}".\n\nREGEL 2 — INTERNE LINKS: Verwerk MINIMAAL 3 interne links in de lopende tekst van de body (mainContent). Gebruik het <a href="URL">ankertekst</a> formaat. De links moeten ALLEEN verwijzen naar de opgegeven interne pagina's. Verwerk ze NATUURLIJK in zinnen, niet als losse lijst. Elke H2-sectie moet minstens 1 interne link bevatten. Dit is VERPLICHT.\n\nREGEL 3 — META TITLE: De meta title MOET altijd eindigen met " | ${cfg.brand}". Voorbeeld: "Conditioners voor zijdezacht haar | ${cfg.brand}". Het totaal inclusief " | ${cfg.brand}" mag max 60 tekens zijn.\n\nREGEL 4 — LINK FORMAT: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen. Format: <a href="${cfg.base}/pad">tekst</a>.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"h1":"Paginatitel max 60 tekens","h1Nl":"Nederlandse vertaling h1 (alleen bij DE/EN)","metaTitle":"Meta title max 60 tekens EINDIGEND op | ${cfg.brand}","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens EINDIGEND op ${cfg.freeShipping}","metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"2-3 zinnen max 55 woorden, primair zoekwoord vet.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"2-3 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"2-3 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"1-2 alineas","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"2 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"1-2 alineas met interne link naar ${cfg.base}/...","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"1 alinea","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
+  const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\nInterne pagina's — gebruik ALLEEN deze URLs: ${lnk||"geen"}\n\n=== STRIKTE REGELS (NOOIT OVERTREDEN) ===\n\nREGEL 1 — VERZENDKOSTEN: De meta description MOET altijd eindigen met "${cfg.freeShipping}". Dit is VERPLICHT en mag NOOIT ontbreken of afwijken. Gebruik exact deze tekst: "${cfg.freeShipping}".\n\nREGEL 2 — INTERNE LINKS: Verwerk MINIMAAL 3 interne links in de lopende tekst van de body (mainContent). Gebruik het <a href="URL">ankertekst</a> formaat. De links moeten ALLEEN verwijzen naar de opgegeven interne pagina's. Verwerk ze NATUURLIJK in zinnen, niet als losse lijst. Elke H2-sectie moet minstens 1 interne link bevatten. Dit is VERPLICHT.\n\nREGEL 3 — META TITLE: De meta title MOET altijd eindigen met " | ${cfg.brand}". Voorbeeld: "Conditioners voor zijdezacht haar | ${cfg.brand}". Het totaal inclusief " | ${cfg.brand}" mag max 60 tekens zijn.\n\nREGEL 4 — LINK FORMAT: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen. Format: <a href="${cfg.base}/pad">tekst</a>.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"h1":"Paginatitel max 60 tekens","h1Nl":"Nederlandse vertaling h1 (alleen bij DE/EN)","metaTitle":"Meta title max 60 tekens EINDIGEND op | ${cfg.brand}","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens EINDIGEND op ${cfg.freeShipping}","metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"2-3 zinnen van 55-60 woorden, primair zoekwoord vet.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"2-3 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"2-3 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"1-2 alineas","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"2 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"1-2 alineas met interne link naar ${cfg.base}/...","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"1 alinea","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
   return xj(await claude(p,5500,false,lang));
 }
 
@@ -720,24 +720,24 @@ function KeyScreen({onSave}){
 function App(){
   const[hasKey,sHasKey]=useState(!!localStorage.getItem("hs_key"));
   const[authed,sAuthed]=useState(!!sessionStorage.getItem("hs_auth"));
-  const[url,sUrl]=useState("");
-  const[lang,sLang]=useState("nl");
-  const[phase,sPhase]=useState("idle");
+  const[url,sUrl]=useState(sessionStorage.getItem("hs_url")||"");
+  const[lang,sLang]=useState(sessionStorage.getItem("hs_lang")||"nl");
+  const[phase,sPhase]=useState(sessionStorage.getItem("hs_phase")||"idle");
   const[status,sStatus]=useState("");
-  const[a,sA]=useState(null);
-  const[c,sC]=useState(null);
-  const[html,sHtml]=useState("");
+  const[a,sA]=useState(()=>{try{var x=sessionStorage.getItem("hs_a");return x?JSON.parse(x):null;}catch(e){return null;}});
+  const[c,sC]=useState(()=>{try{var x=sessionStorage.getItem("hs_c");return x?JSON.parse(x):null;}catch(e){return null;}});
+  const[html,sHtml]=useState(sessionStorage.getItem("hs_html")||"");
   const[err,sErr]=useState(null);
-  const[tab,sTab]=useState("intro");
+  const[tab,sTab]=useState(sessionStorage.getItem("hs_tab")||"intro");
   const[hl,sHl]=useState("intro");
-  const[prev,sPrev]=useState(false);
+  const[prev,sPrev]=useState(sessionStorage.getItem("hs_prev")==="1");
   const[pushed,sPushed]=useState(false);
   const[confirmModal,sConfirmModal]=useState(null);
   const showConfirm=(title,message,onOk)=>{sConfirmModal({title,message,onOk});};
 
   useEffect(()=>{const m={intro:"intro",main:"main",seo:"seo",ai:"ai",meta:"h1",faq:"h1",magento:"h1"};sHl(m[tab]||"intro");},[tab]);
 
-  const[progress,sProgress]=useState(0);
+  const[progress,sProgress]=useState(sessionStorage.getItem("hs_phase")==="done"?100:0);
     const[magentoKey,sMagentoKey]=useState(sessionStorage.getItem("hs_mage_key")||"");
   const[magentoHostUrl,sMagentoHostUrl]=useState(sessionStorage.getItem("hs_mage_host")||"https://www.haarshop.nl");
   const[magentoCategories,sMagentoCategories]=useState(null);
@@ -747,6 +747,17 @@ function App(){
   const[magentoLoading,sMagentoLoading]=useState(false);
   const[magentoStatus,sMagentoStatus]=useState("");
   const[magentoShowPayload,sMagentoShowPayload]=useState(false);
+
+
+  // Persist state to sessionStorage on changes
+  useEffect(()=>{sessionStorage.setItem("hs_url",url);},[url]);
+  useEffect(()=>{sessionStorage.setItem("hs_lang",lang);},[lang]);
+  useEffect(()=>{sessionStorage.setItem("hs_phase",phase);},[phase]);
+  useEffect(()=>{if(a)sessionStorage.setItem("hs_a",JSON.stringify(a));},[a]);
+  useEffect(()=>{if(c)sessionStorage.setItem("hs_c",JSON.stringify(c));},[c]);
+  useEffect(()=>{sessionStorage.setItem("hs_html",html);},[html]);
+  useEffect(()=>{sessionStorage.setItem("hs_tab",tab);},[tab]);
+  useEffect(()=>{sessionStorage.setItem("hs_prev",prev?"1":"0");},[prev]);
 
   const doGenerate=useCallback(async()=>{
     if(!url.trim())return;sErr(null);sPhase("generating");sProgress(0);
