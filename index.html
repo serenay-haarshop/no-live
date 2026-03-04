@@ -445,16 +445,16 @@ async function analyse(url,lang){
   const ll={nl:"Nederlands",de:"Duits",en:"Engels"}[lang];
 
   const searchNote = lang==="de"
-    ? "Voer de SERP-analyse uit op Google.de (Duitsland). Zoekers zijn Duits, concurrenten zijn Duitse webshops. Gebruik zoekvolumes voor de DE-markt."
+    ? "Analyseer de markt op Google.de (Duitsland). Zoekers zijn Duits, concurrenten zijn Duitse webshops. Gebruik zoekvolumes voor de DE-markt."
     : lang==="en"
-    ? "Run SERP analysis on Google.nl (Netherlands) but in English. Searchers use English queries. Use NL search volumes."
-    : "Voer de SERP-analyse uit op Google.nl (Nederland). Gebruik zoekvolumes voor de NL-markt.";
+    ? "Analyze the market on Google.nl (Netherlands) in English. Searchers use English queries. Use NL search volumes."
+    : "Analyseer de markt op Google.nl (Nederland). Gebruik zoekvolumes voor de NL-markt.";
 
   const siteLinks=getSiteMap(lang).slice(0,8).map(p=>`${p.label} → ${p.url}`).join(" | ");
 
   // gap altijd in het Nederlands, rankFactors in de doeltaal
   const p=`URL: ${url}\nDomein: ${cfg.brand}\nTaal: ${ll}\nSlug: "${slug}"\nGerelateerde pagina's (gebruik ALLEEN deze URLs voor interne links): ${rel.map(r=>r.label+" → "+r.url).join(" | ")}\nTop-categorieën van dit domein: ${siteLinks}\n\n${searchNote}\n\nBELANGRIJK: Het veld "gap" moet ALTIJD in het Nederlands worden geschreven, ongeacht de taal. Het is bedoeld voor Nederlandse collega's die de kans willen begrijpen.\n\nRetourneer uitsluitend dit JSON:\n\n{"pageType":"categorie","slug":"${slug}","brand":null,"productTypes":["type1"],"hairNeeds":["behoefte1"],"internalLinks":[{"label":"naam","url":"${cfg.base}/juiste-pad","relation":"child"}],"keywords":[{"term":"primair","type":"primary","volumeMonthly":22400,"cpc":0.85,"kd":42,"intent":"transactioneel","trend":"stabiel"},{"term":"long-tail","type":"secondary","volumeMonthly":4800,"cpc":0.60,"kd":28,"intent":"transactioneel","trend":"stijgend"},{"term":"informatief","type":"secondary","volumeMonthly":2200,"cpc":0.40,"kd":18,"intent":"informatief","trend":"stabiel"},{"term":"variant4","type":"secondary","volumeMonthly":1600,"cpc":0.35,"kd":22,"intent":"transactioneel","trend":"stijgend"},{"term":"variant5","type":"secondary","volumeMonthly":890,"cpc":0.30,"kd":14,"intent":"transactioneel","trend":"stabiel"}],"competitors":[{"position":1,"domain":"domein.de","url":"https://url","da":82,"organicTraffic":95000,"rankFactors":["Reden in doeltaal als volledige zin","Reden twee"],"gap":"Kans voor ${cfg.brand} IN HET NEDERLANDS als volledige zin."},{"position":2,"domain":"domein2.de","url":"https://url2","da":75,"organicTraffic":60000,"rankFactors":["reden in doeltaal","reden"],"gap":"Kans in het Nederlands."},{"position":3,"domain":"domein3.de","url":"https://url3","da":68,"organicTraffic":40000,"rankFactors":["reden","reden"],"gap":"Kans in het Nederlands."}]}`;
-  return xj(await claude(p,2800,true,lang));
+  return xj(await claude(p,2800,false,lang));
 }
 
 async function genContent(a,lang){
@@ -477,7 +477,7 @@ async function genContent(a,lang){
 
   const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\nInterne pagina's — gebruik ALLEEN deze URLs: ${lnk||"geen"}\n\nBELANGRIJK: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"h1":"Paginatitel max 60 tekens","h1Nl":"Nederlandse vertaling h1 (alleen bij DE/EN)","metaTitle":"Meta title max 60 tekens","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens","metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"2-3 zinnen max 55 woorden, primair zoekwoord vet.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"2-3 alineas gescheiden door \\n\\n","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"2-3 alineas","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"1-2 alineas","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"1-2 alineas met interne link naar ${cfg.base}/...","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"1 alinea","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
   // web search ON: used for localization research (top performing pages in target market)
-  return xj(await claude(p,5500,true,lang));
+  return xj(await claude(p,5500,false,lang));
 }
 
 function buildHTML(c,a){
@@ -653,17 +653,19 @@ function App(){
 
   useEffect(()=>{const m={intro:"intro",main:"main",seo:"seo",ai:"ai",meta:"h1",faq:"h1",magento:"h1"};sHl(m[tab]||"intro");},[tab]);
 
-  const doAnalyse=useCallback(async()=>{
-    if(!url.trim())return;sErr(null);sPhase("analyzing");sStatus("Live SERP-data ophalen voor Google Nederland…");
-    try{const r=await analyse(url.trim(),lang);sA(r);sPhase("reviewing");}
-    catch(e){sErr(e.message);sPhase("idle");}
+  const[progress,sProgress]=useState(0);
+  const doGenerate=useCallback(async()=>{
+    if(!url.trim())return;sErr(null);sPhase("generating");sProgress(0);
+    sStatus("Keywords en concurrentie analyseren…");sProgress(15);
+    try{
+      const analyseResult=await analyse(url.trim(),lang);
+      sA(analyseResult);sProgress(45);
+      sStatus("SEO-content genereren…");sProgress(55);
+      const contentResult=await genContent(analyseResult,lang);
+      sC(contentResult);sHtml(buildHTML(contentResult,analyseResult));sProgress(100);
+      sPhase("done");sTab("intro");sPrev(true);
+    }catch(e){sErr(e.message);sPhase("idle");sProgress(0);}
   },[url,lang]);
-
-  const doGen=useCallback(async()=>{
-    if(!a)return;sErr(null);sPhase("generating");sStatus("Menselijk klinkende SEO-teksten schrijven…");
-    try{const r=await genContent(a,lang);sC(r);sHtml(buildHTML(r,a));sPhase("done");sTab("intro");sPrev(true);}
-    catch(e){sErr(e.message);sPhase("reviewing");}
-  },[a,lang]);
 
   const reset=()=>{sPhase("idle");sA(null);sC(null);sErr(null);sPrev(false);};
 
@@ -696,7 +698,7 @@ function App(){
         <div style={{position:"absolute",right:-30,top:-40,width:220,height:220,borderRadius:"50%",background:C.blush,opacity:.4,pointerEvents:"none"}}/>
         <div style={{position:"absolute",right:70,bottom:-60,width:150,height:150,borderRadius:"50%",background:C.blush,opacity:.25,pointerEvents:"none"}}/>
         <div style={{position:"relative"}}>
-          <div style={{fontSize:11,fontWeight:800,textTransform:"uppercase",letterSpacing:".09em",color:C.beige,marginBottom:7}}>Stap 1</div>
+          
           <div style={{fontSize:24,fontWeight:900,color:C.ink,marginBottom:6,lineHeight:1.2}}>Welke pagina ga je optimaliseren?</div>
           <div style={{fontSize:14,color:C.ink3,marginBottom:22}}>Plak een categorie-URL — het domein wordt automatisch herkend.</div>
           {/* Domein badge */}
@@ -706,13 +708,13 @@ function App(){
             const labels={nl:"🇳🇱 haarshop.nl · Zoeklocatie: Nederland · Taal: NL",de:"🇩🇪 haarshop.de · Zoeklocatie: Duitsland · Taal: DE",en:"🇬🇧 haarshop.com · Zoeklocatie: Nederland · Taal: EN",pro:"🏢 haarshoppro.nl · B2B Groothandel · Taal: NL"};
             return url.includes("haarshop")&&<div style={{display:"inline-flex",alignItems:"center",gap:7,background:"#fff",border:`1.5px solid ${C.beige}`,borderRadius:20,padding:"5px 14px",marginBottom:14,fontSize:12,fontWeight:700,color:C.ink}}>
               <span style={{color:C.green}}>✓</span> {labels[detected]}
-              <span style={{color:C.ink3,fontWeight:600}}>· {cfg.location} SERP-analyse</span>
+              <span style={{color:C.ink3,fontWeight:600}}>· {cfg.location}</span>
             </div>;
           })()}
           <div style={{display:"flex",gap:10,marginBottom:14}}>
-            <input type="url" value={url} onChange={e=>{const v=e.target.value;sUrl(v);const d=domainFromUrl(v);sLang(d);}} onKeyDown={e=>e.key==="Enter"&&phase==="idle"&&doAnalyse()} placeholder="https://www.haarshop.nl/haarverzorging/conditioners" style={{flex:1,fontSize:14,borderRadius:24,padding:"12px 20px"}}/>
-            <button className="btn btn-primary" onClick={phase==="idle"?doAnalyse:reset} disabled={phase==="analyzing"||phase==="generating"} style={{padding:"12px 28px",fontSize:14,flexShrink:0}}>
-              {phase==="analyzing"?<><Spin s={15}/> Analyseren…</>:phase==="idle"?"Analyseer →":"↺ Opnieuw"}
+            <input type="url" value={url} onChange={e=>{const v=e.target.value;sUrl(v);const d=domainFromUrl(v);sLang(d);}} onKeyDown={e=>e.key==="Enter"&&phase==="idle"&&doGenerate()} placeholder="https://www.haarshop.nl/haarverzorging/conditioners" style={{flex:1,fontSize:14,borderRadius:24,padding:"12px 20px"}}/>
+            <button className="btn btn-primary" onClick={phase==="idle"?doGenerate:reset} disabled={phase==="generating"} style={{padding:"12px 28px",fontSize:14,flexShrink:0}}>
+              {phase==="generating"?<><Spin s={15}/> Genereren…</>:phase==="idle"?"Genereer SEO-content →":"↺ Opnieuw"}
             </button>
           </div>
           {/* Snel starten per domein */}
@@ -731,18 +733,27 @@ function App(){
             ))}
           </div>
         </div>
-        {(phase==="analyzing"||phase==="generating")&&<div style={{marginTop:18,display:"flex",alignItems:"center",gap:12,background:"rgba(255,255,255,.85)",borderRadius:10,padding:"12px 18px"}}><Spin s={18}/><span style={{fontSize:13,fontWeight:700,color:C.ink}}>{status}</span></div>}
+        {(phase==="generating"||phase==="done")&&<div style={{marginTop:18,background:"rgba(255,255,255,.92)",borderRadius:12,padding:"16px 20px",border:`1px solid ${phase==="done"?C.green+"40":C.bdr}`}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                <span style={{fontSize:13,fontWeight:700,color:phase==="done"?"#16a34a":C.ink}}>{phase==="done"?"\u2705 Klaar!":status}</span>
+                <span style={{fontSize:12,fontWeight:700,color:C.ink3}}>{progress}%</span>
+              </div>
+              <div style={{height:6,borderRadius:3,background:C.cream,overflow:"hidden"}}>
+                <div style={{height:"100%",borderRadius:3,background:phase==="done"?"#16a34a":C.beige,width:progress+"%",transition:"width .4s ease"}}/>
+              </div>
+              {phase==="done"&&<div style={{marginTop:8,fontSize:11.5,color:"#16a34a",fontWeight:600}}>SEO-content is gegenereerd. Scroll naar beneden om te bekijken.</div>}
+            </div>}
         {err&&<div style={{marginTop:14,background:"#fef0ef",border:`1px solid #f5c6c2`,borderRadius:10,padding:"12px 18px",fontSize:13,color:C.red,fontWeight:700}}>⚠ {err}</div>}
       </div>
 
       {/* REVIEW */}
-      {(phase==="reviewing"||phase==="generating"||phase==="done")&&a&&(
+      {phase==="done"&&a&&(
         <div className="fu grid2">
           <div className="col">
             {/* Keyword tabel */}
             <div className="card fu">
               <div style={{padding:"16px 20px 12px",borderBottom:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <div><div style={{fontSize:16,fontWeight:900,color:C.ink}}>Keyword Research</div><div style={{fontSize:12,color:C.ink3,marginTop:2}}>Live SERP-analyse · Google Nederland · {new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long"})}</div></div>
+                <div><div style={{fontSize:16,fontWeight:900,color:C.ink}}>Keyword Research</div><div style={{fontSize:12,color:C.ink3,marginTop:2}}>Analyse · Google Nederland · {new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long"})}</div></div>
                 <span className="pill" style={{background:C.blush2,color:C.beige,border:`1px solid ${C.blush}`}}>{(a.keywords||[]).length} zoekwoorden</span>
               </div>
               <div style={{overflowX:"auto"}}>
@@ -763,12 +774,12 @@ function App(){
                   ))}</tbody>
                 </table>
               </div>
-              <div style={{padding:"9px 20px",fontSize:11,color:C.ink3,borderTop:`1px solid ${C.bdr}`,background:C.cream}}>Volumes op basis van live SERP-analyse en NL marktdata. Verbind Ahrefs voor exacte API-volumes.</div>
+              <div style={{padding:"9px 20px",fontSize:11,color:C.ink3,borderTop:`1px solid ${C.bdr}`,background:C.cream}}>Geschatte volumes op basis van AI-analyse. Verbind Ahrefs voor exacte API-volumes.</div>
             </div>
 
             {/* Parameters */}
             <div className="card fu2">
-              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Stap 2 — Controleer de parameters</div></div>
+              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Analyse-parameters</div></div>
               <div style={{padding:"18px 20px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
                 {[["Paginatype",a.pageType],["Merk",a.brand||"Niet van toepassing"],["Producttypes",(a.productTypes||[]).join(", ")],["Haarbehoeften",(a.hairNeeds||[]).join(", ")]].map(([l,v])=>(
                   <div key={l}><div style={{fontSize:10.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:4}}>{l}</div><div style={{fontSize:14,fontWeight:700,color:C.ink}}>{v||"—"}</div></div>
@@ -789,9 +800,7 @@ function App(){
               </div>
             </div>
 
-            <button className="btn btn-dark fu4" onClick={doGen} disabled={phase==="generating"} style={{width:"100%",padding:"15px",fontSize:15,borderRadius:24,justifyContent:"center"}}>
-              {phase==="generating"?<><Spin s={17}/> Content schrijven…</>:"Genereer volledige SEO-paginacontent →"}
-            </button>
+
           </div>
 
           {/* Concurrenten */}
@@ -800,7 +809,7 @@ function App(){
               <div style={{fontSize:15,fontWeight:900,color:C.ink}}>
                 {lang==="de"?"🇩🇪 Google.de Top 3":lang==="en"?"🇬🇧 Google.nl (EN) Top 3":"🇳🇱 Google.nl Top 3"}
               </div>
-              <div style={{fontSize:12,color:C.ink3,marginTop:1}}>Live concurrentieanalyse · {lang==="de"?"rankFactors in het Duits":lang==="en"?"rankFactors in English":"rankfactoren in het Nederlands"}</div>
+              <div style={{fontSize:12,color:C.ink3,marginTop:1}}>Concurrentieanalyse · {lang==="de"?"rankFactors in het Duits":lang==="en"?"rankFactors in English":"rankfactoren in het Nederlands"}</div>
             </div>
             <div style={{padding:"15px 16px",display:"flex",flexDirection:"column",gap:13}}>
               {(a.competitors||[]).map((comp,i)=>(
@@ -1041,7 +1050,7 @@ function App(){
         <div style={{fontSize:28,fontWeight:900,color:C.ink,marginBottom:10}}>Haarshop SEO Content Machine</div>
         <div style={{fontSize:15,color:C.ink3,maxWidth:500,margin:"0 auto 38px",lineHeight:1.8}}>Plak een URL, de tool analyseert de Google NL SERP, berekent zoekvolumes en schrijft publiceerbare content die menselijk klinkt.</div>
         <div style={{display:"flex",gap:13,justifyContent:"center",flexWrap:"wrap"}}>
-          {[["📊","Keyword Research","Live SERP-analyse voor NL"],["🏆","Concurrentieanalyse","DA, verkeer en rangoorzaken"],["✍️","Menselijke copy","Geen AI-uitstraling, geen opsommingen"],["👁","Pagina-preview","Zie exact waar tekst staat"],["⚡","Magento 2","Direct publiceren via REST API"]].map(([icon,title,sub])=>(
+          {[["📊","Keyword Research","Analyse voor NL"],["🏆","Concurrentieanalyse","DA, verkeer en rangoorzaken"],["✍️","Menselijke copy","Geen AI-uitstraling, geen opsommingen"],["👁","Pagina-preview","Zie exact waar tekst staat"],["⚡","Magento 2","Direct publiceren via REST API"]].map(([icon,title,sub])=>(
             <div key={title} style={{background:"#fff",border:`1px solid ${C.bdr}`,borderRadius:12,padding:"17px 19px",width:180,textAlign:"left",boxShadow:"0 2px 8px rgba(0,0,0,.04)"}}>
               <div style={{fontSize:21,marginBottom:7}}>{icon}</div>
               <div style={{fontSize:13.5,fontWeight:800,color:C.ink,marginBottom:3}}>{title}</div>
@@ -1055,7 +1064,7 @@ function App(){
     {/* Ahrefs notice */}
     <div style={{position:"fixed",bottom:20,right:20,zIndex:300,background:C.ink,color:"#fff",borderRadius:10,padding:"11px 15px",fontSize:12,fontFamily:"var(--f)",maxWidth:230,boxShadow:"0 4px 20px rgba(0,0,0,.2)",lineHeight:1.6}}>
       <div style={{fontWeight:800,marginBottom:2}}>Ahrefs niet gekoppeld</div>
-      <div style={{opacity:.6,fontSize:11}}>Verbind Ahrefs voor exacte API-volumes. Nu actief: SERP-analyse.</div>
+      <div style={{opacity:.6,fontSize:11}}>Verbind Ahrefs voor exacte API-volumes. Nu actief: AI-analyse (geen web search).</div>
     </div>
   </>;
 }
