@@ -954,7 +954,7 @@ function App(){
             <button className="btn btn-primary" onClick={()=>{sPushed(true);setTimeout(()=>sPushed(false),3000);}}>{pushed?"✓ Verzonden!":"⚡ Magento 2"}</button>
           </div>
 
-          <div className={prev?"fu grid2p":"fu col"}>
+          <div className={prev&&tab!=="magento"?"fu grid2p":"fu col"}>
             <div>
               <div className="card" style={{marginBottom:14,overflow:"hidden"}}><div className="tab-bar">{TABS.map(t=><button key={t.k} className={`tab-btn${tab===t.k?" active":""}`} onClick={()=>sTab(t.k)}>{t.l}</button>)}</div></div>
 
@@ -1103,7 +1103,27 @@ function App(){
                 </div>
               </div>}
 
-{tab==="magento"&&<div className="card fu">
+
+
+
+            </div>
+
+
+              {prev&&tab!=="magento"&&<div className="stick">
+              <div style={{fontSize:13,fontWeight:800,color:C.ink,marginBottom:10,display:"flex",alignItems:"center",gap:7}}>
+                Pagina-preview <span style={{fontSize:11,fontWeight:600,color:C.ink3}}>{tab==="intro"?"· intro boven producten":tab==="main"?"· hoofdtekst onder producten":""}</span>
+              </div>
+              <PagePreview content={c} url={url} highlight={hl}/>
+              <div style={{marginTop:9,display:"flex",gap:5}}>
+                {[["intro","Intro"],["main","Hoofdtekst"],["seo","SEO"],["ai","AI"]].map(([key,lbl])=>(
+                  <button key={key} onClick={()=>sTab(key)} style={{flex:1,fontSize:11,padding:"7px",borderRadius:20,cursor:"pointer",border:`1px solid ${tab===key?C.ink:C.bdr}`,fontFamily:"var(--f)",fontWeight:700,background:tab===key?C.ink:"#fff",color:tab===key?"#fff":C.ink3,transition:"all .15s"}}>{lbl}</button>
+                ))}
+              </div>
+            </div>}
+          </div>
+        </div>
+
+              {tab==="magento"&&<div className="card fu">
                 <div style={{padding:"15px 20px",borderBottom:"1px solid "+C.bdr,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                   <div><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Magento 2 REST API</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>Publiceer direct naar {DOMAIN_CONFIG[lang].brand} via de Magento 2 API</div></div>
                   <CopyBtn text={html} label="Alle HTML"/>
@@ -1233,8 +1253,7 @@ function App(){
                   <button className="btn btn-dark" disabled={!magentoKey||!magentoCatId||magentoLoading} onClick={function(){
                     if(!magentoKey){sMagentoStatus("Voer eerst een API key in");return;}
                     if(!magentoCatId){sMagentoStatus("Selecteer eerst een categorie");return;}
-                    var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";
-                    showConfirm("Publiceren naar "+envLabel,"Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+"\nCategorie: "+magentoCatName+" (ID: "+magentoCatId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?",async function(){sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
+                    var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";showConfirm("Publiceren naar "+envLabel,"Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+"\nCategorie: "+magentoCatName+" (ID: "+magentoCatId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?",async function(){sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
                     try{
                       var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
                       var payload=buildMagentoPutPayload(magentoCatId,c);
@@ -1250,22 +1269,6 @@ function App(){
               </div>}
 
 
-            </div>
-
-
-              {prev&&<div className="stick">
-              <div style={{fontSize:13,fontWeight:800,color:C.ink,marginBottom:10,display:"flex",alignItems:"center",gap:7}}>
-                Pagina-preview <span style={{fontSize:11,fontWeight:600,color:C.ink3}}>{tab==="intro"?"· intro boven producten":tab==="main"?"· hoofdtekst onder producten":""}</span>
-              </div>
-              <PagePreview content={c} url={url} highlight={hl}/>
-              <div style={{marginTop:9,display:"flex",gap:5}}>
-                {[["intro","Intro"],["main","Hoofdtekst"],["seo","SEO"],["ai","AI"]].map(([key,lbl])=>(
-                  <button key={key} onClick={()=>sTab(key)} style={{flex:1,fontSize:11,padding:"7px",borderRadius:20,cursor:"pointer",border:`1px solid ${tab===key?C.ink:C.bdr}`,fontFamily:"var(--f)",fontWeight:700,background:tab===key?C.ink:"#fff",color:tab===key?"#fff":C.ink3,transition:"all .15s"}}>{lbl}</button>
-                ))}
-              </div>
-            </div>}
-          </div>
-        </div>
       )}
 
       {/* IDLE */}
