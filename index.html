@@ -667,6 +667,24 @@ function PagePreview({content,url,highlight}){
 }
 
 /* ── API KEY SCREEN ── */
+function PasswordGate({onPass}){
+  const[v,sv]=useState("");const[err,sErr]=useState("");const[show,sShow]=useState(false);
+  const go=()=>{if(v==="SEOhaarshop123"){sErr("");onPass();}else{sErr("Onjuist wachtwoord");}};
+  return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#faf6f1 0%,#f5ede4 100%)",fontFamily:"var(--f)"}}>
+    <div style={{width:"min(420px,90vw)",background:"#fff",borderRadius:20,boxShadow:"0 12px 48px rgba(0,0,0,.08)",padding:"44px 36px",textAlign:"center"}}>
+      <div style={{width:56,height:56,borderRadius:16,background:"#faf6f1",border:"2px solid #f0e6d6",margin:"0 auto 18px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26}}>{String.fromCodePoint(0x1F512)}</div>
+      <div style={{fontSize:22,fontWeight:900,color:"#1a1a1a",marginBottom:6}}>Haarshop SEO Tool</div>
+      <div style={{fontSize:13.5,color:"#888",marginBottom:28}}>Voer het wachtwoord in om toegang te krijgen.</div>
+      <div style={{position:"relative",marginBottom:12}}>
+        <input type={show?"text":"password"} value={v} onChange={e=>sv(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")go();}} placeholder="Wachtwoord" style={{width:"100%",boxSizing:"border-box",padding:"13px 44px 13px 16px",fontSize:14,border:"1.5px solid "+(err?"#e53935":"#e0d6ca"),borderRadius:12,fontFamily:"var(--f)",outline:"none",background:"#faf6f1",transition:"border .2s"}}/>
+        <button onClick={()=>sShow(!show)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:16,color:"#aaa"}}>{show?String.fromCodePoint(0x1F441):String.fromCodePoint(0x1F441)+String.fromCodePoint(0x200D)+String.fromCodePoint(0x1F5E8)}</button>
+      </div>
+      {err&&<div style={{fontSize:12,color:"#e53935",marginBottom:10,fontWeight:600}}>{err}</div>}
+      <button onClick={go} style={{width:"100%",padding:"13px",fontSize:14,fontWeight:800,borderRadius:12,border:"none",cursor:"pointer",background:"#1a1a1a",color:"#fff",fontFamily:"var(--f)",transition:"opacity .15s"}}>Inloggen</button>
+    </div>
+  </div>;
+}
+
 function KeyScreen({onSave}){
   const[v,sv]=useState("");const[show,sShow]=useState(false);const[err,sErr]=useState("");
   const go=()=>{if(!v.trim().startsWith("sk-ant-")){sErr("Sleutel moet beginnen met sk-ant-  — zie je Anthropic dashboard.");return;}saveKey(v.trim());onSave();};
@@ -701,6 +719,7 @@ function KeyScreen({onSave}){
 /* ── APP ── */
 function App(){
   const[hasKey,sHasKey]=useState(!!localStorage.getItem("hs_key"));
+  const[authed,sAuthed]=useState(!!sessionStorage.getItem("hs_auth"));
   const[url,sUrl]=useState("");
   const[lang,sLang]=useState("nl");
   const[phase,sPhase]=useState("idle");
@@ -713,6 +732,8 @@ function App(){
   const[hl,sHl]=useState("intro");
   const[prev,sPrev]=useState(false);
   const[pushed,sPushed]=useState(false);
+  const[confirmModal,sConfirmModal]=useState(null);
+  const showConfirm=(title,message,onOk)=>{sConfirmModal({title,message,onOk});};
 
   useEffect(()=>{const m={intro:"intro",main:"main",seo:"seo",ai:"ai",meta:"h1",faq:"h1",magento:"h1"};sHl(m[tab]||"intro");},[tab]);
 
@@ -742,6 +763,7 @@ function App(){
 
   const reset=()=>{sPhase("idle");sA(null);sC(null);sErr(null);sPrev(false);};
 
+  if(!authed)return<PasswordGate onPass={()=>{sessionStorage.setItem("hs_auth","1");sAuthed(true);}}/>;
   if(!hasKey)return<KeyScreen onSave={()=>sHasKey(true)}/>;
 
   const TABS=[{k:"intro",l:"Introductie"},{k:"main",l:"Hoofdtekst"},{k:"meta",l:"Meta & H1"},{k:"faq",l:"FAQ Schema"},{k:"ai",l:"AI Snippet"},{k:"magento",l:"Magento 2"}];
@@ -759,6 +781,11 @@ function App(){
           {[{k:"nl",f:"🇳🇱"},{k:"de",f:"🇩🇪"},{k:"en",f:"🇬🇧"},{k:"pro",f:"🏢"}].map(({k,f})=>(
             <button key={k} onClick={()=>sLang(k)} style={{fontFamily:"var(--f)",fontSize:11.5,fontWeight:700,padding:"5px 14px",borderRadius:20,cursor:"pointer",border:"none",background:lang===k?C.beige:"transparent",color:lang===k?"#fff":C.ink3,transition:"all .18s"}}>{f} {k.toUpperCase()}</button>
           ))}
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <button onClick={function(){sMagentoHostUrl("https://www.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://www.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:10.5,fontWeight:800,padding:"4px 11px",borderRadius:8,cursor:"pointer",border:"1.5px solid "+(magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":C.bdr),fontFamily:"var(--f)",background:magentoHostUrl==="https://www.haarshop.nl"?"#e8f5e9":"#fff",color:magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":C.ink3,transition:"all .15s"}}>Productie</button>
+          <button onClick={function(){showConfirm("STAGING omgeving","Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?",function(){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");});}} style={{fontSize:10.5,fontWeight:800,padding:"4px 11px",borderRadius:8,cursor:"pointer",border:"1.5px solid "+(magentoHostUrl.includes("staging")?"#e65100":C.bdr),fontFamily:"var(--f)",background:magentoHostUrl.includes("staging")?"#fff3e0":"#fff",color:magentoHostUrl.includes("staging")?"#e65100":C.ink3,transition:"all .15s"}}>Staging</button>
+          {magentoHostUrl.includes("staging")&&<span style={{fontSize:9.5,fontWeight:900,color:"#e65100",background:"#fff3e0",border:"1.5px solid #ffcc80",borderRadius:6,padding:"3px 8px",letterSpacing:".04em"}}>STAGING</span>}
         </div>
         <button onClick={()=>{localStorage.removeItem("hs_key");_key="";sHasKey(false);}} className="btn btn-ghost btn-sm">🔑 API-sleutel</button>
       </div>
@@ -1065,41 +1092,6 @@ function App(){
                 </div>
               </div>}
 
-              {tab==="magento"&&<div className="card fu">
-                <div style={{padding:"15px 20px",borderBottom:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                  <div><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Magento 2 · Publicatieklaar</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>Plak direct in Category Name, Meta Title, Meta Description en Description van {DOMAIN_CONFIG[lang].brand}</div></div>
-                  <CopyBtn text={html} label="Alles"/>
-                </div>
-                <div style={{padding:22,display:"flex",flexDirection:"column",gap:15}}>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:11}}>
-                    {[["Category Name / H1",c.h1],["Meta Title",c.metaTitle],["Meta Description",c.metaDescription]].map(([lbl,val])=>(
-                      <div key={lbl} style={{background:C.cream,border:`1px solid ${C.bdr}`,borderRadius:10,padding:14}}>
-                        <div style={{fontSize:10.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:5}}>{lbl}</div>
-                        <div style={{fontSize:13,color:C.ink,marginBottom:8,lineHeight:1.5}}>{val}</div>
-                        <CopyBtn text={val||""}/>
-                      </div>
-                    ))}
-                  </div>
-                  {lang!=="nl"&&<div style={{background:"#f0f7f4",border:"1px solid #b8dccb",borderRadius:10,padding:"13px 16px"}}>
-                    <div style={{fontSize:11,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#2d6a4f",marginBottom:8}}>🇳🇱 Nederlandse vertalingen (ter controle — niet publiceren)</div>
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-                      {[["H1 NL",c.h1Nl||c.h1],["Meta Title NL",c.metaTitleNl||c.metaTitle],["Meta Description NL",c.metaDescriptionNl||c.metaDescription]].map(([lbl,val])=>(
-                        <div key={lbl} style={{background:"#fff",border:"1px solid #b8dccb",borderRadius:8,padding:11}}>
-                          <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#3a7c5a",marginBottom:4}}>{lbl}</div>
-                          <div style={{fontSize:12.5,color:"#2d5a42",lineHeight:1.5}}>{val}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>}
-                  <div>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}><span style={{fontSize:12,fontWeight:700,color:C.ink2}}>Category Description HTML</span><CopyBtn text={html} label="Kopieer alle HTML"/></div>
-                    <pre className="code-block">{html}</pre>
-                  </div>
-                  <button className="btn btn-dark" onClick={()=>{sPushed(true);setTimeout(()=>sPushed(false),3000);}} style={{fontSize:14,padding:"14px",borderRadius:24,justifyContent:"center",width:"100%"}}>
-                    {pushed?"✓ Succesvol gepubliceerd in Magento 2":"⚡ Verzend naar Magento 2 via REST API"}
-                  </button>
-                </div>
-              </div>}
             </div>
 
 
@@ -1127,7 +1119,7 @@ function App(){
                     </div>
                     <div style={{marginTop:6,display:"flex",gap:6,alignItems:"center"}}>
                       <button onClick={function(){sMagentoHostUrl("https://www.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://www.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":"#fff",color:magentoHostUrl==="https://www.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
-                      <button onClick={function(){if(window.confirm("Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?")){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
+                      <button onClick={function(){showConfirm("STAGING omgeving","Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?",function(){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");})}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
                       {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px"}}>STAGING OMGEVING</span>}
                     </div>
                   </div>
@@ -1230,10 +1222,11 @@ function App(){
                     <pre className="code-block" style={{maxHeight:200}}>{buildDescriptionBottom(c)}</pre>
                   </div>
 
-                  <button className="btn btn-dark" disabled={!magentoKey||!magentoCatId||magentoLoading} onClick={async function(){
+                  <button className="btn btn-dark" disabled={!magentoKey||!magentoCatId||magentoLoading} onClick={function(){
                     if(!magentoKey){sMagentoStatus("Voer eerst een API key in");return;}
                     if(!magentoCatId){sMagentoStatus("Selecteer eerst een categorie");return;}
-                    var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";if(!window.confirm("Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+"\nCategorie: "+magentoCatName+" (ID: "+magentoCatId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?")){return;}sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
+                    var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";
+                    showConfirm("Publiceren naar "+envLabel,"Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+"\nCategorie: "+magentoCatName+" (ID: "+magentoCatId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?",async function(){sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
                     try{
                       var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
                       var payload=buildMagentoPutPayload(magentoCatId,c);
@@ -1241,7 +1234,7 @@ function App(){
                       sPushed(true);sMagentoStatus("Succesvol gepubliceerd naar "+magentoCatName+" (ID: "+magentoCatId+") op "+magentoHostUrl+"!");
                     }catch(e){sMagentoStatus("Fout bij publiceren: "+e.message);}
                     sMagentoLoading(false);
-                  }} style={{fontSize:14,padding:"14px",borderRadius:24,justifyContent:"center",width:"100%",opacity:(!magentoKey||!magentoCatId)?.5:1}}>
+                  });}} style={{fontSize:14,padding:"14px",borderRadius:24,justifyContent:"center",width:"100%",opacity:(!magentoKey||!magentoCatId)?.5:1}}>
                     {magentoLoading?"Bezig met publiceren naar "+(magentoHostUrl.includes("staging")?"staging":"productie")+"...":(pushed?String.fromCodePoint(0x2713)+" Succesvol gepubliceerd!":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"+(magentoCatName?" — "+magentoCatName:""))}
                   </button>
                   {(!magentoKey||!magentoCatId)&&<div style={{fontSize:11,color:C.ink3,textAlign:"center",marginTop:-8}}>{!magentoKey?"Voer eerst een API key in":"Selecteer eerst een categorie"}</div>}
@@ -1280,6 +1273,21 @@ function App(){
         </div>
       </div>}
     </main>
+
+    
+      {confirmModal&&<div style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.45)",backdropFilter:"blur(4px)"}}>
+        <div style={{background:"#fff",borderRadius:18,width:"min(440px,90vw)",boxShadow:"0 24px 80px rgba(0,0,0,.18)",overflow:"hidden",fontFamily:"var(--f)"}}>
+          <div style={{padding:"22px 24px 0",display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:36,height:36,borderRadius:10,background:confirmModal.title.includes("STAGING")?"#fff3e0":"#e8f5e9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{confirmModal.title.includes("STAGING")?String.fromCodePoint(0x26A0):String.fromCodePoint(0x1F680)}</div>
+            <div style={{fontSize:16,fontWeight:900,color:C.ink}}>{confirmModal.title}</div>
+          </div>
+          <div style={{padding:"14px 24px 22px",fontSize:13.5,color:C.ink2,lineHeight:1.7,whiteSpace:"pre-line"}}>{confirmModal.message}</div>
+          <div style={{padding:"0 24px 20px",display:"flex",gap:10,justifyContent:"flex-end"}}>
+            <button onClick={()=>sConfirmModal(null)} style={{fontSize:13,fontWeight:700,padding:"10px 22px",borderRadius:12,cursor:"pointer",border:"1px solid "+C.bdr,background:"#fff",color:C.ink2,fontFamily:"var(--f)",transition:"all .15s"}}>Annuleren</button>
+            <button onClick={()=>{sConfirmModal(null);confirmModal.onOk();}} style={{fontSize:13,fontWeight:700,padding:"10px 22px",borderRadius:12,cursor:"pointer",border:"none",background:confirmModal.title.includes("STAGING")?"#e65100":C.ink,color:"#fff",fontFamily:"var(--f)",transition:"all .15s"}}>{confirmModal.title.includes("STAGING")?"Naar staging":"Bevestigen"}</button>
+          </div>
+        </div>
+      </div>}
 
     {/* Ahrefs notice */}
     <div style={{position:"fixed",bottom:20,right:20,zIndex:300,background:C.ink,color:"#fff",borderRadius:10,padding:"11px 15px",fontSize:12,fontFamily:"var(--f)",maxWidth:230,boxShadow:"0 4px 20px rgba(0,0,0,.2)",lineHeight:1.6}}>
