@@ -425,7 +425,6 @@ function saveKey(k){_key=k;localStorage.setItem("hs_key",k);}
 async function claude(msg,tokens=4000,search=false,lang="nl"){
   if(!_key)throw new Error("Geen API-sleutel.");
   const body={model:"claude-sonnet-4-20250514",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
-  if(search)body.tools=[{type:"web_search_20250305",name:"web_search"}];
   const r=await fetch("https://api.anthropic.com/v1/messages",{
     method:"POST",
     headers:{"Content-Type":"application/json","x-api-key":_key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
