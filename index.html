@@ -117,9 +117,9 @@ const C = {
    zoeklocatie en competitie-markt
 ───────────────────────────────────────────── */
 const DOMAIN_CONFIG = {
-  nl: { base:"https://www.haarshop.nl",  location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.nl" },
-  de: { base:"https://www.haarshop.de",  location:"Germany",     market:"de", currency:"€", brand:"Haarshop.de" },
-  en: { base:"https://www.haarshop.com", location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.com" },
+  nl: { base:"https://www.haarshop.nl",  location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.nl",  freeShipping:"Gratis verzending vanaf €35,-" },
+  de: { base:"https://www.haarshop.de",  location:"Germany",     market:"de", currency:"€", brand:"Haarshop.de",  freeShipping:"Gratis verzending vanaf €39,-" },
+  en: { base:"https://www.haarshop.com", location:"Netherlands", market:"nl", currency:"€", brand:"Haarshop.com", freeShipping:"Gratis verzending vanaf €35,-" },
   pro:{ base:"https://www.haarshoppro.nl",location:"Netherlands",market:"nl", currency:"€", brand:"Haarshoppro.nl", magentoCode:"haarshop_b2b", freeShipping:"Gratis verzending vanaf €50,- ex btw", audience:"b2b" },
 };
 
@@ -437,6 +437,71 @@ async function claude(msg,tokens=4000,search=false,lang="nl"){
 
 function xj(raw){const s=raw.indexOf("{"),e=raw.lastIndexOf("}");if(s<0||e<0)throw new Error("Geen JSON.");return JSON.parse(raw.slice(s,e+1));}
 
+function buildFaqWidgets(schemaFAQ){
+  if(!schemaFAQ||!schemaFAQ.length) return "";
+  return schemaFAQ.map(function(f){
+    var title=(f.question||"").replace(/"/g,"&quot;");
+    var text=(f.answer||"").replace(/"/g,"&quot;");
+    return '{{widget type="BigBridge\\Base\\Block\\Widget\\Faq" title="'+title+'" text="'+text+'"}}';
+  }).join("\n");
+}
+
+function buildDescriptionBottom(c){
+  var mc=c.mainContent||{};
+  var p=function(t){return(t||"").split(/\n\n+/).filter(Boolean).map(function(x){return"<p>"+x.trim()+"</p>";}).join("\n");};
+  var faqWidgets=buildFaqWidgets(c.schemaFAQ);
+  var faq={"@context":"https://schema.org","@type":"FAQPage",mainEntity:(c.schemaFAQ||[]).map(function(f){return{"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}};})};
+  var html="";
+  html+="<h2>"+(mc.h2_what?.heading||"")+"</h2>\n"+p(mc.h2_what?.body)+"\n\n";
+  html+="<h2>"+(mc.h2_hairtype?.heading||"")+"</h2>\n"+p(mc.h2_hairtype?.body)+"\n";
+  html+="<h3>"+(mc.h2_hairtype?.h3_tips?.heading||"")+"</h3>\n"+p(mc.h2_hairtype?.h3_tips?.body)+"\n\n";
+  html+="<h2>"+(mc.h2_why?.heading||"")+"</h2>\n"+p(mc.h2_why?.body)+"\n";
+  html+="<h3>"+(mc.h2_why?.h3_combine?.heading||"")+"</h3>\n"+p(mc.h2_why?.h3_combine?.body)+"\n\n";
+  html+="<h2>"+(mc.h2_howto?.heading||"")+"</h2>\n"+p(mc.h2_howto?.body)+"\n";
+  html+="<h3>"+(mc.h2_howto?.h3_daily?.heading||"")+"</h3>\n"+p(mc.h2_howto?.h3_daily?.body)+"\n\n";
+  html+='<div itemprop="description" style="display:none">'+(c.aiSnippet||"")+"</div>\n\n";
+  if(faqWidgets){html+=faqWidgets+"\n\n";}
+  html+='<script type="application/ld+json">\n'+JSON.stringify(faq,null,2)+'\n<\/script>';
+  return html.trim();
+}
+
+function buildDescriptionTop(c){
+  return '<p class="category-intro">'+(c.introText||"")+"</p>";
+}
+
+function buildMagentoPutPayload(categoryId,c){
+  var attrs=[];
+  attrs.push({attribute_code:"description_bottom",value:buildDescriptionBottom(c)});
+  attrs.push({attribute_code:"description_top",value:buildDescriptionTop(c)});
+  attrs.push({attribute_code:"meta_title",value:c.metaTitle||""});
+  attrs.push({attribute_code:"meta_keywords",value:(c.metaKeywords||[]).join(", ")});
+  attrs.push({attribute_code:"meta_description",value:c.metaDescription||""});
+  return{category:{id:categoryId,custom_attributes:attrs}};
+}
+
+async function magentoFetch(endpoint,magentoKey,options){
+  var resp=await fetch(endpoint,Object.assign({},options,{
+    headers:Object.assign({"Content-Type":"application/json","Authorization":"Bearer "+magentoKey},options&&options.headers||{}),
+  }));
+  if(!resp.ok){
+    var txt=await resp.text();
+    throw new Error("Magento API "+resp.status+": "+txt);
+  }
+  return resp.json();
+}
+
+function flattenCategories(node,path){
+  var results=[];
+  var currentPath=path?path+" > "+node.name:node.name;
+  results.push({id:node.id,name:node.name,path:currentPath,level:node.level,isActive:node.is_active,productCount:node.product_count});
+  if(node.children_data){
+    for(var i=0;i<node.children_data.length;i++){
+      results=results.concat(flattenCategories(node.children_data[i],currentPath));
+    }
+  }
+  return results;
+}
+
 async function analyse(url,lang){
   const cfg=DOMAIN_CONFIG[lang||domainFromUrl(url)||"nl"];
   const slug=url.replace(cfg.base,"").split("/").filter(Boolean).pop()||"";
@@ -474,8 +539,7 @@ async function genContent(a,lang){
     ? `\n\nVERPLICHT EXTRA VELD: Voeg aan elke tekstsectie ook een "nl" veld toe met een natuurlijke Nederlandse vertaling van die tekst. Dit is voor Nederlandse collega's die de ${ll} tekst willen begrijpen en controleren. De Nederlandse vertaling moet vloeiend Nederlands zijn, niet letterlijk vertaald.\n\nJSON structuur voor mainContent blokken:\n{"heading":"Duits/Engels heading","body":"Duits/Engels body","nl":{"heading":"Nederlandse vertaling heading","body":"Nederlandse vertaling body"}}\n\nEn voor introText, h1, metaTitle, metaDescription ook een nlTranslation veld toevoegen:`
     : "";
 
-  const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\nInterne pagina's — gebruik ALLEEN deze URLs: ${lnk||"geen"}\n\nBELANGRIJK: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"h1":"Paginatitel max 60 tekens","h1Nl":"Nederlandse vertaling h1 (alleen bij DE/EN)","metaTitle":"Meta title max 60 tekens","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens","metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"2-3 zinnen max 55 woorden, primair zoekwoord vet.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"2-3 alineas gescheiden door \\n\\n","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"2-3 alineas","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"1-2 alineas","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"1-2 alineas met interne link naar ${cfg.base}/...","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"1 alinea","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
-  // web search ON: used for localization research (top performing pages in target market)
+  const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\nInterne pagina's — gebruik ALLEEN deze URLs: ${lnk||"geen"}\n\n=== STRIKTE REGELS (NOOIT OVERTREDEN) ===\n\nREGEL 1 — VERZENDKOSTEN: De meta description MOET altijd eindigen met "${cfg.freeShipping}". Dit is VERPLICHT en mag NOOIT ontbreken of afwijken. Gebruik exact deze tekst: "${cfg.freeShipping}".\n\nREGEL 2 — INTERNE LINKS: Verwerk MINIMAAL 3 interne links in de lopende tekst van de body (mainContent). Gebruik het <a href="URL">ankertekst</a> formaat. De links moeten ALLEEN verwijzen naar de opgegeven interne pagina's. Verwerk ze NATUURLIJK in zinnen, niet als losse lijst. Elke H2-sectie moet minstens 1 interne link bevatten. Dit is VERPLICHT.\n\nREGEL 3 — META TITLE: De meta title MOET altijd eindigen met " | ${cfg.brand}". Voorbeeld: "Conditioners voor zijdezacht haar | ${cfg.brand}". Het totaal inclusief " | ${cfg.brand}" mag max 60 tekens zijn.\n\nREGEL 4 — LINK FORMAT: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen. Format: <a href="${cfg.base}/pad">tekst</a>.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"h1":"Paginatitel max 60 tekens","h1Nl":"Nederlandse vertaling h1 (alleen bij DE/EN)","metaTitle":"Meta title max 60 tekens EINDIGEND op | ${cfg.brand}","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens EINDIGEND op ${cfg.freeShipping}","metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"2-3 zinnen max 55 woorden, primair zoekwoord vet.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"2-3 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"2-3 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"1-2 alineas","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"2 alineas met minstens 1 <a href> interne link","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"1-2 alineas met interne link naar ${cfg.base}/...","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"2 alineas","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"1 alinea","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
   return xj(await claude(p,5500,false,lang));
 }
 
@@ -653,6 +717,16 @@ function App(){
   useEffect(()=>{const m={intro:"intro",main:"main",seo:"seo",ai:"ai",meta:"h1",faq:"h1",magento:"h1"};sHl(m[tab]||"intro");},[tab]);
 
   const[progress,sProgress]=useState(0);
+    const[magentoKey,sMagentoKey]=useState(sessionStorage.getItem("hs_mage_key")||"");
+  const[magentoHostUrl,sMagentoHostUrl]=useState(sessionStorage.getItem("hs_mage_host")||"https://www.haarshop.nl");
+  const[magentoCategories,sMagentoCategories]=useState(null);
+  const[magentoCatSearch,sMagentoCatSearch]=useState("");
+  const[magentoCatId,sMagentoCatId]=useState(null);
+  const[magentoCatName,sMagentoCatName]=useState("");
+  const[magentoLoading,sMagentoLoading]=useState(false);
+  const[magentoStatus,sMagentoStatus]=useState("");
+  const[magentoShowPayload,sMagentoShowPayload]=useState(false);
+
   const doGenerate=useCallback(async()=>{
     if(!url.trim())return;sErr(null);sPhase("generating");sProgress(0);
     sStatus("Keywords en concurrentie analyseren…");sProgress(15);
@@ -1027,6 +1101,153 @@ function App(){
                 </div>
               </div>}
             </div>
+
+
+              {tab==="magento"&&<div className="card fu">
+                <div style={{padding:"15px 20px",borderBottom:"1px solid "+C.bdr,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Magento 2 REST API</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>Publiceer direct naar {DOMAIN_CONFIG[lang].brand} via de Magento 2 API</div></div>
+                  <CopyBtn text={html} label="Alle HTML"/>
+                </div>
+                <div style={{padding:22,display:"flex",flexDirection:"column",gap:16}}>
+
+                  <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
+                    <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:12}}>API Configuratie</div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div>
+                        <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:5}}>Magento API Bearer Token</div>
+                        <input type="password" value={magentoKey} onChange={function(e){sMagentoKey(e.target.value);sessionStorage.setItem("hs_mage_key",e.target.value);}} placeholder="Voer je Magento 2 API key in..." style={{fontSize:13}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:5}}>Magento Host URL</div>
+                        <input type="text" value={magentoHostUrl} onChange={function(e){sMagentoHostUrl(e.target.value);sessionStorage.setItem("hs_mage_host",e.target.value);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} placeholder="https://staging.haarshop.nl" style={{fontSize:13}}/>
+                      </div>
+                    </div>
+                    <div style={{marginTop:8,fontSize:11,color:C.ink3}}>
+                      Endpoint: <code style={{background:C.blush,padding:"1px 6px",borderRadius:4,fontSize:10.5}}>{magentoHostUrl}/rest/{DOMAIN_CONFIG[lang].magentoCode}/V1/</code>
+                    </div>
+                    <div style={{marginTop:6,display:"flex",gap:6,alignItems:"center"}}>
+                      <button onClick={function(){sMagentoHostUrl("https://www.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://www.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":"#fff",color:magentoHostUrl==="https://www.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
+                      <button onClick={function(){if(window.confirm("Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?")){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
+                      {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px"}}>STAGING OMGEVING</span>}
+                    </div>
+                  </div>
+
+                  <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                      <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3}}>Categorie selecteren</div>
+                      <button className="btn btn-primary btn-sm" disabled={!magentoKey||magentoLoading} onClick={async function(){
+                        sMagentoLoading(true);sMagentoStatus("Categorieen ophalen...");
+                        try{
+                          var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
+                          var data=await magentoFetch(host+"/categories",magentoKey,{method:"GET"});
+                          var flat=flattenCategories(data,"");
+                          sMagentoCategories(flat);
+                          sMagentoStatus(flat.length+" categorieen geladen");
+                          var pageTitle=a&&(a.pageTitle||a.h1)||"";
+                          if(pageTitle){
+                            var match=flat.find(function(cat){return cat.name.toLowerCase()===pageTitle.toLowerCase();});
+                            if(match){sMagentoCatId(match.id);sMagentoCatName(match.name);sMagentoStatus(flat.length+" categorieen geladen - "+match.name+" (ID: "+match.id+") automatisch geselecteerd");}
+                          }
+                        }catch(e){sMagentoStatus("Fout: "+e.message);sMagentoCategories(null);}
+                        sMagentoLoading(false);
+                      }}>{magentoLoading?"Laden...":"Categorieen ophalen"}</button>
+                    </div>
+                    {magentoCatId&&<div style={{background:"#e8f5e9",border:"1px solid #a5d6a7",borderRadius:8,padding:"10px 14px",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <div><span style={{fontSize:12,fontWeight:800,color:"#2e7d32"}}>Geselecteerd:</span>{" "}<span style={{fontSize:13,fontWeight:700,color:"#1b5e20"}}>{magentoCatName}</span>{" "}<span style={{fontSize:11,color:"#4caf50"}}>(ID: {magentoCatId})</span></div>
+                      <button onClick={function(){sMagentoCatId(null);sMagentoCatName("");}} style={{fontSize:11,color:"#c62828",background:"none",border:"none",cursor:"pointer",fontFamily:"var(--f)",fontWeight:700}}>Wijzig</button>
+                    </div>}
+                    {magentoCategories&&!magentoCatId&&<div>
+                      <input value={magentoCatSearch} onChange={function(e){sMagentoCatSearch(e.target.value);}} placeholder="Zoek categorie op naam..." style={{fontSize:13,marginBottom:8}}/>
+                      <div style={{maxHeight:220,overflowY:"auto",border:"1px solid "+C.bdr,borderRadius:8,background:"#fff"}}>
+                        {magentoCategories.filter(function(cat){return!magentoCatSearch||cat.name.toLowerCase().includes(magentoCatSearch.toLowerCase())||cat.path.toLowerCase().includes(magentoCatSearch.toLowerCase());}).slice(0,50).map(function(cat){return(
+                          <div key={cat.id} onClick={function(){sMagentoCatId(cat.id);sMagentoCatName(cat.name);}} style={{padding:"8px 14px",cursor:"pointer",borderBottom:"1px solid "+C.bdr,fontSize:12,display:"flex",justifyContent:"space-between",alignItems:"center",background:"#fff",transition:"background .1s"}} onMouseEnter={function(e){e.currentTarget.style.background=C.blush;}} onMouseLeave={function(e){e.currentTarget.style.background="#fff";}}>
+                            <div><span style={{fontWeight:700,color:C.ink}}>{cat.name}</span>{cat.level>2&&<span style={{color:C.ink3,fontSize:11,marginLeft:6}}>{cat.path}</span>}</div>
+                            <div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{fontSize:10,color:C.ink3}}>{cat.productCount} prod.</span><span style={{fontSize:10,color:cat.isActive?"#4caf50":"#ef5350",fontWeight:700}}>{cat.isActive?"Actief":"Inactief"}</span></div>
+                          </div>
+                        );})}
+                      </div>
+                    </div>}
+                    {magentoStatus&&<div style={{marginTop:8,fontSize:11,color:magentoStatus.startsWith("Fout")?"#c62828":C.ink3}}>{magentoStatus}</div>}
+                  </div>
+
+                  <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
+                    <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:12}}>Velden mapping</div>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+                      {[["meta_title",c.metaTitle],["meta_description",c.metaDescription],["meta_keywords",(c.metaKeywords||[]).join(", ")]].map(function(pair){return(
+                        <div key={pair[0]} style={{background:"#fff",border:"1px solid "+C.bdr,borderRadius:8,padding:12}}>
+                          <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:4}}>{pair[0]}</div>
+                          <div style={{fontSize:12.5,color:C.ink,lineHeight:1.5,wordBreak:"break-word"}}>{pair[1]||"—"}</div>
+                          <CopyBtn text={pair[1]||""}/>
+                        </div>
+                      );})}
+                    </div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
+                      <div style={{background:"#fff",border:"1px solid "+C.bdr,borderRadius:8,padding:12}}>
+                        <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:4}}>description_top <span style={{fontWeight:500,textTransform:"none"}}>(intro boven producten)</span></div>
+                        <div style={{fontSize:12,color:C.ink,lineHeight:1.5}} dangerouslySetInnerHTML={{__html:c.introText||"—"}}/>
+                        <CopyBtn text={buildDescriptionTop(c)}/>
+                      </div>
+                      <div style={{background:"#fff",border:"1px solid "+C.bdr,borderRadius:8,padding:12}}>
+                        <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:4}}>description_bottom <span style={{fontWeight:500,textTransform:"none"}}>(SEO + FAQ widgets + JSON-LD)</span></div>
+                        <div style={{fontSize:11,color:C.ink3}}>Hoofdtekst + AI snippet + {(c.schemaFAQ||[]).length} FAQ widget(s) + JSON-LD schema</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {(c.schemaFAQ||[]).length>0&&<div style={{background:"#fff8e1",border:"1px solid #ffcc02",borderRadius:12,padding:16}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                      <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#f57f17"}}>BigBridge FAQ Widgets ({(c.schemaFAQ||[]).length})</div>
+                      <CopyBtn text={buildFaqWidgets(c.schemaFAQ)} label="Kopieer widgets"/>
+                    </div>
+                    {(c.schemaFAQ||[]).map(function(f,i){return(
+                      <div key={i} style={{background:"#fff",border:"1px solid #ffe082",borderRadius:8,padding:"10px 14px",marginBottom:6,fontSize:12}}>
+                        <div style={{fontWeight:700,color:C.ink,marginBottom:3}}>{f.question}</div>
+                        <div style={{color:C.ink2,fontSize:11.5,lineHeight:1.5}}>{f.answer}</div>
+                      </div>
+                    );})}
+                    <div style={{fontSize:11,color:"#f57f17",marginTop:6}}>FAQ widgets worden zichtbaar op de pagina + JSON-LD schema voor Google</div>
+                  </div>}
+
+                  {lang!=="nl"&&lang!=="pro"&&<div style={{background:"#f0f7f4",border:"1px solid #b8dccb",borderRadius:10,padding:"13px 16px"}}>
+                    <div style={{fontSize:11,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#2d6a4f",marginBottom:8}}>Nederlandse vertalingen (ter controle)</div>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10}}>
+                      {[["Meta Title NL",c.metaTitleNl||c.metaTitle],["Meta Description NL",c.metaDescriptionNl||c.metaDescription]].map(function(pair){return(
+                        <div key={pair[0]} style={{background:"#fff",border:"1px solid #b8dccb",borderRadius:8,padding:11}}>
+                          <div style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#3a7c5a",marginBottom:4}}>{pair[0]}</div>
+                          <div style={{fontSize:12.5,color:"#2d5a42",lineHeight:1.5}}>{pair[1]}</div>
+                        </div>
+                      );})}
+                    </div>
+                  </div>}
+
+                  <div>
+                    <button onClick={function(){sMagentoShowPayload(function(x){return!x;});}} style={{fontSize:12,fontWeight:700,color:C.ink2,background:"none",border:"none",cursor:"pointer",fontFamily:"var(--f)",padding:0,marginBottom:6}}>{magentoShowPayload?"Verberg":"Bekijk"} PUT payload JSON</button>
+                    {magentoShowPayload&&<pre className="code-block" style={{fontSize:10.5,maxHeight:250}}>{JSON.stringify(buildMagentoPutPayload(magentoCatId||0,c),null,2)}</pre>}
+                  </div>
+
+                  <div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}><span style={{fontSize:12,fontWeight:700,color:C.ink2}}>description_bottom HTML</span><CopyBtn text={buildDescriptionBottom(c)} label="Kopieer HTML"/></div>
+                    <pre className="code-block" style={{maxHeight:200}}>{buildDescriptionBottom(c)}</pre>
+                  </div>
+
+                  <button className="btn btn-dark" disabled={!magentoKey||!magentoCatId||magentoLoading} onClick={async function(){
+                    if(!magentoKey){sMagentoStatus("Voer eerst een API key in");return;}
+                    if(!magentoCatId){sMagentoStatus("Selecteer eerst een categorie");return;}
+                    var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";if(!window.confirm("Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+"\nCategorie: "+magentoCatName+" (ID: "+magentoCatId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?")){return;}sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
+                    try{
+                      var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
+                      var payload=buildMagentoPutPayload(magentoCatId,c);
+                      await magentoFetch(host+"/categories/"+magentoCatId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
+                      sPushed(true);sMagentoStatus("Succesvol gepubliceerd naar "+magentoCatName+" (ID: "+magentoCatId+") op "+magentoHostUrl+"!");
+                    }catch(e){sMagentoStatus("Fout bij publiceren: "+e.message);}
+                    sMagentoLoading(false);
+                  }} style={{fontSize:14,padding:"14px",borderRadius:24,justifyContent:"center",width:"100%",opacity:(!magentoKey||!magentoCatId)?.5:1}}>
+                    {magentoLoading?"Bezig met publiceren naar "+(magentoHostUrl.includes("staging")?"staging":"productie")+"...":(pushed?String.fromCodePoint(0x2713)+" Succesvol gepubliceerd!":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"+(magentoCatName?" — "+magentoCatName:""))}
+                  </button>
+                  {(!magentoKey||!magentoCatId)&&<div style={{fontSize:11,color:C.ink3,textAlign:"center",marginTop:-8}}>{!magentoKey?"Voer eerst een API key in":"Selecteer eerst een categorie"}</div>}
+                </div>
+              </div>}
+
 
             {prev&&<div className="stick">
               <div style={{fontSize:13,fontWeight:800,color:C.ink,marginBottom:10,display:"flex",alignItems:"center",gap:7}}>
