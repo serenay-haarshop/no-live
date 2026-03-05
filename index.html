@@ -984,6 +984,14 @@ function App(){
   const updateC=function(path,value){sC(function(prev){var next=JSON.parse(JSON.stringify(prev));var keys=path.split(".");var obj=next;for(var i=0;i<keys.length-1;i++){obj=obj[keys[i]];}obj[keys[keys.length-1]]=value;return next;});};
   useEffect(function(){if(c&&a){sHtml(buildHTML(c,a));}},[c,a]);
   useEffect(()=>{const m={intro:"intro",main:"main",seo:"seo",ai:"ai",meta:"h1",faq:"h1",magento:"h1"};sHl(m[tab]||"intro");},[tab]);
+  useEffect(()=>{
+    // Auto-update Magento host to production URL for selected lang, unless staging is active
+    if(!magentoHostUrl.includes("staging")){
+      const prodHost=DOMAIN_CONFIG[lang]?.base||"https://www.haarshop.nl";
+      sMagentoHostUrl(prodHost);sessionStorage.setItem("hs_mage_host",prodHost);
+      sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");
+    }
+  },[lang]);
 
   const doAnalyse=useCallback(async()=>{
     if(!url.trim())return;sErr(null);sPhase("analyzing");sStatus("Analyseren…");
@@ -1428,7 +1436,7 @@ function App(){
                       Endpoint: <code style={{background:C.blush,padding:"1px 6px",borderRadius:4,fontSize:10.5}}>{magentoHostUrl}/rest/{DOMAIN_CONFIG[lang].magentoCode}/V1/</code>
                     </div>
                     <div style={{marginTop:6,display:"flex",gap:6,alignItems:"center"}}>
-                      <button onClick={function(){sMagentoHostUrl("https://www.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://www.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://www.haarshop.nl"?"#2e7d32":"#fff",color:magentoHostUrl==="https://www.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
+                      <button onClick={function(){var prodHost=DOMAIN_CONFIG[lang]?.base||"https://www.haarshop.nl";sMagentoHostUrl(prodHost);sessionStorage.setItem("hs_mage_host",prodHost);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(!magentoHostUrl.includes("staging")?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:!magentoHostUrl.includes("staging")?"#2e7d32":"#fff",color:!magentoHostUrl.includes("staging")?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
                       <button onClick={function(){if(window.confirm("Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?")){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
                       {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px"}}>STAGING OMGEVING</span>}
                     </div>
