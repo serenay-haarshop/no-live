@@ -1274,9 +1274,7 @@ function App(){
               </div>
             </div>
 
-            <button className="btn btn-dark fu4" onClick={doGen} disabled={phase==="generating"} style={{width:"100%",padding:"15px",fontSize:15,borderRadius:24,justifyContent:"center"}}>
-              {phase==="generating"?<><Spin s={17}/> Content schrijven…</>:"Genereer volledige SEO-paginacontent →"}
-            </button>
+
           </div>
 
         </div>
@@ -1484,6 +1482,32 @@ function App(){
                       <button onClick={function(){if(window.confirm("Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?")){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
                       {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px"}}>STAGING OMGEVING</span>}
                     </div>
+                    <button className="btn btn-dark" style={{width:"100%",marginTop:12,fontSize:13,padding:"12px",justifyContent:"center"}} disabled={!magentoKey||magentoLoading} onClick={async function(){
+                      if(!magentoKey){sMagentoStatus("Voer eerst een API key in");return;}
+                      var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";
+                      var catId=magentoCatId;
+                      var catInfo="";
+                      if(magentoCatId&&magentoCatName){catInfo="\nCategorie: "+magentoCatName+" (ID: "+magentoCatId+")";}else{catInfo="\n(Categorie wordt bepaald op basis van paginatitel)";}
+                      if(!window.confirm("Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+catInfo+"\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?")){return;}
+                      sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
+                      try{
+                        var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
+                        if(!catId&&a&&a.pageTitle){
+                          var data=await magentoFetch(host+"/categories",magentoKey,{method:"GET"});
+                          var flat=flattenCategories(data,"");
+                          var match=flat.find(function(cat){return cat.name.toLowerCase()===a.pageTitle.toLowerCase();});
+                          if(match)catId=match.id;
+                        }
+                        if(!catId){sMagentoStatus("Geen categorie geselecteerd en geen overeenkomst gevonden op basis van paginatitel");sMagentoLoading(false);return;}
+                        var payload=buildMagentoPutPayload(catId,c);
+                        await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
+                        sPushed(true);sMagentoStatus("Succesvol gepubliceerd!");
+                      }catch(e){sMagentoStatus("Fout bij publiceren: "+e.message);}
+                      sMagentoLoading(false);
+                    }}>
+                      {magentoLoading?"Bezig met publiceren...":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"}
+                    </button>
+                    {!magentoKey&&<div style={{fontSize:11,color:C.ink3,textAlign:"center",marginTop:8}}>Voer eerst een API key in</div>}
                   </div>
 
                   <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
@@ -1583,22 +1607,6 @@ function App(){
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}><span style={{fontSize:12,fontWeight:700,color:C.ink2}}>description_bottom HTML</span><CopyBtn text={buildDescriptionBottom(c)} label="Kopieer HTML"/></div>
                     <pre className="code-block" style={{maxHeight:200}}>{buildDescriptionBottom(c)}</pre>
                   </div>
-
-                  <button className="btn btn-dark" disabled={!magentoKey||!magentoCatId||magentoLoading} onClick={async function(){
-                    if(!magentoKey){sMagentoStatus("Voer eerst een API key in");return;}
-                    if(!magentoCatId){sMagentoStatus("Selecteer eerst een categorie");return;}
-                    var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";if(!window.confirm("Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+"\nCategorie: "+magentoCatName+" (ID: "+magentoCatId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?")){return;}sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
-                    try{
-                      var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
-                      var payload=buildMagentoPutPayload(magentoCatId,c);
-                      await magentoFetch(host+"/categories/"+magentoCatId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
-                      sPushed(true);sMagentoStatus("Succesvol gepubliceerd naar "+magentoCatName+" (ID: "+magentoCatId+") op "+magentoHostUrl+"!");
-                    }catch(e){sMagentoStatus("Fout bij publiceren: "+e.message);}
-                    sMagentoLoading(false);
-                  }} style={{fontSize:14,padding:"14px",borderRadius:24,justifyContent:"center",width:"100%",opacity:(!magentoKey||!magentoCatId)?.5:1}}>
-                    {magentoLoading?"Bezig met publiceren naar "+(magentoHostUrl.includes("staging")?"staging":"productie")+"...":(pushed?String.fromCodePoint(0x2713)+" Succesvol gepubliceerd!":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"+(magentoCatName?" — "+magentoCatName:""))}
-                  </button>
-                  {(!magentoKey||!magentoCatId)&&<div style={{fontSize:11,color:C.ink3,textAlign:"center",marginTop:-8}}>{!magentoKey?"Voer eerst een API key in":"Selecteer eerst een categorie"}</div>}
                 </div>
               </div>}
             </div>
