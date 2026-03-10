@@ -474,6 +474,7 @@ function getRelated(url, lang){
 
 function getSystem(lang){
   const cfg=DOMAIN_CONFIG[lang||"nl"];
+  const jsonRule=`\n\nCRITIEK JSON-OUTPUTREGEL: Wanneer je JSON retourneert met HTML daarin, gebruik je ALTIJD enkele aanhalingstekens voor HTML-attributen. Dus NOOIT <a href="url"> maar ALTIJD <a href='url'>. Dit geldt voor ALLE HTML-attributen: href, class, style, target, rel, etc. Dubbele aanhalingstekens breken de JSON-structuur.`;
   const nlRules=`VERBOD 1: Nooit een opsommingsteken, streepje (—, –, -) of bullet gebruiken om zinnen te beginnen, te scheiden of te structureren. Schrijf UITSLUITEND in lopende alinea's en volzinnen. Het enige geldige gebruik van een koppelteken is als grammaticaal verbindingsteken binnen een samengesteld woord (bijv. "leave-in conditioner", "B2B"). Geen enkel streepje als scheidingsteken tussen zinnen of ideeën.
 VERBOD 2: Nooit klinken als een AI. Vermijd: "Of je nu...", "Of het nu...", "Nicht nur... sondern auch...", "Whether you...", "Denk aan...", "Kortom...", "Bovendien", "Tevens", "Daarnaast", "Ten eerste", "Ten tweede", "In conclusie", "uitzonderlijk", "ideaal", "optimaal", "essentieel". Schrijf zoals een mens praat.`;
   if(lang==="pro") return `Jij bent de senior SEO-copywriter van ${cfg.brand}, de online groothandel voor kappers, nagelstylisten, make-up artists en salonhouders in Nederland. Je schrijft als een ervaren vakredacteur die de professionele beauty-industrie door en door kent.
@@ -486,7 +487,7 @@ ${nlRules}
 
 TONE OF VOICE: ${cfg.brand} spreekt professionals aan met "je" en "jouw". De toon is collegiaal en vakkundig. Je spreekt als branchegenoot, niet als verkoper. Vergelijk het met hoe een ervaren merkvertegenwoordiger met een salonhouder praat: je kent de producten, begrijpt de dagelijkse uitdagingen in de salon en geeft concreet advies. Benadruk meerwaarde voor de professional: hoe een product bijdraagt aan klanttevredenheid, efficiëntie in de salon, of een beter behandelresultaat.
 SEO BOLD-REGELS: Primair zoekwoord vet (<strong>keyword</strong>) in eerste of tweede zin van intro. Secundaire zoekwoorden één keer vet.
-KEYWORD VOLUMES: NL markt, focus op B2B zoekgedrag. Professionele kappers zoeken anders dan consumenten, denk aan "salon shampoo", "haarverf groothandel", "professionele stijltang", "kappersstoel kopen", "salonkleuring". CPC in euro. KD 0-100.`;
+KEYWORD VOLUMES: NL markt, focus op B2B zoekgedrag. Professionele kappers zoeken anders dan consumenten, denk aan "salon shampoo", "haarverf groothandel", "professionele stijltang", "kappersstoel kopen", "salonkleuring". CPC in euro. KD 0-100.`+jsonRule;
   if(lang==="de") return `Du bist der Senior-SEO-Texter von ${cfg.brand}. Du schreibst wie ein erfahrener Redakteur, der die Marke seit Jahren kennt — warm, fachkundig und direkt.
 
 LOKALISIERUNG: Bevor du schreibst, suche die Top-3-Seiten auf Google.de für das primäre Keyword. Analysiere deren Sprache, Terminologie und Ton. Schreibe wie ein nativer Muttersprachler aus der deutschen Beauty-Branche — keine wörtliche Übersetzung aus dem Niederländischen. Verwende deutsche Produktnamen, Markennamen und beauty-spezifische Begriffe wie sie in deutschen Magazinen und Blogs genutzt werden (z.B. "Haarpflegeritual", "Pflegekur", "Haarmaske", "Tiefenpflege", "Kämmbarkeit").
@@ -496,7 +497,7 @@ ${nlRules.replace(/Nooit/g,"Niemals").replace(/Schrijf altijd/g,"Schreib immer")
 TONE OF VOICE: ${cfg.brand} spricht Kunden mit "du" und "dein" an. Ton ist warm, kompetent aber nicht übermäßig jovial. Denk an den Stil von DM-Blog oder Cosnova-Redaktion.
 SEO BOLD-REGELN: Primäres Keyword fett (<strong>keyword</strong>) im ersten oder zweiten Satz. Sekundäre Keywords einmal fett.
 KEYWORD-VOLUMINA: DE-Markt. Haarpflege gesamt 80k-120k/Mon. Conditioner 18k-25k. Shampoo 45k-65k. Immer eine genaue Zahl. CPC in Euro. KD 0-100.
-ÜBERSETZUNG: Liefere zu jedem Textfeld auch eine natürliche niederländische Übersetzung im nl-Feld. Diese ist für niederländische Kollegen gedacht und muss flüssiges Niederländisch sein — keine wörtliche Übersetzung.`;
+ÜBERSETZUNG: Liefere zu jedem Textfeld auch eine natürliche niederländische Übersetzung im nl-Feld. Diese ist für niederländische Kollegen gedacht und muss flüssiges Niederländisch sein — keine wörtliche Übersetzung.`+jsonRule;
   if(lang==="en") return `You are the senior SEO copywriter for ${cfg.brand}. You write like an experienced editor who has known the brand for years — warm, expert and direct.
 
 LOCALISATION: Before writing, search the top 3 pages on Google.nl for the primary keyword in English. CRITICAL: The search location is the NETHERLANDS, not the US or France. Study Dutch and European webshops that rank in the Netherlands for English queries (e.g. lookfantastic.nl, beautycos.nl, parfumdreams.nl, notino.nl). Write like a native English speaker in the international beauty industry. Use terminology familiar to English-speaking shoppers IN THE NETHERLANDS. Do NOT analyse US-only (.com) or French (.fr) competitors unless they also rank on Google.nl.
@@ -506,7 +507,7 @@ ${nlRules}
 TONE OF VOICE: ${cfg.brand} addresses customers with "you" and "your". Tone is warm but not overly casual. Think Cult Beauty or Space NK editorial style.
 SEO BOLD RULES: Primary keyword bold (<strong>keyword</strong>) in first or second sentence of intro. Secondary keywords bold once.
 KEYWORD VOLUMES: NL market in English. Hair care total 60k-80k/mth. Conditioner 22k-28k. Shampoo 40k-55k. Always one exact number. CPC in euros. KD 0-100.
-TRANSLATION: For every text field also provide a natural Dutch translation in the nl field. This is for Dutch colleagues who need to review and understand the English content.`;
+TRANSLATION: For every text field also provide a natural Dutch translation in the nl field. This is for Dutch colleagues who need to review and understand the English content.`+jsonRule;
   return `Jij bent de senior SEO-copywriter van ${cfg.brand}. Je schrijft alsof je een ervaren redacteur bent die het merk al jaren kent — warm, deskundig en direct.
 
 LOKALISATIE: Analyseer voor het primaire zoekwoord de top 3 pagina's op Google.nl. Gebruik hun taalpatronen en terminologie als inspiratie voor authentiek klinkende, beter rankende tekst.
@@ -515,29 +516,40 @@ ${nlRules}
 
 TONE OF VOICE: ${cfg.brand} spreekt klanten aan met "je" en "jouw". Toon is warm maar niet overdreven joviaal.
 SEO BOLD-REGELS: Primair zoekwoord vet (<strong>keyword</strong>) in eerste of tweede zin van intro. Secundaire zoekwoorden één keer vet.
-KEYWORD VOLUMES: NL markt. Haarverzorging totaal 60k-80k/mnd. Conditioner 22k-28k. Shampoo 40k-55k. Altijd één exact getal. CPC in euro. KD 0-100.`;
+KEYWORD VOLUMES: NL markt. Haarverzorging totaal 60k-80k/mnd. Conditioner 22k-28k. Shampoo 40k-55k. Altijd één exact getal. CPC in euro. KD 0-100.`+jsonRule;
 }
 
 let _key=localStorage.getItem("hs_key")||"";
 function saveKey(k){_key=k;localStorage.setItem("hs_key",k);}
 
 async function claude(msg,tokens=4000,search=false,lang="nl"){
-  if(!_key)throw new Error("Geen API-sleutel.");
-  const body={model:"claude-sonnet-4-20250514",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
+  if(!_key)throw new Error("Geen API-sleutel ingevuld. Voer je sleutel in via het slotje rechtsbovenin.");
+  const body={model:"claude-sonnet-4-5",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
   if(search)body.tools=[{type:"web_search_20250305",name:"web_search"}];
-  const r=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","x-api-key":_key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify(body),
-  });
-  const d=await r.json();
-  if(d.error)throw new Error(d.error.message);
+  let r;
+  try {
+    r = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":_key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify(body),
+    });
+  } catch(e) {
+    throw new Error("Netwerkfout: "+e.message);
+  }
+  let d;
+  try { d = await r.json(); } catch(e) { throw new Error("Ongeldig API-antwoord (status "+r.status+")"); }
+  if(!r.ok || d.error) {
+    const msg = d?.error?.message || ("API fout "+r.status);
+    if(r.status===401) throw new Error("API-sleutel ongeldig of verlopen. Controleer je sleutel. ("+msg+")");
+    if(r.status===400) throw new Error("Verzoek afgewezen: "+msg);
+    if(r.status===529||r.status===503) throw new Error("API overbelast, probeer het over een moment opnieuw. ("+msg+")");
+    throw new Error("API fout "+r.status+": "+msg);
+  }
   return(d.content||[]).map(b=>b.text||"").join("");
 }
 
 function xj(raw){
   var s=raw.lastIndexOf('{"pageType"');
-  if(s<0)s=raw.lastIndexOf('{"h1"');
   if(s<0)s=raw.indexOf("{");
   var e=raw.lastIndexOf("}");
   if(s<0||e<0)throw new Error("Geen JSON gevonden.");
@@ -566,52 +578,38 @@ function xj(raw){
   throw new Error("JSON parse error. Probeer opnieuw te genereren.");
 }
 
-async function analyse(url,lang){
-  const cfg=DOMAIN_CONFIG[lang||domainFromUrl(url)||"nl"];
-  const slug=url.replace(cfg.base,"").split("/").filter(Boolean).pop()||"";
-  const rel=getRelated(url,lang);
-  const ll={nl:"Nederlands",de:"Duits",en:"Engels",pro:"Nederlands (B2B)"}[lang];
+/* ── TWO-STEP GENERATE: analyse (keywords only) + genContent (HTML text) ── */
+async function analyse(url, lang) {
+  const cfg = DOMAIN_CONFIG[lang||domainFromUrl(url)||"nl"];
+  const slug = url.replace(cfg.base,"").split("/").filter(Boolean).pop()||"";
+  const rel = getRelated(url, lang);
+  const ll = {nl:"Nederlands",de:"Duits",en:"Engels",pro:"Nederlands (B2B)"}[lang];
+  const siteLinks = getSiteMap(lang).slice(0,8).map(p=>`${p.label} → ${p.url}`).join(" | ");
 
   const searchNote = lang==="de"
     ? "Voer de SERP-analyse uit op Google.de (Duitsland). Zoekers zijn Duits, concurrenten zijn Duitse webshops. Gebruik zoekvolumes voor de DE-markt."
     : lang==="en"
-    ? "Run SERP analysis on Google.nl (Netherlands). Search location is the NETHERLANDS, not the US or France. Searchers use English queries but are located in the Netherlands. Find competitors that rank on Google.nl for English beauty queries. Use NL search volumes. Do NOT include US-only or French competitors."
-    : lang==="pro"
-    ? "Voer de SERP-analyse uit op Google.nl (Nederland). Dit is een B2B groothandel webshop voor kappers, nagelstylisten en make-up artists. Zoek naar B2B concurrenten en professionele leveranciers. Analyseer hoe zij productcategorieën beschrijven en welke B2B termen zij gebruiken. Focus op zoektermen met 'professioneel', 'salon', 'groothandel', 'kapper' etc."
+    ? "Run SERP analysis on Google.nl (Netherlands) but in English. Searchers use English queries. Use NL search volumes."
     : "Voer de SERP-analyse uit op Google.nl (Nederland). Gebruik zoekvolumes voor de NL-markt.";
 
-  const siteLinks=getSiteMap(lang).map(p=>`${p.label} → ${p.url}`).join(" | ");
-
-  // gap altijd in het Nederlands, rankFactors in de doeltaal
-  const relStr=rel.map(r=>`${r.label} → ${r.url} (${r.relation})`).join(" | ");
-  const p=`URL: ${url}\nDomein: ${cfg.brand}\nTaal: ${ll}\nSlug: "${slug}"\n\nVoorgeselecteerde interne links (op basis van sitestructuur): ${relStr}\n\nVOLLEDIG SITEMAP van ${cfg.brand} (gebruik ALLEEN URLs uit deze lijst voor interne links):\n${siteLinks}\n\n${searchNote}\n\nBELANGRIJK: Het veld "gap" moet ALTIJD in het Nederlands worden geschreven, ongeacht de taal. Het is bedoeld voor Nederlandse collega's die de kans willen begrijpen.\n\nINTERNE LINKS STRATEGIE:\nDETECTEER EERST: Als de URL een merk/brand bevat (bijv. /merken/kyone), is dit een MERKPAGINA. Link dan PRIMAIR naar productcategorieen die dit merk aanbiedt (cross-category BINNEN het merk). Voorbeeld: Kyone -> scharen, fohns, tondeuses.\nVOOR CATEGORIEPAGINA'S:\nSiblings zijn DOMINANT — zustercategorieën binnen hetzelfde parent dragen het sterkste semantische signaal en versterken de topical focus binnen hetzelfde intent cluster.\n- Kies 2-4 sibling links als hoofdlinks. Dit zijn je belangrijkste interne links.\nCross-category is BEPERKT EN STRATEGISCH — alleen als er een duidelijke routine- of gebruikerslogica is (bijv. shampoo → conditioner, styling → haartools).\n- Maximaal 1-2 cross-category links.\nParent en children zijn contextueel — 1 parent link voor navigatie, children alleen als de pagina brede subcategorieën heeft.\n\nGebruik ALLEEN URLs die EXACT in het sitemap voorkomen. Verzin NOOIT een URL.\nElke link moet een "relation" hebben: sibling, cross-category, parent, of child.\n\nSTRIKTE REGELS:\n\nREGEL 1 - VERZENDKOSTEN: De metaDescription MOET de verzendkosten vermelden: ${cfg.freeShipping}. VERPLICHT.\n\nREGEL 2 - INTERNE LINKS: MINIMAAL 3 interne links in mainContent body.\n\nREGEL 3 - META TITLE: Moet eindigen met " | ${cfg.brand}".\n\nREGEL 4 - LINK FORMAT: Alle links beginnen met ${cfg.base}. ALLEEN URLs uit sitemap.\n\nREGEL 5 - INTRO LENGTE: introText VERPLICHT 55-60 woorden. NOOIT korter dan 55.\n\nREGEL 6 - BODY LENGTE: Elke H2 body minimaal 80-100 woorden. H3 minimaal 50 woorden.\n\nBELANGRIJK JSON-REGELS: (1) Alle tekst op EEN regel, gebruik alleen \\n voor alinea-scheidingen. (2) In HTML gebruik ENKELE aanhalingstekens voor attributen, bijv <a href='url'> niet <a href=\\"url\\">. (3) Geen trailing komma na laatste array/object element.\n\nRetourneer uitsluitend dit JSON:\n\n{"pageType":"categorie","slug":"${slug}","brand":null,"productTypes":["type1"],"hairNeeds":["behoefte1"],"internalLinks":[{"label":"sibling1","url":"${cfg.base}/...","relation":"sibling"},{"label":"sibling2","url":"${cfg.base}/...","relation":"sibling"},{"label":"sibling3","url":"${cfg.base}/...","relation":"sibling"},{"label":"cross-cat","url":"${cfg.base}/...","relation":"cross-category"}],"keywords":[{"term":"primair","type":"primary","volumeMonthly":22400,"cpc":0.85,"kd":42,"intent":"transactioneel","trend":"stabiel"},{"term":"long-tail","type":"secondary","volumeMonthly":4800,"cpc":0.60,"kd":28,"intent":"transactioneel","trend":"stijgend"},{"term":"informatief","type":"secondary","volumeMonthly":2200,"cpc":0.40,"kd":18,"intent":"informatief","trend":"stabiel"},{"term":"variant4","type":"secondary","volumeMonthly":1600,"cpc":0.35,"kd":22,"intent":"transactioneel","trend":"stijgend"},{"term":"variant5","type":"secondary","volumeMonthly":890,"cpc":0.30,"kd":14,"intent":"transactioneel","trend":"stabiel"}],"competitors":[{"position":1,"domain":"domein.de","url":"https://url","da":82,"organicTraffic":95000,"rankFactors":["Reden in doeltaal als volledige zin","Reden twee"],"gap":"Kans voor ${cfg.brand} IN HET NEDERLANDS als volledige zin."},{"position":2,"domain":"domein2.de","url":"https://url2","da":75,"organicTraffic":60000,"rankFactors":["reden in doeltaal","reden"],"gap":"Kans in het Nederlands."},{"position":3,"domain":"domein3.de","url":"https://url3","da":68,"organicTraffic":40000,"rankFactors":["reden","reden"],"gap":"Kans in het Nederlands."}]}`;
-  return xj(await claude(p,4096,false,lang));
+  const p = `URL: ${url}\nDomein: ${cfg.brand}\nTaal: ${ll}\nSlug: "${slug}"\nGerelateerde pagina's (gebruik ALLEEN deze URLs voor interne links): ${rel.map(r=>r.label+" → "+r.url).join(" | ")}\nTop-categorieën van dit domein: ${siteLinks}\n\n${searchNote}\n\nBELANGRIJK: Het veld "gap" moet ALTIJD in het Nederlands worden geschreven, ongeacht de taal. Het is bedoeld voor Nederlandse collega's die de kans willen begrijpen.\n\nRetourneer uitsluitend dit JSON:\n\n{"pageType":"categorie","slug":"${slug}","brand":null,"productTypes":["type1"],"hairNeeds":["behoefte1"],"internalLinks":[{"label":"naam","url":"${cfg.base}/juiste-pad","relation":"child"}],"keywords":[{"term":"primair","type":"primary","volumeMonthly":22400,"cpc":0.85,"kd":42,"intent":"transactioneel","trend":"stabiel"},{"term":"long-tail","type":"secondary","volumeMonthly":4800,"cpc":0.60,"kd":28,"intent":"transactioneel","trend":"stijgend"},{"term":"informatief","type":"secondary","volumeMonthly":2200,"cpc":0.40,"kd":18,"intent":"informatief","trend":"stabiel"},{"term":"variant4","type":"secondary","volumeMonthly":1600,"cpc":0.35,"kd":22,"intent":"transactioneel","trend":"stijgend"},{"term":"variant5","type":"secondary","volumeMonthly":890,"cpc":0.30,"kd":14,"intent":"transactioneel","trend":"stabiel"}]}`;
+  return xj(await claude(p, 4096, false, lang));
 }
 
-async function genContent(a,lang){
-  const cfg=DOMAIN_CONFIG[lang||"nl"];
-  const ll={nl:"Nederlands",de:"Duits",en:"Engels",pro:"Nederlands (B2B)"}[lang];
-  const pk=a.keywords?.find(k=>k.type==="primary")||a.keywords?.[0];
-  const sec=(a.keywords||[]).filter(k=>k.type==="secondary").map(k=>k.term);
-  const validLinks=(a.internalLinks||[]).filter(l=>getSiteMap(lang).some(s=>s.url===l.url)||(l.url||"").startsWith(cfg.base));
-  const lnk=validLinks.map(l=>`${l.label} (${l.url}) [${l.relation||"related"}]`).join(", ");
-  const fullSiteMap=getSiteMap(lang).map(p=>`${p.label} → ${p.url}`).join(" | ");
-
-  const locNote = lang==="de"
-    ? `LOKALISATIE VOOR DUITSLAND: Analyseer via web search de top 3 presterende pagina's op Google.de voor het primaire zoekwoord. Gebruik echte Duitse zoekintenties, terminologie en zinsconstructies die Duits publiek aanspreekt. Geen directe vertaling van Nederlands — schrijf zoals een native Duitser in de beauty-sector schrijft. Gebruik "Sie" NIET, gebruik "du/dein". Verwijs naar bekende Duitse beautycultuur waar relevant.`
-    : lang==="en"
-    ? `LOCALISATION FOR NL-ENGLISH MARKET: Search top 3 performing pages on Google.nl (NETHERLANDS, not US or France) for the primary keyword in English. Find competitors that actually rank in the Netherlands. Write in natural British/international English as used in professional beauty editorial. Reference trends and terminology familiar to English-speaking shoppers in the Netherlands and Europe.`
-    : lang==="pro"
-    ? `B2B LOKALISATIE: Analyseer de top 3 B2B concurrenten op Google.nl voor het primaire zoekwoord. Focus op professionele leveranciers en groothandels (Shopkapper.nl, HairandBeautyOnline.com, Kapperskorting.com, Cosmetica-groothandel.nl, Probeauty.nl). Gebruik hun B2B taalgebruik als benchmark maar schrijf beter. Schrijf vanuit het perspectief van een branchegenoot die de dagelijkse realiteit in de salon begrijpt. Benadruk professionele meerwaarde: behandelresultaat, klanttevredenheid, efficiëntie, inkoopvoordeel, salonkwaliteit. Gebruik vakjargon waar passend maar houd het toegankelijk.`
-    : `LOKALISATIE: Analyseer de top 3 presterende pagina's op Google.nl voor het primaire zoekwoord en gebruik hun taalpatronen als inspiratie voor een betere tekst.`;
-
-  const translNote = lang!=="nl"
-    ? `\n\nVERPLICHT EXTRA VELD: Voeg aan elke tekstsectie ook een "nl" veld toe met een natuurlijke Nederlandse vertaling van die tekst. Dit is voor Nederlandse collega's die de ${ll} tekst willen begrijpen en controleren. De Nederlandse vertaling moet vloeiend Nederlands zijn, niet letterlijk vertaald.\n\nJSON structuur voor mainContent blokken:\n{"heading":"Duits/Engels heading","body":"Duits/Engels body","nl":{"heading":"Nederlandse vertaling heading","body":"Nederlandse vertaling body"}}\n\nEn voor introText, h1, metaTitle, metaDescription ook een nlTranslation veld toevoegen:`
-    : "";
-
-  const p=`Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links uit analyse (verwerk deze in de tekst): ${lnk||"geen"}\n\nVOLLEDIG SITEMAP (gebruik ALLEEN URLs uit deze lijst — verzin NOOIT een URL):\n${fullSiteMap}\n\nBELANGRIJK: Alle interne links moeten beginnen met ${cfg.base}. Nooit links naar andere domeinen.\n\nINTERNE LINKS IN DE TEKST — VERPLICHT:\nVerwerk de interne links als natuurlijke <a href="...">anchor text</a> in de lopende tekst. Volg deze regels strikt:\n\n1. ALS DIT EEN MERKPAGINA IS: Link PRIMAIR naar productcategorieen die dit merk aanbiedt (scharen, fohns, tondeuses, stylingproducten). Verwerk 3-5 merkgebonden links verspreid over alle secties.\\n\\n2. ALS DIT EEN CATEGORIEPAGINA IS: SIBLINGS ZIJN DOMINANT (2-4 links). CROSS-CATEGORY IS BEPERKT (max 1-2 links).\n\n3. Gebruik beschrijvende anchor text met het zoekwoord van de doelpagina (bijv. <a href="${cfg.base}/haarverzorging/conditioners">conditioner</a>, NOOIT "klik hier" of "bekijk hier"). Gebruik ALTIJD correcte HTML syntax. Controleer dat elke <a> tag correct gesloten is.\n\n4. Totaal 3-5 interne links in de hele tekst. Niet meer. Niet alle links in één sectie.\n\n5. Elke link moet EXACT een URL uit het sitemap zijn. Controleer dit.\n\n${locNote}${translNote}\n\nSchrijf in ${ll}. Alleen lopende zinnen. Geen opsommingstekens. Geen structurerende streepjes. Geen AI-constructies. Gebruik <strong>tag</strong> voor vette zoekwoorden.\n\nHOOFDLETTERGEBRUIK: Gebruik NOOIT onnodige hoofdletters in titels of headings. Alleen eerste letter van een zin en eigennamen (merknamen) krijgen een hoofdletter. FOUT: \"Ontdek De Beste Shampoo\". CORRECT: \"Ontdek de beste shampoo\".\n\nBELANGRIJK JSON-REGELS: (1) Alle tekst op EEN regel, gebruik alleen \\n voor alinea-scheidingen. (2) In HTML gebruik ENKELE aanhalingstekens voor attributen, bijv <a href='url'> niet <a href=\\"url\\">. (3) Geen trailing komma na laatste array/object element.\n\nRetourneer uitsluitend dit JSON (met nl-vertaalvelden bij DE/EN):\n\n{"metaTitle":"Meta title max 60 tekens","metaTitleNl":"NL vertaling (alleen bij DE/EN)","metaDescription":"Meta description max 155 tekens, vermeld altijd: Gratis verzending vanaf EUR35,-","metaKeywords":["keyword1","keyword2","keyword3"],"metaDescriptionNl":"NL vertaling (alleen bij DE/EN)","introText":"VERPLICHT 55-60 woorden (tel ze!). Schrijf 3-4 zinnen. Primair zoekwoord vet met <strong>. NOOIT korter dan 55 woorden.","introTextNl":"Nederlandse vertaling van introText (alleen bij DE/EN)","mainContent":{"h2_what":{"heading":"H2","body":"VERPLICHT 2-3 alineas van elk minimaal 40 woorden, gescheiden door \\n\\n. Totaal minimaal 100 woorden. Verwerk 1-2 sibling links als <a href>.","nl":{"heading":"NL heading","body":"NL body"}},"h2_hairtype":{"heading":"H2","body":"VERPLICHT 2-3 alineas, totaal minimaal 100 woorden. Verwerk 1 sibling link als <a href>.","nl":{"heading":"NL","body":"NL"},"h3_tips":{"heading":"H3","body":"VERPLICHT 1-2 alineas, totaal minimaal 50 woorden.","nl":{"heading":"NL","body":"NL"}}},"h2_why":{"heading":"H2","body":"VERPLICHT 2-3 alineas, totaal minimaal 80 woorden. Verwerk 1 sibling link als <a href>.","nl":{"heading":"NL","body":"NL"},"h3_combine":{"heading":"H3","body":"VERPLICHT 1-2 alineas, totaal minimaal 50 woorden.","nl":{"heading":"NL","body":"NL"}}},"h2_howto":{"heading":"H2","body":"VERPLICHT 2-3 alineas, totaal minimaal 80 woorden.","nl":{"heading":"NL","body":"NL"},"h3_daily":{"heading":"H3","body":"VERPLICHT 1 alinea van minimaal 30 woorden.","nl":{"heading":"NL","body":"NL"}}}},"schemaFAQ":[{"question":"Vraag in doeltaal?","answer":"Antwoord in doeltaal.","questionNl":"Nederlandse vertaling vraag","answerNl":"Nederlandse vertaling antwoord"}],"aiSnippet":"60-75 woorden feitelijke alinea voor Google SGE in doeltaal.","aiSnippetNl":"Nederlandse vertaling aiSnippet (alleen bij DE/EN)"}`;
-  // web search ON: used for localization research (top performing pages in target market)
-  return xj(await claude(p,8000,false,lang));
+// Keep genContent for backwards-compat with doGen (regenerate content only)
+async function genContent(a, lang) {
+  const cfg = DOMAIN_CONFIG[lang||"nl"];
+  const ll = {nl:"Nederlands",de:"Duits",en:"Engels",pro:"Nederlands (B2B)"}[lang];
+  const pk = a.keywords?.find(k=>k.type==="primary")||a.keywords?.[0];
+  const sec = (a.keywords||[]).filter(k=>k.type==="secondary").map(k=>k.term);
+  const validLinks = (a.internalLinks||[]).filter(l=>getSiteMap(lang).some(s=>s.url===l.url)||(l.url||"").startsWith(cfg.base));
+  const lnk = validLinks.map(l=>`${l.label} (${l.url}) [${l.relation||"related"}]`).join(", ");
+  const fullSiteMap = getSiteMap(lang).map(p=>`${p.label} → ${p.url}`).join(" | ");
+  const locNote = lang==="de" ? `Schrijf zoals een native Duitser in de beauty-sector. Gebruik "du/dein".` : lang==="en" ? `Write like a native English speaker for NL-based English shoppers.` : `Schrijf authentiek Nederlands.`;
+  const translNote = lang!=="nl" ? `\nVoeg bij elke tekstsectie een "nl" veld toe met een vloeiende Nederlandse vertaling. Voeg ook "metaTitleNl", "metaDescriptionNl", "introTextNl" toe.` : "";
+  const p = `Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links: ${lnk||"geen"}\nSITEMAP: ${fullSiteMap}\n\nREGELS: Alle links beginnen met ${cfg.base}. 3-5 interne links. introText 55-60 woorden. H2 body min 80 woorden. Geen opsommingstekens. <strong>keyword</strong>. Kleine letters tenzij eigennamen. Meta description verplicht: ${cfg.freeShipping}. HTML attributen met enkele aanhalingstekens.\n${locNote}${translNote}\n\nRetourneer ALLEEN dit JSON object zonder markdown:\n{"metaTitle":"...","metaDescription":"...","metaKeywords":["kw1"],"introText":"...","mainContent":{"h2_what":{"heading":"...","body":"..."},"h2_hairtype":{"heading":"...","body":"...","h3_tips":{"heading":"...","body":"..."}},"h2_why":{"heading":"...","body":"...","h3_combine":{"heading":"...","body":"..."}},"h2_howto":{"heading":"...","body":"...","h3_daily":{"heading":"...","body":"..."}}},"schemaFAQ":[{"question":"...","answer":"..."}],"aiSnippet":"..."}`;
+  const raw = await claude(p, 8000, false, lang);
+  return xj(raw);
 }
 
 /* ── Section-level regeneration with feedback ── */
@@ -636,7 +634,7 @@ async function regenSection(sectionKey, feedback, currentContent, analysisData, 
     h2_hairtype: "H2 sectie: Haartype / Doelgroep (2-3 alinea's + H3 tips)",
     h2_why: "H2 sectie: Waarom / Voordelen (2 alinea's + H3 combineren)",
     h2_howto: "H2 sectie: Hoe gebruik je / Toepassing (2 alinea's + H3 dagelijks)",
-    metaFields: "Meta Title + Meta Description + H1",
+    metaFields: "Meta Title + Meta Description",
     schemaFAQ: "Schema FAQ vragen en antwoorden",
     aiSnippet: "AI Snippet voor Google SGE (60-75 woorden)"
   };
@@ -644,7 +642,7 @@ async function regenSection(sectionKey, feedback, currentContent, analysisData, 
   const currentSection = sectionKey === "introText"
     ? {introText: currentContent.introText}
     : sectionKey === "metaFields"
-    ? {h1: currentContent.h1, metaTitle: currentContent.metaTitle, metaDescription: currentContent.metaDescription}
+    ? {metaTitle: currentContent.metaTitle, metaDescription: currentContent.metaDescription}
     : sectionKey === "schemaFAQ"
     ? {schemaFAQ: currentContent.schemaFAQ}
     : sectionKey === "aiSnippet"
@@ -814,6 +812,33 @@ function TranslationToggle({lang, children}){
   </div>;
 }
 function Spin({s=16}){return<svg className="spin-a" width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="28 56" strokeLinecap="round"/></svg>;}
+
+function ProgressBar({active, durationMs=60000}){
+  const[pct,sPct]=useState(0);
+  useEffect(()=>{
+    if(!active){sPct(0);return;}
+    sPct(0);
+    const start=Date.now();
+    const tick=()=>{
+      const elapsed=Date.now()-start;
+      // Ease-out curve: fast start, slows near 90%, never reaches 100 until done
+      const p=Math.min(90, Math.round(100*(1-Math.exp(-3.5*elapsed/durationMs))));
+      sPct(p);
+      if(p<90) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  },[active, durationMs]);
+  if(!active && pct===0) return null;
+  return<div style={{width:"100%",marginTop:10}}>
+    <div style={{height:6,background:"#e8e0d8",borderRadius:3,overflow:"hidden"}}>
+      <div style={{height:"100%",width:`${active?pct:100}%`,background:"linear-gradient(90deg,#c4956a,#e8b87a)",borderRadius:3,transition:active?"none":"width .3s ease"}}/>
+    </div>
+    <div style={{display:"flex",justifyContent:"space-between",marginTop:4,fontSize:11,color:C.ink3}}>
+      <span>{active ? (pct<30?"Keyword research…":pct<65?"Content schrijven…":"Afronden…") : "Klaar ✓"}</span>
+      <span>{active?pct:100}%</span>
+    </div>
+  </div>;
+}
 function CopyBtn({text,label="Kopieer"}){const[d,sd]=useState(false);return<button className="btn btn-ghost btn-sm" onClick={()=>{navigator.clipboard.writeText(text);sd(true);setTimeout(()=>sd(false),2000);}}>{d?"✓ Gekopieerd":`⎘ ${label}`}</button>;}
 function VolBar({val}){const pct=Math.min(100,Math.round((val/60000)*100));const col=pct>55?"#2e7d32":pct>25?C.beige:"#bbb";const fmt=val>=1000?(val/1000).toFixed(1)+"k":val;return<div className="vw"><div className="vbg"><div className="vfill" style={{width:`${pct}%`,background:col}}/></div><span style={{fontSize:12,fontWeight:700,color:C.ink}}>{fmt}</span></div>;}
 function KdPill({kd}){const col=kd>65?C.red:kd>40?"#e67e22":"#27ae60";const lbl=kd>65?"Hoog":kd>40?"Gemid.":"Laag";return<span className="pill" style={{background:col+"18",color:col,border:`1px solid ${col}30`}}><span style={{width:5,height:5,borderRadius:"50%",background:col,display:"inline-block"}}/>{kd} · {lbl}</span>;}
@@ -842,8 +867,7 @@ function PagePreview({content,url,highlight}){
       <div style={{background:C.blush,padding:"4px 10px",textAlign:"center",fontSize:8.5,color:C.ink2,fontWeight:600}}>10% EXTRA korting op bestellingen* vanaf €50 met kortingscode: HAARSHOP10</div>
     </div>
     <div style={{padding:"11px 13px",maxHeight:500,overflowY:"auto"}}>
-      <div style={{fontSize:9,color:C.ink3,marginBottom:8}}>Home › Haar › <strong style={{color:C.ink}}>{content?.h1||"Categorie"}</strong></div>
-      <div style={{...hl("h1"),marginBottom:7}}><h1 style={{fontSize:15,fontWeight:900,color:C.ink,lineHeight:1.2}} dangerouslySetInnerHTML={{__html:content?.h1||"…"}}/></div>
+      <div style={{fontSize:9,color:C.ink3,marginBottom:8}}>Home › Haar › <strong style={{color:C.ink}}>{url.split("/").filter(Boolean).pop()||"Categorie"}</strong></div>
       <div style={{background:C.blush2,border:`1px solid ${C.blush}`,borderRadius:4,padding:"2px 7px",display:"inline-flex",fontSize:8.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".05em",color:C.beige,marginBottom:5}}>↑ Introductie boven producten</div>
       <div style={{...hl("intro"),marginBottom:12}}><p style={{fontSize:11,color:C.ink2,lineHeight:1.7}} dangerouslySetInnerHTML={{__html:content?.introText||""}}/></div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:12}}>
@@ -920,7 +944,18 @@ function PasswordScreen({onSuccess}){
 }
 
 function KeyScreen({onSave}){
-  const[v,sv]=useState("");const[show,sShow]=useState(false);const[err,sErr]=useState("");
+  const[v,sv]=useState("");const[show,sShow]=useState(false);const[err,sErr]=useState("");const[testing,sTesting]=useState(false);
+  const test=async()=>{
+    if(!v.trim().startsWith("sk-ant-")){sErr("Sleutel moet beginnen met sk-ant-");return;}
+    sTesting(true);sErr("");
+    try{
+      const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":v.trim(),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:10,messages:[{role:"user",content:"hi"}]})});
+      const d=await r.json();
+      if(d.error)sErr("❌ API fout: "+d.error.message);
+      else{sErr("✅ Sleutel werkt! Klik Opslaan.");saveKey(v.trim());}
+    }catch(e){sErr("❌ Netwerkfout: "+e.message);}
+    sTesting(false);
+  };
   const go=()=>{if(!v.trim().startsWith("sk-ant-")){sErr("Sleutel moet beginnen met sk-ant-  — zie je Anthropic dashboard.");return;}saveKey(v.trim());onSave();};
   return<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:C.cream}}>
     
@@ -941,9 +976,12 @@ function KeyScreen({onSave}){
             <input type={show?"text":"password"} value={v} onChange={e=>{sv(e.target.value);sErr("");}} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="sk-ant-api03-..." style={{paddingRight:46,borderColor:err?C.red:C.bdr}}/>
             <button onClick={()=>sShow(x=>!x)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.ink3}}>{show?"🙈":"👁"}</button>
           </div>
-          {err&&<div style={{marginTop:6,fontSize:12,color:C.red,fontWeight:600}}>{err}</div>}
+          {err&&<div style={{marginTop:6,fontSize:12,color:err.startsWith("✅")?C.green:C.red,fontWeight:600}}>{err}</div>}
         </div>
-        <button onClick={go} className="btn btn-primary" style={{width:"100%",padding:"14px",fontSize:14,borderRadius:24,justifyContent:"center",marginBottom:16}}>Opslaan en starten →</button>
+        <div style={{display:"flex",gap:10,marginBottom:10}}>
+          <button onClick={test} disabled={testing} className="btn btn-ghost" style={{flex:1,padding:"12px",fontSize:13,borderRadius:24,justifyContent:"center"}}>{testing?"Testen…":"🔌 Test verbinding"}</button>
+          <button onClick={go} className="btn btn-primary" style={{flex:2,padding:"12px",fontSize:14,borderRadius:24,justifyContent:"center"}}>Opslaan en starten →</button>
+        </div>
         <div style={{fontSize:12,color:"#bbb",textAlign:"center",lineHeight:1.7}}>Nog geen sleutel? Maak er een aan op <a href="https://console.anthropic.com/settings/keys" target="_blank" style={{color:C.beige,textDecoration:"none",fontWeight:700}}>console.anthropic.com</a></div>
       </div>
     </div>
@@ -967,6 +1005,7 @@ function App(){
   const[hl,sHl]=useState("intro");
   const[prev,sPrev]=useState(!!_saved?.content);
   const[pushed,sPushed]=useState(false);
+  const[progActive,sProgActive]=useState(false);
   const[magentoKey,sMagentoKey]=useState(sessionStorage.getItem("hs_mage_key")||"");
   const[magentoHostUrl,sMagentoHostUrl]=useState(sessionStorage.getItem("hs_mage_host")||"https://www.haarshop.nl");
   const[magentoCategories,sMagentoCategories]=useState(null);
@@ -994,9 +1033,18 @@ function App(){
   },[lang]);
 
   const doAnalyse=useCallback(async()=>{
-    if(!url.trim())return;sErr(null);sPhase("analyzing");sStatus("Analyseren…");
-    try{const r=await analyse(url.trim(),lang);sA(r);sPhase("generating");sStatus("SEO-content genereren…");const g=await genContent(r,lang);if(!g.metaKeywords)g.metaKeywords=[];sC(g);sHtml(buildHTML(g,r));sPhase("done");sTab("intro");sPrev(true);sessionStorage.setItem("hs_state",JSON.stringify({analysis:r,content:g,url:url.trim(),lang:lang}));}
-    catch(e){sErr("Fout: "+e.message);sPhase("idle");console.error("Error:",e);}
+    if(!url.trim())return;sErr(null);sPhase("analyzing");sStatus("Pagina analyseren en zoekwoorden bepalen…");sProgActive(true);
+    try{
+      const r=await analyse(url.trim(),lang);
+      sA(r);
+      sPhase("generating");sStatus("SEO-content schrijven…");
+      const g=await genContent(r,lang);
+      if(!g.metaKeywords)g.metaKeywords=[];
+      sC(g);sHtml(buildHTML(g,r));
+      sProgActive(false);sPhase("done");sTab("intro");sPrev(true);
+      sessionStorage.setItem("hs_state",JSON.stringify({analysis:r,content:g,url:url.trim(),lang}));
+    }
+    catch(e){sErr("Fout: "+e.message);sProgActive(false);sPhase("idle");console.error("Error:",e);}
   },[url,lang]);
 
   const doGen=useCallback(async()=>{
@@ -1016,11 +1064,9 @@ function App(){
         updated.introText=result.introText||result.intro||c.introText;
         if(result.introTextNl) updated.introTextNl=result.introTextNl;
       } else if(sectionKey==="metaFields"){
-        if(result.h1) updated.h1=result.h1;
         if(result.metaTitle) updated.metaTitle=result.metaTitle;
         if(result.metaDescription) updated.metaDescription=result.metaDescription;
         if(result.metaKeywords) updated.metaKeywords=result.metaKeywords;
-        if(result.h1Nl) updated.h1Nl=result.h1Nl;
         if(result.metaTitleNl) updated.metaTitleNl=result.metaTitleNl;
         if(result.metaDescriptionNl) updated.metaDescriptionNl=result.metaDescriptionNl;
       } else if(sectionKey==="schemaFAQ"){
@@ -1165,7 +1211,10 @@ function App(){
             ))}
           </div>
         </div>
-        {(phase==="analyzing"||phase==="generating")&&<div style={{marginTop:18,display:"flex",alignItems:"center",gap:12,background:"rgba(255,255,255,.85)",borderRadius:10,padding:"12px 18px"}}><Spin s={18}/><span style={{fontSize:13,fontWeight:700,color:C.ink}}>{status}</span></div>}
+        {(phase==="analyzing"||phase==="generating")&&<div style={{marginTop:18,background:"rgba(255,255,255,.92)",borderRadius:12,padding:"16px 20px",border:`1px solid ${C.bdr}`}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Spin s={16}/><span style={{fontSize:13,fontWeight:700,color:C.ink}}>SEO content genereren — keyword research + teksten in één stap</span></div>
+          <ProgressBar active={progActive} durationMs={60000}/>
+        </div>}
         {err&&<div style={{marginTop:14,background:"#fef0ef",border:`1px solid #f5c6c2`,borderRadius:10,padding:"12px 18px",fontSize:13,color:C.red,fontWeight:700}}>⚠ {err}</div>}
       </div>
 
@@ -1230,33 +1279,6 @@ function App(){
             </button>
           </div>
 
-          {/* Concurrenten */}
-          <div className="card fu2 stick">
-            <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}>
-              <div style={{fontSize:15,fontWeight:900,color:C.ink}}>
-                {lang==="de"?"🇩🇪 Google.de Top 3":lang==="en"?"🇬🇧 Google.nl (EN) Top 3":lang==="pro"?"🏢 Google.nl (B2B) Top 3":"🇳🇱 Google.nl Top 3"}
-              </div>
-              <div style={{fontSize:12,color:C.ink3,marginTop:1}}>Live concurrentieanalyse · {lang==="de"?"rankFactors in het Duits":lang==="en"?"rankFactors in English":"rankfactoren in het Nederlands"}</div>
-            </div>
-            <div style={{padding:"15px 16px",display:"flex",flexDirection:"column",gap:13}}>
-              {(a.competitors||[]).map((comp,i)=>(
-                <div key={i} style={{border:`1px solid ${i===0?C.blush:C.bdr}`,borderRadius:10,padding:14,background:i===0?C.blush2:"#fff"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:9}}>
-                    <div style={{width:28,height:28,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"#fff",background:i===0?"#c9a227":i===1?"#8e959e":"#a07555",flexShrink:0}}>#{comp.position}</div>
-                    <div><div style={{fontSize:13,fontWeight:800,color:C.ink}}>{comp.domain}</div><div style={{fontSize:11,color:C.ink3}}>DA {comp.da} · ~{comp.organicTraffic>=1000?Math.round(comp.organicTraffic/1000)+"k":comp.organicTraffic}/mnd</div></div>
-                  </div>
-                  <a href={comp.url} target="_blank" rel="noopener noreferrer" style={{fontSize:10.5,color:C.beige,display:"block",marginBottom:8,wordBreak:"break-all",textDecoration:"none"}}>↗ {comp.url}</a>
-                  {/* rankFactors: in doeltaal — OK voor collega's die die taal spreken */}
-                  <div style={{marginBottom:8}}>{(comp.rankFactors||[]).map((f,j)=><div key={j} style={{fontSize:11,color:C.ink2,marginBottom:3,paddingLeft:8,borderLeft:`2px solid ${C.blush}`}}>{f}</div>)}</div>
-                  {/* gap: ALTIJD in het Nederlands */}
-                  {comp.gap&&<div style={{background:C.blush2,border:`1px solid ${C.blush}`,borderRadius:7,padding:"8px 11px"}}>
-                    <div style={{fontSize:9.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.beige,marginBottom:2}}>{lang==="pro"?"🏢":"🇳🇱"} Kans voor {lang==="pro"?"Haarshoppro":"Haarshop"}</div>
-                    <div style={{fontSize:11.5,color:C.ink2,lineHeight:1.6}}>{comp.gap}</div>
-                  </div>}
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 
@@ -1264,7 +1286,7 @@ function App(){
       {phase==="done"&&c&&(
         <div className="fu">
           <div className="card" style={{padding:"13px 20px",display:"flex",alignItems:"center",gap:13,marginBottom:18,flexWrap:"wrap"}}>
-            <div style={{flex:1,minWidth:0}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>{c.h1}</div><div style={{fontSize:11.5,color:C.ink3}}>{url}</div></div>
+            <div style={{flex:1,minWidth:0}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>{url}</div></div>
             <button className="btn btn-ghost" onClick={()=>sPrev(v=>!v)} style={{fontSize:12}}>{prev?"Verberg preview":"👁 Toon pagina-preview"}</button>
             <CopyBtn text={html} label="Kopieer HTML"/>
             <button className="btn btn-primary" onClick={function(){sTab("magento");}}>{pushed?String.fromCodePoint(0x2713)+" Gepubliceerd":String.fromCodePoint(0x26A1)+" Magento 2"}</button>
@@ -1285,8 +1307,12 @@ function App(){
                 <div style={{padding:22}}>
                   <TranslationToggle lang={lang}>{showNl=>{
                     const text = showNl ? (c.introTextNl||c.introText||"") : (c.introText||"");
+                    const field = showNl ? "introTextNl" : "introText";
                     return<>
-                      <div className="rich" style={{background:showNl?"#f0f7f4":C.cream,border:`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:"17px 22px",fontSize:15,lineHeight:1.85,color:C.ink}} dangerouslySetInnerHTML={{__html:text}}/>
+                      {editMode==="intro"
+                        ? <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:text}} onInput={function(e){updateC(field,e.currentTarget.innerHTML);}} style={{background:"#fff",border:"2px solid #c4956a",borderRadius:10,padding:"17px 22px",fontSize:15,lineHeight:1.85,color:C.ink,outline:"none",minHeight:60}}/>
+                        : <div className="rich" style={{background:showNl?"#f0f7f4":C.cream,border:`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:"17px 22px",fontSize:15,lineHeight:1.85,color:C.ink}} dangerouslySetInnerHTML={{__html:text}}/>
+                      }
                       <div style={{marginTop:8,fontSize:11.5,color:C.ink3}}>{(text||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean).length} woorden</div>
                     </>;
                   }}</TranslationToggle>
@@ -1319,16 +1345,16 @@ function App(){
                         const h3Body  = showNl ? (h3Obj?.nl?.body||h3Obj?.body)       : h3Obj?.body;
                         return<div style={{flex:1,minWidth:0}}>
                           <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,marginBottom:10}}>
-                            {editMode==="main."+key?<h2 contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:heading}} onBlur={function(e){updateC("mainContent."+key+(showNl?".nl.heading":".heading"),e.target.innerHTML);}} style={{fontSize:17,fontWeight:900,color:C.ink,margin:0,outline:"none",borderBottom:"2px solid #c4956a"}}/>:<h2 style={{fontSize:17,fontWeight:900,color:showNl?"#2d6a4f":C.ink,margin:0}} dangerouslySetInnerHTML={{__html:heading}}/>}
+                            {editMode==="main."+key?<h2 contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:heading}} onInput={function(e){updateC("mainContent."+key+(showNl?".nl.heading":".heading"),e.currentTarget.innerHTML);}} style={{fontSize:17,fontWeight:900,color:C.ink,margin:0,outline:"none",borderBottom:"2px solid #c4956a"}}/>:<h2 style={{fontSize:17,fontWeight:900,color:showNl?"#2d6a4f":C.ink,margin:0}} dangerouslySetInnerHTML={{__html:heading}}/>}
                             <div style={{display:"flex",gap:6,flexShrink:0}}>
                               {!showNl&&<HtmlBtn code={blockHtml}/>}
                               <CopyBtn text={[heading,body,h3Obj?h3Head+"\n"+h3Body:""].join("\n")} label="Tekst"/>{!showNl&&<EditBtn id={"main."+key} editMode={editMode} sEditMode={sEditMode}/>}
                             </div>
                           </div>
-                                                    {editMode==="main."+key?<div contentEditable suppressContentEditableWarning onBlur={function(e){updateC("mainContent."+key+(showNl?".nl.body":".body"),e.target.innerHTML);}} style={{fontSize:14,lineHeight:1.85,color:C.ink2,background:"#fff",border:"2px solid #c4956a",borderRadius:8,padding:12,outline:"none"}} dangerouslySetInnerHTML={{__html:(body||"").replace(/\n\n/g,"<br/>")}}/>:<div className="rich" style={{fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2,background:showNl?"#f0f7f4":"transparent",borderRadius:8,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:addTargetBlank((body||"").replace(/\n\n/g,"</p><p>"))}}/>}
+                                                    {editMode==="main."+key?<div contentEditable suppressContentEditableWarning onInput={function(e){updateC("mainContent."+key+(showNl?".nl.body":".body"),e.currentTarget.innerHTML);}} style={{fontSize:14,lineHeight:1.85,color:C.ink2,background:"#fff",border:"2px solid #c4956a",borderRadius:8,padding:12,outline:"none"}} dangerouslySetInnerHTML={{__html:(body||"").replace(/\n\n/g,"<br/>")}}/>:<div className="rich" style={{fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2,background:showNl?"#f0f7f4":"transparent",borderRadius:8,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:addTargetBlank((body||"").replace(/\n\n/g,"</p><p>"))}}/>}
                           {h3Obj&&<div style={{marginTop:15,paddingLeft:17,borderLeft:`3px solid ${showNl?"#b8dccb":C.blush}`}}>
-                            {editMode==="main."+key?<h3 contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:h3Head}} onBlur={function(e){updateC("mainContent."+key+"."+h3+(showNl?".nl.heading":".heading"),e.target.innerHTML);}} style={{fontSize:14,fontWeight:800,color:C.ink2,marginBottom:7,outline:"none",borderBottom:"2px solid #c4956a"}}/>:<h3 style={{fontSize:14,fontWeight:800,color:showNl?"#2d6a4f":C.ink2,marginBottom:7}} dangerouslySetInnerHTML={{__html:h3Head}}/>}
-                            {editMode==="main."+key?<div contentEditable suppressContentEditableWarning onBlur={function(e){updateC("mainContent."+key+"."+h3+(showNl?".nl.body":".body"),e.target.innerHTML);}} style={{fontSize:13.5,lineHeight:1.85,color:C.ink3,background:"#fff",border:"2px solid #c4956a",borderRadius:8,padding:12,outline:"none"}} dangerouslySetInnerHTML={{__html:(h3Body||"").replace(/\n\n/g,"<br/>")}}/>:<div className="rich" style={{fontSize:13.5,lineHeight:1.85,color:showNl?"#2d5a42":C.ink3,background:showNl?"#f0f7f4":"transparent",borderRadius:8,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:addTargetBlank((h3Body||"").replace(/\n\n/g,"</p><p>"))}}/>}
+                            {editMode==="main."+key?<h3 contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:h3Head}} onInput={function(e){updateC("mainContent."+key+"."+h3+(showNl?".nl.heading":".heading"),e.currentTarget.innerHTML);}} style={{fontSize:14,fontWeight:800,color:C.ink2,marginBottom:7,outline:"none",borderBottom:"2px solid #c4956a"}}/>:<h3 style={{fontSize:14,fontWeight:800,color:showNl?"#2d6a4f":C.ink2,marginBottom:7}} dangerouslySetInnerHTML={{__html:h3Head}}/>}
+                            {editMode==="main."+key?<div contentEditable suppressContentEditableWarning onInput={function(e){updateC("mainContent."+key+"."+h3+(showNl?".nl.body":".body"),e.currentTarget.innerHTML);}} style={{fontSize:13.5,lineHeight:1.85,color:C.ink3,background:"#fff",border:"2px solid #c4956a",borderRadius:8,padding:12,outline:"none"}} dangerouslySetInnerHTML={{__html:(h3Body||"").replace(/\n\n/g,"<br/>")}}/>:<div className="rich" style={{fontSize:13.5,lineHeight:1.85,color:showNl?"#2d5a42":C.ink3,background:showNl?"#f0f7f4":"transparent",borderRadius:8,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:addTargetBlank((h3Body||"").replace(/\n\n/g,"</p><p>"))}}/>}
                           </div>}
                         </div>;
                       }}</TranslationToggle>
@@ -1340,24 +1366,32 @@ function App(){
 
               {tab==="meta"&&<div style={{display:"flex",flexDirection:"column",gap:15}}>
                 <div className="card fu">
-                  <div style={{padding:"15px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Google SERP-preview</div></div>
+                  <div style={{padding:"15px 20px",borderBottom:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <div><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Google SERP-preview</div></div>
+                    <EditBtn id="meta" editMode={editMode} sEditMode={sEditMode}/>
+                  </div>
                   <div style={{padding:22}}>
                     <TranslationToggle lang={lang}>{showNl=>{
                       const mt = showNl ? (c.metaTitleNl||c.metaTitle) : c.metaTitle;
                       const md = showNl ? (c.metaDescriptionNl||c.metaDescription) : c.metaDescription;
+                      const mtField = showNl ? "metaTitleNl" : "metaTitle";
+                      const mdField = showNl ? "metaDescriptionNl" : "metaDescription";
                       const cfg=DOMAIN_CONFIG[lang];
                       const previewDomain=cfg.base.replace("https://www.","");
                       return<>
-                        <div style={{background:"#fff",border:`1px solid ${C.bdr}`,borderRadius:10,padding:20}}>
+                        <div style={{background:"#fff",border:`1px solid ${C.bdr}`,borderRadius:10,padding:20,marginBottom:15}}>
                           <div style={{fontSize:12,color:"#5f5f5f",marginBottom:4,fontFamily:"Arial,sans-serif"}}><span style={{background:"#f1f3f4",padding:"2px 8px",borderRadius:20,fontSize:11,marginRight:8}}>{previewDomain}</span>{url.replace(cfg.base+"/","")}</div>
                           <div style={{fontSize:19,color:"#1a0dab",marginBottom:4,lineHeight:1.3,fontFamily:"Arial,sans-serif"}}>{mt}</div>
                           <div style={{fontSize:13.5,color:"#4d5156",lineHeight:1.6,fontFamily:"Arial,sans-serif"}}>{md}</div>
                         </div>
-                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginTop:15}}>
-                          {[["Meta Title",mt,60],["Meta Description",md,155]].map(([lbl,val,max])=>(
-                            <div key={lbl} style={{background:showNl?"#f0f7f4":C.cream,border:`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:14}}>
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                          {[[mtField,"Meta Title",mt,60],[mdField,"Meta Description",md,155]].map(([field,lbl,val,max])=>(
+                            <div key={lbl} style={{background:showNl?"#f0f7f4":C.cream,border:editMode==="meta"?"2px solid #c4956a":`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:14}}>
                               <div style={{fontSize:10.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:5}}>{lbl}</div>
-                              <div style={{fontSize:13.5,color:showNl?"#2d5a42":C.ink,marginBottom:8,lineHeight:1.5}}>{val}</div>
+                              {editMode==="meta"
+                                ? <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:val||""}} onInput={function(e){updateC(field,e.currentTarget.innerText);}} style={{fontSize:13.5,color:C.ink,marginBottom:8,lineHeight:1.5,outline:"none",minHeight:20}}/>
+                                : <div style={{fontSize:13.5,color:showNl?"#2d5a42":C.ink,marginBottom:8,lineHeight:1.5}}>{val}</div>
+                              }
                               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                                 <span style={{fontSize:11.5,fontWeight:700,color:(val?.length||0)>max?C.red:C.green}}>{val?.length||0}/{max} {(val?.length||0)>max?"⚠ te lang":"✓ OK"}</span>
                                 <CopyBtn text={val||""}/>
@@ -1378,13 +1412,22 @@ function App(){
                   <div style={{display:"flex",gap:7}}>
                     <HtmlBtn code={`<script type="application/ld+json">\n${JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:(c.schemaFAQ||[]).map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))},null,2)}\n<\/script>`} label="</> HTML"/>
                     <CopyBtn text={JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:(c.schemaFAQ||[]).map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))},null,2)} label="JSON-LD"/>
+                    <EditBtn id="faq" editMode={editMode} sEditMode={sEditMode}/>
                   </div>
                 </div>
                 <div style={{padding:22,display:"flex",flexDirection:"column",gap:11}}>
                   <TranslationToggle lang={lang}>{showNl=>(c.schemaFAQ||[]).map((f,i)=>(
-                    <div key={i} style={{border:`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:15,background:showNl?"#f0f7f4":C.cream}}>
-                      <div style={{fontWeight:800,fontSize:14,color:showNl?"#2d6a4f":C.ink,marginBottom:5}}>{showNl?(f.questionNl||f.question):f.question}</div>
-                      <div style={{fontSize:13.5,color:showNl?"#2d5a42":C.ink2,lineHeight:1.7}}>{showNl?(f.answerNl||f.answer):f.answer}</div>
+                    <div key={i} style={{border:`1px solid ${editMode==="faq"?"#c4956a":showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:15,background:showNl?"#f0f7f4":C.cream}}>
+                      {editMode==="faq"
+                        ? <>
+                            <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:showNl?(f.questionNl||f.question):f.question}} onInput={function(e){var next=JSON.parse(JSON.stringify(c.schemaFAQ));next[i][showNl?"questionNl":"question"]=e.currentTarget.innerText;updateC("schemaFAQ",next);}} style={{fontWeight:800,fontSize:14,color:C.ink,marginBottom:5,outline:"none",borderBottom:"1px dashed #c4956a",paddingBottom:3}}/>
+                            <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:showNl?(f.answerNl||f.answer):f.answer}} onInput={function(e){var next=JSON.parse(JSON.stringify(c.schemaFAQ));next[i][showNl?"answerNl":"answer"]=e.currentTarget.innerText;updateC("schemaFAQ",next);}} style={{fontSize:13.5,color:C.ink2,lineHeight:1.7,outline:"none"}}/>
+                          </>
+                        : <>
+                            <div style={{fontWeight:800,fontSize:14,color:showNl?"#2d6a4f":C.ink,marginBottom:5}}>{showNl?(f.questionNl||f.question):f.question}</div>
+                            <div style={{fontSize:13.5,color:showNl?"#2d5a42":C.ink2,lineHeight:1.7}}>{showNl?(f.answerNl||f.answer):f.answer}</div>
+                          </>
+                      }
                     </div>
                   ))}</TranslationToggle>
                   <pre className="code-block">{JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:(c.schemaFAQ||[]).map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))},null,2)}</pre>
@@ -1398,12 +1441,13 @@ function App(){
                   <div style={{display:"flex",gap:7}}>
                     <HtmlBtn code={`<div itemprop="description" style="display:none">\n  ${c.aiSnippet||""}\n</div>`} label="</> HTML"/>
                     <CopyBtn text={c.aiSnippet||""}/>
+                    <EditBtn id="ai" editMode={editMode} sEditMode={sEditMode}/>
                   </div>
                 </div>
                 <div style={{padding:22,display:"flex",flexDirection:"column",gap:14}}>
                   <TranslationToggle lang={lang}>{showNl=>{
                     const snip = showNl ? (c.aiSnippetNl||c.aiSnippet||"") : (c.aiSnippet||"");
-                        return editMode==="ai"?<div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:snip}} onBlur={function(e){updateC(showNl?"aiSnippetNl":"aiSnippet",e.target.innerHTML);sEditMode(null);}} style={{background:"#fff",border:"2px solid #c4956a",borderLeft:"4px solid #c4956a",borderRadius:10,padding:"15px 22px",fontSize:14,lineHeight:1.85,color:C.ink2,outline:"none"}}/>:<div style={{background:showNl?"#f0f7f4":"#f0f7f4",border:showNl?"1px solid #b8dccb":"1px solid #b8dccb",borderLeft:"4px solid "+(showNl?"#2d6a4f":"#27ae60"),borderRadius:10,padding:"15px 22px",fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2}} dangerouslySetInnerHTML={{__html:snip}}/>;
+                        return editMode==="ai"?<div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:snip}} onInput={function(e){updateC(showNl?"aiSnippetNl":"aiSnippet",e.currentTarget.innerHTML);}} style={{background:"#fff",border:"2px solid #c4956a",borderLeft:"4px solid #c4956a",borderRadius:10,padding:"15px 22px",fontSize:14,lineHeight:1.85,color:C.ink2,outline:"none"}}/>:<div style={{background:showNl?"#f0f7f4":"#f0f7f4",border:showNl?"1px solid #b8dccb":"1px solid #b8dccb",borderLeft:"4px solid "+(showNl?"#2d6a4f":"#27ae60"),borderRadius:10,padding:"15px 22px",fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2}} dangerouslySetInnerHTML={{__html:snip}}/>;
                   }}</TranslationToggle>
                   <div style={{background:C.blush2,border:`1px solid ${C.blush}`,borderRadius:10,padding:"14px 18px"}}>
                     <div style={{fontSize:11.5,fontWeight:800,color:C.ink,marginBottom:6}}>Hoe werkt dit in Magento 2?</div>
@@ -1453,7 +1497,7 @@ function App(){
                           var flat=flattenCategories(data,"");
                           sMagentoCategories(flat);
                           sMagentoStatus(flat.length+" categorieen geladen");
-                          var pageTitle=a&&(a.pageTitle||a.h1)||"";
+                          var pageTitle=a&&a.pageTitle||"";
                           if(pageTitle){
                             var match=flat.find(function(cat){return cat.name.toLowerCase()===pageTitle.toLowerCase();});
                             if(match){sMagentoCatId(match.id);sMagentoCatName(match.name);sMagentoStatus(flat.length+" categorieen geladen - "+match.name+" (ID: "+match.id+") automatisch geselecteerd");}
