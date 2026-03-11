@@ -727,14 +727,33 @@ function buildMagentoPutPayload(categoryId,c){
 }
 
 async function magentoFetch(endpoint,magentoKey,options){
-  var resp=await fetch(endpoint,Object.assign({},options,{
-    headers:Object.assign({"Content-Type":"application/json","Authorization":"Bearer "+magentoKey},options&&options.headers||{}),
-  }));
-  if(!resp.ok){
-    var txt=await resp.text();
-    throw new Error("Magento API "+resp.status+": "+txt);
+  console.log('🔌 Magento API Call:',{endpoint:endpoint,method:options?.method||'GET'});
+  try{
+    var resp=await fetch(endpoint,Object.assign({},options,{
+      headers:Object.assign({"Content-Type":"application/json; charset=utf-8","Authorization":"Bearer "+magentoKey,"Accept":"application/json"},options&&options.headers||{}),
+    }));
+    if(!resp.ok){
+      var contentType=resp.headers.get('content-type')||'';
+      var errorDetails;
+      if(contentType.includes('application/json')){
+        try{errorDetails=await resp.json();}catch(e){errorDetails='Invalid JSON response';}
+      }else{
+        errorDetails=await resp.text();
+      }
+      console.error('❌ Magento API Error:',{status:resp.status,statusText:resp.statusText,details:errorDetails});
+      if(resp.status===0||resp.statusText===''){
+        throw new Error("CORS/Network Error: Browser blocked request. Mogelijke oorzaken:\n1. CORS niet ingeschakeld op Magento\n2. Verkeerde domein/URL\n3. Netwerkprobleem\n\nCheck browser console (F12).");
+      }
+      var errorMsg=typeof errorDetails==='object'?JSON.stringify(errorDetails):String(errorDetails);
+      throw new Error("Magento API "+resp.status+": "+errorMsg.substring(0,200));
+    }
+    var data=await resp.json();
+    console.log('✅ Magento API Success:',{endpoint:endpoint,method:options?.method||'GET'});
+    return data;
+  }catch(e){
+    console.error('💥 Magento Fetch Exception:',e.message);
+    throw e;
   }
-  return resp.json();
 }
 
 function flattenCategories(node,path){
@@ -1492,17 +1511,24 @@ function App(){
                       sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
                       try{
                         var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
+                        console.log('📤 Publish Debug Info:',{host:host,hasKey:!!magentoKey,keyLength:magentoKey.length});
                         if(!catId&&a&&a.pageTitle){
+                          sMagentoStatus("Categorieen ophalen op basis van paginatitel: "+a.pageTitle);
                           var data=await magentoFetch(host+"/categories",magentoKey,{method:"GET"});
                           var flat=flattenCategories(data,"");
                           var match=flat.find(function(cat){return cat.name.toLowerCase()===a.pageTitle.toLowerCase();});
                           if(match)catId=match.id;
                         }
-                        if(!catId){sMagentoStatus("Geen categorie geselecteerd en geen overeenkomst gevonden op basis van paginatitel");sMagentoLoading(false);return;}
+                        if(!catId){sMagentoStatus("❌ Geen categorie geselecteerd en geen overeenkomst gevonden op basis van paginatitel: "+a.pageTitle);sMagentoLoading(false);return;}
+                        sMagentoStatus("Payload uploaden naar Magento...");
                         var payload=buildMagentoPutPayload(catId,c);
+                        console.log('📦 Payload:',JSON.stringify(payload).substring(0,200)+'...');
                         await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
-                        sPushed(true);sMagentoStatus("Succesvol gepubliceerd!");
-                      }catch(e){sMagentoStatus("Fout bij publiceren: "+e.message);}
+                        sPushed(true);sMagentoStatus("✅ Succesvol gepubliceerd!");
+                      }catch(e){
+                        console.error('💥 Publish Error Full Details:',e);
+                        sMagentoStatus("❌ Fout: "+e.message);
+                      }
                       sMagentoLoading(false);
                     }}>
                       {magentoLoading?"Bezig met publiceren...":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"}
