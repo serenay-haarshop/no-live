@@ -777,7 +777,6 @@ function buildMagentoPutPayload(categoryId,c){
 }
 
 let _magentoProxy=sessionStorage.getItem("hs_mage_proxy")||"";
-function setMagentoProxy(v){_magentoProxy=v;sessionStorage.setItem("hs_mage_proxy",v);}
 
 async function magentoFetch(endpoint,magentoKey,options){
   var headers=Object.assign({"Content-Type":"application/json","Authorization":"Bearer "+magentoKey},options&&options.headers||{});
@@ -1074,6 +1073,7 @@ function App(){
   const[magentoCatName,sMagentoCatName]=useState("");
   const[magentoLoading,sMagentoLoading]=useState(false);
   const[magentoStatus,sMagentoStatus]=useState("");
+  const[magentoProxy,sMagentoProxy]=useState(sessionStorage.getItem("hs_mage_proxy")||"");
   const[magentoShowPayload,sMagentoShowPayload]=useState(false);
   const[fbSection,sFbSection]=useState(null); // which section is getting feedback
   const[fbText,sFbText]=useState(""); // feedback text
@@ -1537,15 +1537,15 @@ function App(){
                     <div style={{marginTop:10}}>
                       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5}}>
                         <div style={{fontSize:11,fontWeight:700,color:C.ink2}}>CORS Proxy URL</div>
-                        {_magentoProxy&&<span style={{fontSize:9,fontWeight:800,color:"#2e7d32",background:"#e8f5e9",padding:"2px 7px",borderRadius:4}}>ACTIEF</span>}
-                        {!_magentoProxy&&<span style={{fontSize:9,fontWeight:700,color:"#e65100",background:"#fff3e0",padding:"2px 7px",borderRadius:4}}>NIET INGESTELD — publish werkt niet zonder proxy of CORS headers</span>}
+                        {magentoProxy&&<span style={{fontSize:9,fontWeight:800,color:"#2e7d32",background:"#e8f5e9",padding:"2px 7px",borderRadius:4}}>ACTIEF</span>}
+                        {!magentoProxy&&<span style={{fontSize:9,fontWeight:700,color:"#e65100",background:"#fff3e0",padding:"2px 7px",borderRadius:4}}>NIET INGESTELD — publish werkt niet zonder proxy of CORS headers</span>}
                       </div>
-                      <input type="text" value={_magentoProxy} onChange={function(e){setMagentoProxy(e.target.value);sErr(null);}} placeholder="https://magento-proxy.jouw-naam.workers.dev" style={{fontSize:13}}/>
+                      <input type="text" value={magentoProxy} onChange={function(e){var v=e.target.value;sMagentoProxy(v);_magentoProxy=v;sessionStorage.setItem("hs_mage_proxy",v);}} placeholder="https://magento-proxy.jouw-naam.workers.dev" style={{fontSize:13}}/>
                       <div style={{fontSize:10,color:C.ink3,marginTop:4}}>Cloudflare Worker URL die verzoeken doorstuurt naar Magento. Zonder proxy of CORS headers op de server blokkeert de browser alle API-verzoeken.</div>
                     </div>
                     <div style={{marginTop:8,fontSize:11,color:C.ink3}}>
                       Endpoint: <code style={{background:C.blush,padding:"1px 6px",borderRadius:4,fontSize:10.5}}>{magentoHostUrl}/rest/{DOMAIN_CONFIG[lang].magentoCode}/V1/</code>
-                      {_magentoProxy&&<span style={{marginLeft:8,fontSize:10,color:"#2e7d32"}}>→ via proxy</span>}
+                      {magentoProxy&&<span style={{marginLeft:8,fontSize:10,color:"#2e7d32"}}>→ via proxy</span>}
                     </div>
                     <div style={{marginTop:6,display:"flex",gap:6,alignItems:"center"}}>
                       <button onClick={function(){var prodHost=DOMAIN_CONFIG[lang]?.base||"https://www.haarshop.nl";sMagentoHostUrl(prodHost);sessionStorage.setItem("hs_mage_host",prodHost);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(!magentoHostUrl.includes("staging")?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:!magentoHostUrl.includes("staging")?"#2e7d32":"#fff",color:!magentoHostUrl.includes("staging")?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
@@ -1643,14 +1643,22 @@ function App(){
                           <button onClick={function(){sMagentoCatId(null);sMagentoCatName("");sMagentoCatSearch("");}} className="btn btn-sm btn-ghost" style={{fontSize:11}}>Reset naar auto</button>
                         </div>}
 
-                        {/* H1/Title search box */}
-                        <div style={{marginBottom:10}}>
-                          <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:4}}>Zoek op H1 / categorienaam</div>
-                          <input type="text" value={magentoCatSearch} onChange={function(e){sMagentoCatSearch(e.target.value);}} placeholder="Typ de H1 of paginatitel om te bevestigen..." style={{fontSize:13}}/>
-                          {magentoCatSearch.length>=2&&(function(){
-                            var q=magentoCatSearch.toLowerCase();
-                            var matches=MAGENTO_ALL_CATS.filter(function(cat){return cat.name.toLowerCase().includes(q);}).slice(0,12);
-                            if(matches.length===0)return<div style={{marginTop:6,fontSize:11,color:C.ink3}}>Geen categorieën gevonden voor "{magentoCatSearch}"</div>;
+                        {/* Unified search: name or ID */}
+                        <div style={{marginBottom:8}}>
+                          <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:4}}>Zoek op naam of ID</div>
+                          <input type="text" value={magentoCatSearch} onChange={function(e){sMagentoCatSearch(e.target.value);}} placeholder="Typ categorienaam of ID nummer..." style={{fontSize:13}}/>
+                          {magentoCatSearch.length>=1&&(function(){
+                            var q=magentoCatSearch.toLowerCase().trim();
+                            var isNumeric=/^\d+$/.test(q);
+                            var matches;
+                            if(isNumeric){
+                              var exactId=parseInt(q);
+                              matches=MAGENTO_ALL_CATS.filter(function(cat){return String(cat.id).startsWith(q);}).slice(0,12);
+                            }else if(q.length>=2){
+                              matches=MAGENTO_ALL_CATS.filter(function(cat){return cat.name.toLowerCase().includes(q);}).slice(0,12);
+                            }else{matches=[];}
+                            if(matches.length===0&&q.length>=2)return<div style={{marginTop:6,fontSize:11,color:C.ink3}}>Geen categorieën gevonden voor "{magentoCatSearch}"</div>;
+                            if(matches.length===0)return null;
                             return<div style={{marginTop:6,maxHeight:200,overflowY:"auto",border:"1px solid "+C.bdr,borderRadius:8,background:"#fff"}}>
                               {matches.map(function(cat){
                                 var isActive=activeId===cat.id;
@@ -1661,12 +1669,6 @@ function App(){
                               })}
                             </div>;
                           })()}
-                        </div>
-
-                        {/* Manual ID input */}
-                        <div style={{marginBottom:8}}>
-                          <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:4}}>Of voer handmatig een categorie-ID in</div>
-                          <input type="text" value={isOverridden?magentoCatId:""} onChange={function(e){var val=e.target.value.replace(/\D/g,"");if(val){sMagentoCatId(parseInt(val));var found=MAGENTO_ALL_CATS.find(function(c){return c.id===parseInt(val);});sMagentoCatName(found?found.name:"Handmatig ID "+val);}else{sMagentoCatId(null);sMagentoCatName("");}}} placeholder={"Laat leeg voor auto-detect"+(autoId?" (ID: "+autoId+")":"")} style={{fontSize:13}}/>
                         </div>
 
                         {/* Summary */}
