@@ -767,10 +767,20 @@ function buildMagentoPutPayload(categoryId,c){
   return{category:{id:categoryId,custom_attributes:attrs}};
 }
 
+let _magentoProxy=sessionStorage.getItem("hs_mage_proxy")||"";
+function setMagentoProxy(v){_magentoProxy=v;sessionStorage.setItem("hs_mage_proxy",v);}
+
 async function magentoFetch(endpoint,magentoKey,options){
-  var resp=await fetch(endpoint,Object.assign({},options,{
-    headers:Object.assign({"Content-Type":"application/json","Authorization":"Bearer "+magentoKey},options&&options.headers||{}),
-  }));
+  var headers=Object.assign({"Content-Type":"application/json","Authorization":"Bearer "+magentoKey},options&&options.headers||{});
+  var fetchUrl=endpoint;
+  
+  // If proxy is configured, route through it
+  if(_magentoProxy){
+    fetchUrl=_magentoProxy;
+    headers["X-Target-URL"]=endpoint;
+  }
+  
+  var resp=await fetch(fetchUrl,Object.assign({},options,{headers:headers}));
   if(!resp.ok){
     var txt=await resp.text();
     throw new Error("Magento API "+resp.status+": "+txt);
@@ -1515,38 +1525,81 @@ function App(){
                         <input type="text" value={magentoHostUrl} onChange={function(e){sMagentoHostUrl(e.target.value);sessionStorage.setItem("hs_mage_host",e.target.value);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} placeholder="https://staging.haarshop.nl" style={{fontSize:13}}/>
                       </div>
                     </div>
+                    <div style={{marginTop:10}}>
+                      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5}}>
+                        <div style={{fontSize:11,fontWeight:700,color:C.ink2}}>CORS Proxy URL</div>
+                        {_magentoProxy&&<span style={{fontSize:9,fontWeight:800,color:"#2e7d32",background:"#e8f5e9",padding:"2px 7px",borderRadius:4}}>ACTIEF</span>}
+                        {!_magentoProxy&&<span style={{fontSize:9,fontWeight:700,color:"#e65100",background:"#fff3e0",padding:"2px 7px",borderRadius:4}}>NIET INGESTELD — publish werkt niet zonder proxy of CORS headers</span>}
+                      </div>
+                      <input type="text" value={_magentoProxy} onChange={function(e){setMagentoProxy(e.target.value);sErr(null);}} placeholder="https://magento-proxy.jouw-naam.workers.dev" style={{fontSize:13}}/>
+                      <div style={{fontSize:10,color:C.ink3,marginTop:4}}>Cloudflare Worker URL die verzoeken doorstuurt naar Magento. Zonder proxy of CORS headers op de server blokkeert de browser alle API-verzoeken.</div>
+                    </div>
                     <div style={{marginTop:8,fontSize:11,color:C.ink3}}>
                       Endpoint: <code style={{background:C.blush,padding:"1px 6px",borderRadius:4,fontSize:10.5}}>{magentoHostUrl}/rest/{DOMAIN_CONFIG[lang].magentoCode}/V1/</code>
+                      {_magentoProxy&&<span style={{marginLeft:8,fontSize:10,color:"#2e7d32"}}>→ via proxy</span>}
                     </div>
                     <div style={{marginTop:6,display:"flex",gap:6,alignItems:"center"}}>
                       <button onClick={function(){var prodHost=DOMAIN_CONFIG[lang]?.base||"https://www.haarshop.nl";sMagentoHostUrl(prodHost);sessionStorage.setItem("hs_mage_host",prodHost);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(!magentoHostUrl.includes("staging")?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:!magentoHostUrl.includes("staging")?"#2e7d32":"#fff",color:!magentoHostUrl.includes("staging")?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
                       <button onClick={function(){if(window.confirm("Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?")){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
                       {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px"}}>STAGING OMGEVING</span>}
                     </div>
-                    <button className="btn btn-dark" style={{width:"100%",marginTop:12,fontSize:13,padding:"12px",justifyContent:"center"}} disabled={!magentoKey||magentoLoading} onClick={async function(){
-                      if(!magentoKey){sMagentoStatus("Voer eerst een API key in");return;}
-                      var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";
+                    <button className="btn btn-dark" style={{width:"100%",marginTop:12,fontSize:13,padding:"12px",justifyContent:"center",position:"relative"}} disabled={!magentoKey||magentoLoading} onClick={async function(){
+                      if(!magentoKey){sMagentoStatus("error:Voer eerst een API key in");return;}
                       var catId=magentoCatId;
                       if(!catId){catId=getCatIdFromUrl(url,lang);}
-                      var catInfo="";
-                      if(catId){
-                        var mapMatch=getSiteMap(lang).find(function(p){return p.catId===catId;});
-                        catInfo="\nCategorie: "+(magentoCatName||mapMatch&&mapMatch.label||"onbekend")+" (ID: "+catId+")";
-                      }else{catInfo="\nGeen categorie gevonden voor deze URL!";}
-                      if(!catId){sMagentoStatus("Geen categorie-ID gevonden voor deze URL. Voer handmatig een ID in.");sMagentoLoading(false);return;}
-                      if(!window.confirm("Je staat op het punt om te publiceren naar:\n\n"+envLabel+" - "+magentoHostUrl+catInfo+"\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nWeet je het zeker?")){return;}
-                      sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
+                      if(!catId){sMagentoStatus("error:Geen categorie-ID gevonden voor deze URL. Voer handmatig een ID in.");return;}
+                      var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";
+                      var mapMatch=getSiteMap(lang).find(function(p){return p.catId===catId;});
+                      var catLabel=(magentoCatName||mapMatch&&mapMatch.label||"onbekend");
+                      if(!window.confirm("Publiceren naar "+envLabel+"?\n\nHost: "+magentoHostUrl+"\nCategorie: "+catLabel+" (ID: "+catId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nDit overschrijft de bestaande content!")){return;}
+                      sMagentoLoading(true);sMagentoStatus("loading:Verbinden met "+envLabel+"...");sPushed(false);
                       try{
                         var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
                         var payload=buildMagentoPutPayload(catId,c);
+                        console.log("📤 Publishing to:",host+"/categories/"+catId);
+                        console.log("📦 Payload:",JSON.stringify(payload).substring(0,500));
+                        sMagentoStatus("loading:Payload verzenden naar categorie "+catId+"...");
                         await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PATCH",body:JSON.stringify(payload)});
-                        sPushed(true);sMagentoStatus("Succesvol gepubliceerd!");
-                      }catch(e){sMagentoStatus("Fout bij publiceren: "+e.message);}
+                        sPushed(true);sMagentoStatus("success:Succesvol gepubliceerd naar "+catLabel+" (ID: "+catId+") op "+envLabel+"!");
+                      }catch(e){
+                        console.error("❌ Publish error:",e);
+                        var errMsg=e.message||"Onbekende fout";
+                        if(errMsg.includes("Failed to fetch")||errMsg.includes("NetworkError")){
+                          errMsg="CORS fout — de browser blokkeert het verzoek naar "+magentoHostUrl+". Je Magento server moet Access-Control-Allow-Origin headers toestaan voor "+window.location.origin+". Vraag je developer om CORS in te stellen op de Magento server.";
+                        }
+                        sMagentoStatus("error:"+errMsg);
+                      }
                       sMagentoLoading(false);
                     }}>
+                      {magentoLoading&&<span className="spin-a" style={{display:"inline-block",width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",marginRight:8}}/>}
                       {magentoLoading?"Bezig met publiceren...":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"}
                     </button>
                     {!magentoKey&&<div style={{fontSize:11,color:C.ink3,textAlign:"center",marginTop:8}}>Voer eerst een API key in</div>}
+
+                    {/* Status feedback banner */}
+                    {magentoStatus&&(function(){
+                      var isError=magentoStatus.startsWith("error:");
+                      var isSuccess=magentoStatus.startsWith("success:");
+                      var isLoading=magentoStatus.startsWith("loading:");
+                      var msg=magentoStatus.replace(/^(error|success|loading):/,"");
+                      var bg=isError?"#fbe9e7":isSuccess?"#e8f5e9":isLoading?"#e3f2fd":"#fafafa";
+                      var border=isError?"#ef9a9a":isSuccess?"#a5d6a7":isLoading?"#90caf9":C.bdr;
+                      var color=isError?"#c62828":isSuccess?"#2e7d32":isLoading?"#1565c0":C.ink2;
+                      var icon=isError?"❌":isSuccess?"✅":isLoading?"⏳":"ℹ️";
+                      return<div style={{marginTop:12,background:bg,border:"1px solid "+border,borderRadius:10,padding:"14px 16px",display:"flex",gap:10,alignItems:"flex-start",animation:"fadeUp .3s ease both"}}>
+                        <span style={{fontSize:18,lineHeight:1,flexShrink:0}}>{icon}</span>
+                        <div style={{flex:1}}>
+                          <div style={{fontSize:13,fontWeight:700,color:color,lineHeight:1.5}}>{msg}</div>
+                          {isError&&msg.includes("CORS")&&<div style={{marginTop:8,fontSize:11,color:C.ink2,lineHeight:1.6,background:"#fff",border:"1px solid "+C.bdr,borderRadius:6,padding:10}}>
+                            <div style={{fontWeight:800,marginBottom:4}}>Hoe CORS oplossen?</div>
+                            <div>Vraag je developer om in Nginx/Apache op <strong>{magentoHostUrl}</strong> deze header toe te voegen voor <code style={{background:C.blush,padding:"1px 4px",borderRadius:3}}>/rest/*</code> endpoints:</div>
+                            <code style={{display:"block",marginTop:6,background:"#1e1e2e",color:"#a6e3a1",padding:8,borderRadius:6,fontSize:10.5}}>Access-Control-Allow-Origin: {window.location.origin}</code>
+                          </div>}
+                          {isSuccess&&<div style={{marginTop:6,fontSize:11,color:"#4caf50"}}>Controleer de pagina op {magentoHostUrl} om het resultaat te zien.</div>}
+                        </div>
+                        {!isLoading&&<button onClick={function(){sMagentoStatus("");}} style={{background:"none",border:"none",cursor:"pointer",fontSize:14,color:C.ink3,padding:0,lineHeight:1}}>×</button>}
+                      </div>;
+                    })()}
                   </div>
 
                   <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
