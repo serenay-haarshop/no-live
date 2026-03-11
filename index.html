@@ -560,7 +560,7 @@ function saveKey(k){_key=k;localStorage.setItem("hs_key",k);}
 
 async function claude(msg,tokens=4000,search=false,lang="nl"){
   if(!_key)throw new Error("Geen API-sleutel ingevuld. Voer je sleutel in via het slotje rechtsbovenin.");
-  const body={model:"claude-sonnet-4-5",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
+  const body={model:"claude-sonnet-4-20250514",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
   if(search)body.tools=[{type:"web_search_20250305",name:"web_search"}];
   let r;
   try {
@@ -1079,6 +1079,7 @@ function App(){
   const[magentoStatus,sMagentoStatus]=useState("");
   const[magentoProxy,sMagentoProxy]=useState(sessionStorage.getItem("hs_mage_proxy")||"");
   const[magentoShowPayload,sMagentoShowPayload]=useState(false);
+  const[showStagingConfirm,sShowStagingConfirm]=useState(false);
   const[fbSection,sFbSection]=useState(null); // which section is getting feedback
   const[fbText,sFbText]=useState(""); // feedback text
   const[fbLoading,sFbLoading]=useState(false); // loading state for regen
@@ -1584,8 +1585,25 @@ function App(){
                     </div>
                     <div style={{marginTop:6,display:"flex",gap:6,alignItems:"center"}}>
                       <button onClick={function(){var prodHost=DOMAIN_CONFIG[lang]?.base||"https://www.haarshop.nl";sMagentoHostUrl(prodHost);sessionStorage.setItem("hs_mage_host",prodHost);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(!magentoHostUrl.includes("staging")?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:!magentoHostUrl.includes("staging")?"#2e7d32":"#fff",color:!magentoHostUrl.includes("staging")?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
-                      <button onClick={function(){if(window.confirm("Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?")){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
+                      <button onClick={function(){sShowStagingConfirm(true);}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
                       {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px",fontFamily:"var(--f)"}}>STAGING OMGEVING</span>}
+
+                      {/* Staging confirmation modal */}
+                      {showStagingConfirm&&<div style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.5)",backdropFilter:"blur(3px)"}} onClick={e=>{if(e.target===e.currentTarget)sShowStagingConfirm(false);}}>
+                        <div style={{background:"#fff",borderRadius:16,padding:"36px 40px",maxWidth:440,width:"95%",boxShadow:"0 24px 80px rgba(0,0,0,.25)",fontFamily:"var(--f)"}}>
+                          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}>
+                            <div style={{width:48,height:48,borderRadius:12,background:"#fff3e0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>⚠️</div>
+                            <div style={{fontSize:20,fontWeight:900,color:C.ink,lineHeight:1.3}}>Overschakelen naar Staging?</div>
+                          </div>
+                          <div style={{fontSize:14,color:C.ink2,lineHeight:1.7,marginBottom:24}}>
+                            Je schakelt over naar de <strong style={{color:"#e65100"}}>STAGING omgeving</strong> van Haarshop. Dit is de testomgeving — wijzigingen hier zijn <strong>niet zichtbaar</strong> op de live site.
+                          </div>
+                          <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+                            <button onClick={function(){sShowStagingConfirm(false);}} className="btn btn-ghost" style={{fontSize:13,padding:"10px 22px"}}>Annuleer</button>
+                            <button onClick={function(){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");sShowStagingConfirm(false);}} className="btn" style={{fontSize:13,padding:"10px 22px",background:"#e65100",color:"#fff",fontWeight:800}}>Ja, gebruik Staging</button>
+                          </div>
+                        </div>
+                      </div>}
                     </div>
                     <button className="btn btn-dark" style={{width:"100%",marginTop:12,fontSize:13,padding:"12px",justifyContent:"center",position:"relative"}} disabled={!magentoKey||magentoLoading} onClick={async function(){
                       if(!magentoKey){sMagentoStatus("error:Voer eerst een API key in");return;}
