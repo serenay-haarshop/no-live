@@ -524,7 +524,7 @@ function saveKey(k){_key=k;localStorage.setItem("hs_key",k);}
 
 async function claude(msg,tokens=4000,search=false,lang="nl"){
   if(!_key)throw new Error("Geen API-sleutel ingevuld. Voer je sleutel in via het slotje rechtsbovenin.");
-  const body={model:"claude-sonnet-4-5",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
+  const body={model:"claude-opus-4-6",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
   if(search)body.tools=[{type:"web_search_20250305",name:"web_search"}];
   let r;
   try {
@@ -545,20 +545,24 @@ async function claude(msg,tokens=4000,search=false,lang="nl"){
     if(r.status===529||r.status===503) throw new Error("API overbelast, probeer het over een moment opnieuw. ("+msg+")");
     throw new Error("API fout "+r.status+": "+msg);
   }
-  return(d.content||[]).map(b=>b.text||"").join("");
+  const content=(d.content||[]).filter(b=>b.type==="text").map(b=>b.text||"").join("");
+  if(!content){throw new Error("Lege API-respons - geen tekstinhoud ontvangen.");}
+  return content;
 }
 
 function xj(raw){
   var s=raw.lastIndexOf('{"pageType"');
   if(s<0)s=raw.indexOf("{");
   var e=raw.lastIndexOf("}");
-  if(s<0||e<0)throw new Error("Geen JSON gevonden.");
+  if(s<0||e<0)throw new Error("Geen JSON gevonden in API-respons.");
   var txt=raw.slice(s,e+1);
   function tp(t){try{return JSON.parse(t);}catch(e){return null;}}
   var r=tp(txt);if(r)return r;
   txt=txt.replace(/[\r\n\t]+/g," ");
   r=tp(txt);if(r)return r;
   txt=txt.replace(/,\s*([}\]])/g,"$1");
+  r=tp(txt);if(r)return r;
+  txt=txt.replace(/\\"/g,'"').replace(/([^\\])\\([^\\])/g,'$1$2');
   r=tp(txt);if(r)return r;
   var fixed="";var inStr=false;var esc=false;
   for(var i=0;i<txt.length;i++){
@@ -575,7 +579,8 @@ function xj(raw){
     }else{fixed+=ch;}
   }
   r=tp(fixed);if(r)return r;
-  throw new Error("JSON parse error. Probeer opnieuw te genereren.");
+  console.error("JSON parse failed. Raw response:",raw.substring(0,500));
+  throw new Error("JSON parse error. API respons is ongeldig. Check browser console (F12).");
 }
 
 /* ── TWO-STEP GENERATE: analyse (keywords only) + genContent (HTML text) ── */
@@ -727,33 +732,14 @@ function buildMagentoPutPayload(categoryId,c){
 }
 
 async function magentoFetch(endpoint,magentoKey,options){
-  console.log('🔌 Magento API Call:',{endpoint:endpoint,method:options?.method||'GET'});
-  try{
-    var resp=await fetch(endpoint,Object.assign({},options,{
-      headers:Object.assign({"Content-Type":"application/json; charset=utf-8","Authorization":"Bearer "+magentoKey,"Accept":"application/json"},options&&options.headers||{}),
-    }));
-    if(!resp.ok){
-      var contentType=resp.headers.get('content-type')||'';
-      var errorDetails;
-      if(contentType.includes('application/json')){
-        try{errorDetails=await resp.json();}catch(e){errorDetails='Invalid JSON response';}
-      }else{
-        errorDetails=await resp.text();
-      }
-      console.error('❌ Magento API Error:',{status:resp.status,statusText:resp.statusText,details:errorDetails});
-      if(resp.status===0||resp.statusText===''){
-        throw new Error("CORS/Network Error: Browser blocked request. Mogelijke oorzaken:\n1. CORS niet ingeschakeld op Magento\n2. Verkeerde domein/URL\n3. Netwerkprobleem\n\nCheck browser console (F12).");
-      }
-      var errorMsg=typeof errorDetails==='object'?JSON.stringify(errorDetails):String(errorDetails);
-      throw new Error("Magento API "+resp.status+": "+errorMsg.substring(0,200));
-    }
-    var data=await resp.json();
-    console.log('✅ Magento API Success:',{endpoint:endpoint,method:options?.method||'GET'});
-    return data;
-  }catch(e){
-    console.error('💥 Magento Fetch Exception:',e.message);
-    throw e;
+  var resp=await fetch(endpoint,Object.assign({},options,{
+    headers:Object.assign({"Content-Type":"application/json","Authorization":"Bearer "+magentoKey},options&&options.headers||{}),
+  }));
+  if(!resp.ok){
+    var txt=await resp.text();
+    throw new Error("Magento API "+resp.status+": "+txt);
   }
+  return resp.json();
 }
 
 function flattenCategories(node,path){
@@ -1511,24 +1497,17 @@ function App(){
                       sMagentoLoading(true);sMagentoStatus("Publiceren naar "+envLabel+"...");sPushed(false);
                       try{
                         var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
-                        console.log('📤 Publish Debug Info:',{host:host,hasKey:!!magentoKey,keyLength:magentoKey.length});
                         if(!catId&&a&&a.pageTitle){
-                          sMagentoStatus("Categorieen ophalen op basis van paginatitel: "+a.pageTitle);
                           var data=await magentoFetch(host+"/categories",magentoKey,{method:"GET"});
                           var flat=flattenCategories(data,"");
                           var match=flat.find(function(cat){return cat.name.toLowerCase()===a.pageTitle.toLowerCase();});
                           if(match)catId=match.id;
                         }
-                        if(!catId){sMagentoStatus("❌ Geen categorie geselecteerd en geen overeenkomst gevonden op basis van paginatitel: "+a.pageTitle);sMagentoLoading(false);return;}
-                        sMagentoStatus("Payload uploaden naar Magento...");
+                        if(!catId){sMagentoStatus("Geen categorie geselecteerd en geen overeenkomst gevonden op basis van paginatitel");sMagentoLoading(false);return;}
                         var payload=buildMagentoPutPayload(catId,c);
-                        console.log('📦 Payload:',JSON.stringify(payload).substring(0,200)+'...');
                         await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PATCH",body:JSON.stringify(payload)});
-                        sPushed(true);sMagentoStatus("✅ Succesvol gepubliceerd!");
-                      }catch(e){
-                        console.error('💥 Publish Error Full Details:',e);
-                        sMagentoStatus("❌ Fout: "+e.message);
-                      }
+                        sPushed(true);sMagentoStatus("Succesvol gepubliceerd!");
+                      }catch(e){sMagentoStatus("Fout bij publiceren: "+e.message);}
                       sMagentoLoading(false);
                     }}>
                       {magentoLoading?"Bezig met publiceren...":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"}
