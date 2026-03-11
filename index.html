@@ -779,13 +779,17 @@ function buildMagentoPutPayload(categoryId,c){
 let _magentoProxy=sessionStorage.getItem("hs_mage_proxy")||"";
 
 async function magentoFetch(endpoint,magentoKey,options){
+  var proxy=sessionStorage.getItem("hs_mage_proxy")||"";
   var headers=Object.assign({"Content-Type":"application/json","Authorization":"Bearer "+magentoKey},options&&options.headers||{});
   var fetchUrl=endpoint;
   
   // If proxy is configured, route through it
-  if(_magentoProxy){
-    fetchUrl=_magentoProxy;
+  if(proxy){
+    fetchUrl=proxy.replace(/\/$/,""); // remove trailing slash
     headers["X-Target-URL"]=endpoint;
+    console.log("🔌 Using CORS proxy:",fetchUrl,"→",endpoint);
+  }else{
+    console.log("🔌 Direct Magento call (no proxy):",endpoint);
   }
   
   var resp=await fetch(fetchUrl,Object.assign({},options,{headers:headers}));
@@ -1568,7 +1572,7 @@ function App(){
                         console.log("📤 Publishing to:",host+"/categories/"+catId);
                         console.log("📦 Payload:",JSON.stringify(payload).substring(0,500));
                         sMagentoStatus("loading:Payload verzenden naar categorie "+catId+"...");
-                        await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PATCH",body:JSON.stringify(payload)});
+                        await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
                         sPushed(true);sMagentoStatus("success:Succesvol gepubliceerd naar "+catLabel+" (ID: "+catId+") op "+envLabel+"!");
                       }catch(e){
                         console.error("❌ Publish error:",e);
