@@ -1523,7 +1523,7 @@ function App(){
                         sMagentoStatus("Payload uploaden naar Magento...");
                         var payload=buildMagentoPutPayload(catId,c);
                         console.log('📦 Payload:',JSON.stringify(payload).substring(0,200)+'...');
-                        await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
+                        await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PATCH",body:JSON.stringify(payload)});
                         sPushed(true);sMagentoStatus("✅ Succesvol gepubliceerd!");
                       }catch(e){
                         console.error('💥 Publish Error Full Details:',e);
