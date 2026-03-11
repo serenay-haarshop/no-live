@@ -560,7 +560,7 @@ function saveKey(k){_key=k;localStorage.setItem("hs_key",k);}
 
 async function claude(msg,tokens=4000,search=false,lang="nl"){
   if(!_key)throw new Error("Geen API-sleutel ingevuld. Voer je sleutel in via het slotje rechtsbovenin.");
-  const body={model:"claude-opus-4-6",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
+  const body={model:"claude-sonnet-4-5",max_tokens:tokens,system:getSystem(lang),messages:[{role:"user",content:msg}]};
   if(search)body.tools=[{type:"web_search_20250305",name:"web_search"}];
   let r;
   try {
@@ -757,7 +757,7 @@ function buildDescriptionBottom(c){
   html+="<h2>"+(mc.h2_howto?.heading||"")+"</h2>\n"+p(mc.h2_howto?.body)+"\n";
   html+="<h3>"+(mc.h2_howto?.h3_daily?.heading||"")+"</h3>\n"+p(mc.h2_howto?.h3_daily?.body)+"\n\n";
   html+='<div itemprop="description" style="display:none">'+(c.aiSnippet||"")+"</div>\n\n";
-  if(faqWidgets){html+=faqWidgets+"\n\n";}
+  if(faqWidgets){html+="<h2>Veelgestelde vragen</h2>\n"+faqWidgets+"\n\n";}
   html+='<script type="application/ld+json">\n'+JSON.stringify(faq,null,2)+'\n<\/script>';
   return html.trim();
 }
@@ -876,7 +876,7 @@ function TranslationToggle({lang, children}){
 }
 function Spin({s=16}){return<svg className="spin-a" width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="28 56" strokeLinecap="round"/></svg>;}
 
-function ProgressBar({active, durationMs=60000}){
+function ProgressBar({active, durationMs=40000}){
   const[pct,sPct]=useState(0);
   useEffect(()=>{
     if(!active){sPct(0);return;}
@@ -1189,21 +1189,22 @@ function App(){
     </div>;
   };
 
-  // Inline feedback block for section-level regeneration
+  // Inline feedback block for section-level regeneration — uses LOCAL state for text
   const FeedbackBlock = ({sectionKey, label}) => {
     const isOpen = fbSection === sectionKey;
+    const[localText,sLocalText]=useState("");
     return <div style={{marginTop:10}}>
-      {!isOpen && <button onClick={()=>{sFbSection(sectionKey);sFbText("");}} style={{fontSize:11.5,fontWeight:700,padding:"6px 14px",borderRadius:20,cursor:"pointer",border:`1px solid ${C.bdr}`,background:"#fff",color:C.ink3,fontFamily:"var(--f)",transition:"all .15s"}} disabled={fbLoading}>
+      {!isOpen && <button onClick={()=>{sFbSection(sectionKey);sLocalText("");}} style={{fontSize:11.5,fontWeight:700,padding:"6px 14px",borderRadius:20,cursor:"pointer",border:`1px solid ${C.bdr}`,background:"#fff",color:C.ink3,fontFamily:"var(--f)",transition:"all .15s"}} disabled={fbLoading}>
         ✏️ Feedback op {label||sectionKey}
       </button>}
       {isOpen && <div style={{background:"#fef9f0",border:`1px solid #f0dbb8`,borderRadius:10,padding:14,marginTop:4}}>
         <div style={{fontSize:12,fontWeight:800,color:C.ink,marginBottom:6}}>✏️ Feedback: {label||sectionKey}</div>
-        <textarea value={fbText} onChange={e=>sFbText(e.target.value)} placeholder="Beschrijf wat je wilt aanpassen... (bijv. 'meer focus op professioneel gebruik' of 'de tweede alinea klopt niet, het moet gaan over...')" style={{width:"100%",minHeight:70,fontSize:13,padding:10,borderRadius:8,border:`1px solid #e0d5cb`,fontFamily:"var(--f)",resize:"vertical",boxSizing:"border-box"}}/>
+        <textarea value={localText} onChange={e=>sLocalText(e.target.value)} placeholder="Beschrijf wat je wilt aanpassen... (bijv. 'meer focus op professioneel gebruik' of 'de tweede alinea klopt niet, het moet gaan over...')" style={{width:"100%",minHeight:70,fontSize:13,padding:10,borderRadius:8,border:`1px solid #e0d5cb`,fontFamily:"var(--f)",resize:"vertical",boxSizing:"border-box"}}/>
         <div style={{display:"flex",gap:8,marginTop:8}}>
-          <button onClick={()=>doRegen(sectionKey,fbText)} disabled={fbLoading||!fbText.trim()} style={{fontSize:12,fontWeight:700,padding:"7px 18px",borderRadius:20,cursor:"pointer",border:"none",background:C.ink,color:"#fff",fontFamily:"var(--f)",opacity:fbLoading||!fbText.trim()?.5:1}}>
+          <button onClick={()=>doRegen(sectionKey,localText)} disabled={fbLoading||!localText.trim()} style={{fontSize:12,fontWeight:700,padding:"7px 18px",borderRadius:20,cursor:"pointer",border:"none",background:C.ink,color:"#fff",fontFamily:"var(--f)",opacity:fbLoading||!localText.trim()?.5:1}}>
             {fbLoading?"⏳ Herschrijven...":"🔄 Herschrijf deze sectie"}
           </button>
-          <button onClick={()=>{sFbSection(null);sFbText("");}} style={{fontSize:12,fontWeight:600,padding:"7px 14px",borderRadius:20,cursor:"pointer",border:`1px solid ${C.bdr}`,background:"#fff",color:C.ink3,fontFamily:"var(--f)"}}>Annuleer</button>
+          <button onClick={()=>{sFbSection(null);sLocalText("");}} style={{fontSize:12,fontWeight:600,padding:"7px 14px",borderRadius:20,cursor:"pointer",border:`1px solid ${C.bdr}`,background:"#fff",color:C.ink3,fontFamily:"var(--f)"}}>Annuleer</button>
         </div>
       </div>}
     </div>;
@@ -1325,16 +1326,46 @@ function App(){
 
             {/* Interne links */}
             <div className="card fu3">
-              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Interne Links</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>Gebaseerd op de volledige sitestructuur van {DOMAIN_CONFIG[lang]?.brand||"haarshop"}</div></div>
+              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`}}><div style={{fontSize:15,fontWeight:900,color:C.ink}}>Interne Links</div><div style={{fontSize:12,color:C.ink3,marginTop:1}}>{c?"Links gebruikt in de gegenereerde content":"Gebaseerd op de volledige sitestructuur van "+( DOMAIN_CONFIG[lang]?.brand||"haarshop")}</div></div>
               <div style={{padding:"14px 20px",display:"flex",flexDirection:"column",gap:8}}>
-                {(a.internalLinks||getRelated(url,lang)).map((lnk,i)=>{
-                  const relColors={"parent":["#1a5276","#d4e6f1"],"child":[C.beige,C.blush2],"sibling":["#2d6a4f","#e8f5ee"],"cross-category":["#7d3c98","#f0e6f6"]};
-                  const[rc,rb]=relColors[(lnk.relation||"").toLowerCase()]||[C.ink3,C.cream];
-                  return <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.cream,border:`1px solid ${C.bdr}`,borderRadius:10,padding:"10px 15px"}}>
-                    <div><div style={{fontSize:13,fontWeight:700,color:C.ink}}>{lnk.label}</div><a href={lnk.url} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:C.beige,textDecoration:"none"}}>{lnk.url}</a></div>
-                    <span className="tag" style={{background:rb,color:rc,border:`1px solid ${rc}22`,fontWeight:700}}>{lnk.relation||"gerelateerd"}</span>
-                  </div>;
-                })}
+                {(function(){
+                  // Extract links actually used in generated content
+                  var links=a.internalLinks||getRelated(url,lang);
+                  if(c){
+                    var allHtml=(c.introText||"")+(c.aiSnippet||"");
+                    var mc=c.mainContent||{};
+                    Object.values(mc).forEach(function(sec){
+                      if(sec&&sec.body)allHtml+=sec.body;
+                      if(sec&&sec.heading)allHtml+=sec.heading;
+                      Object.keys(sec||{}).forEach(function(k){if(k.startsWith("h3_")&&sec[k]){allHtml+=(sec[k].body||"")+(sec[k].heading||"");}});
+                    });
+                    var hrefRegex=/href=['"]([^'"]+)['"]/g;
+                    var usedUrls=new Set();
+                    var m;
+                    while((m=hrefRegex.exec(allHtml))!==null){usedUrls.add(m[1]);}
+                    // Merge: show used-in-content links first, then remaining planned links
+                    var cfg=DOMAIN_CONFIG[lang]||DOMAIN_CONFIG.nl;
+                    var map=getSiteMap(lang);
+                    var contentLinks=[];
+                    var seen=new Set();
+                    usedUrls.forEach(function(u){
+                      if(!u.startsWith(cfg.base))return;
+                      seen.add(u);
+                      var match=map.find(function(p){return p.url===u;});
+                      contentLinks.push({label:match?match.label:u.split("/").pop(),url:u,relation:"in content"});
+                    });
+                    links.forEach(function(l){if(!seen.has(l.url)){contentLinks.push(l);}});
+                    links=contentLinks;
+                  }
+                  return links.map(function(lnk,i){
+                    var relColors={"parent":["#1a5276","#d4e6f1"],"child":[C.beige,C.blush2],"sibling":["#2d6a4f","#e8f5ee"],"cross-category":["#7d3c98","#f0e6f6"],"in content":["#1565c0","#e3f2fd"]};
+                    var pair=relColors[(lnk.relation||"").toLowerCase()]||[C.ink3,C.cream];
+                    return<div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.cream,border:"1px solid "+C.bdr,borderRadius:10,padding:"10px 15px"}}>
+                      <div><div style={{fontSize:13,fontWeight:700,color:C.ink}}>{lnk.label}</div><a href={lnk.url} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:C.beige,textDecoration:"none"}}>{lnk.url}</a></div>
+                      <span className="tag" style={{background:pair[1],color:pair[0],border:"1px solid "+pair[0]+"22",fontWeight:700}}>{lnk.relation||"gerelateerd"}</span>
+                    </div>;
+                  });
+                })()}
               </div>
             </div>
 
@@ -1554,7 +1585,7 @@ function App(){
                     <div style={{marginTop:6,display:"flex",gap:6,alignItems:"center"}}>
                       <button onClick={function(){var prodHost=DOMAIN_CONFIG[lang]?.base||"https://www.haarshop.nl";sMagentoHostUrl(prodHost);sessionStorage.setItem("hs_mage_host",prodHost);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(!magentoHostUrl.includes("staging")?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:!magentoHostUrl.includes("staging")?"#2e7d32":"#fff",color:!magentoHostUrl.includes("staging")?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
                       <button onClick={function(){if(window.confirm("Let op! Je schakelt over naar de STAGING omgeving.\n\nDit is de testomgeving van Haarshop.\nWijzigingen hier zijn NIET zichtbaar op de live site.\n\nWil je doorgaan?")){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
-                      {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px"}}>STAGING OMGEVING</span>}
+                      {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px",fontFamily:"var(--f)"}}>STAGING OMGEVING</span>}
                     </div>
                     <button className="btn btn-dark" style={{width:"100%",marginTop:12,fontSize:13,padding:"12px",justifyContent:"center",position:"relative"}} disabled={!magentoKey||magentoLoading} onClick={async function(){
                       if(!magentoKey){sMagentoStatus("error:Voer eerst een API key in");return;}
