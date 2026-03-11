@@ -1118,6 +1118,7 @@ function App(){
   const[prev,sPrev]=useState(!!_saved?.content);
   const[pushed,sPushed]=useState(false);
   const[progActive,sProgActive]=useState(false);
+  const[showBar,sShowBar]=useState(false);
   const[magentoKey,sMagentoKey]=useState(sessionStorage.getItem("hs_mage_key")||"");
   const[magentoHostUrl,sMagentoHostUrl]=useState(sessionStorage.getItem("hs_mage_host")||"https://www.haarshop.nl");
   const[magentoCategories,sMagentoCategories]=useState(null);
@@ -1148,7 +1149,7 @@ function App(){
   },[lang]);
 
   const doAnalyse=useCallback(async()=>{
-    if(!url.trim())return;sErr(null);sPhase("analyzing");sStatus("Pagina analyseren en zoekwoorden bepalen…");sProgActive(true);
+    if(!url.trim())return;sErr(null);sPhase("analyzing");sStatus("Pagina analyseren en zoekwoorden bepalen…");sProgActive(true);sShowBar(true);
     try{
       const r=await analyse(url.trim(),lang);
       sA(r);
@@ -1162,10 +1163,10 @@ function App(){
         try{g.aiSnippet=await claude(snippetPrompt,300,false,lang);}catch(e2){console.warn("aiSnippet fallback failed:",e2);}
       }
       sC(g);sHtml(buildHTML(g,r));
-      sProgActive(false);sPhase("done");sTab("intro");sPrev(true);
+      sProgActive(false);sPhase("done");sTab("intro");sPrev(true);setTimeout(()=>sShowBar(false),3000);
       sessionStorage.setItem("hs_state",JSON.stringify({analysis:r,content:g,url:url.trim(),lang}));
     }
-    catch(e){sErr("Fout: "+e.message);sProgActive(false);sPhase("idle");console.error("Error:",e);}
+    catch(e){sErr("Fout: "+e.message);sProgActive(false);sShowBar(false);sPhase("idle");console.error("Error:",e);}
   },[url,lang]);
 
   const doGen=useCallback(async()=>{
@@ -1333,8 +1334,12 @@ function App(){
             ))}
           </div>
         </div>
-        {(phase==="analyzing"||phase==="generating")&&<div style={{marginTop:18,background:"rgba(255,255,255,.92)",borderRadius:12,padding:"16px 20px",border:`1px solid ${C.bdr}`}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Spin s={16}/><span style={{fontSize:13,fontWeight:700,color:C.ink}}>SEO content genereren — keyword research + teksten in één stap</span></div>
+        {showBar&&<div style={{marginTop:18,background:"rgba(255,255,255,.92)",borderRadius:12,padding:"16px 20px",border:`1px solid ${C.bdr}`}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+            {progActive&&<Spin s={16}/>}
+            {!progActive&&<span style={{width:16,height:16,borderRadius:"50%",background:"#43a047",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:900}}>✓</span>}
+            <span style={{fontSize:13,fontWeight:700,color:progActive?C.ink:"#2e7d32"}}>{progActive?"SEO content genereren — keyword research + teksten in één stap":"Content succesvol gegenereerd!"}</span>
+          </div>
           <ProgressBar active={progActive} durationMs={60000}/>
         </div>}
         {err&&<div style={{marginTop:14,background:"#fef0ef",border:`1px solid #f5c6c2`,borderRadius:10,padding:"12px 18px",fontSize:13,color:C.red,fontWeight:700}}>⚠ {err}</div>}
