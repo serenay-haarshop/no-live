@@ -588,6 +588,7 @@ async function claude(msg,tokens=4000,search=false,lang="nl"){
 
 function xj(raw){
   var s=raw.lastIndexOf('{"pageType"');
+  if(s<0)s=raw.lastIndexOf('{"metaTitle"');
   if(s<0)s=raw.indexOf("{");
   var e=raw.lastIndexOf("}");
   if(s<0||e<0)throw new Error("Geen JSON gevonden in API-respons.");
@@ -615,8 +616,16 @@ function xj(raw){
     }else{fixed+=ch;}
   }
   r=tp(fixed);if(r)return r;
+  // Try to repair truncated JSON by closing open brackets/braces
+  var repaired=fixed;
+  if(inStr)repaired+='"';
+  var opens=0;var closes=0;var arrOpens=0;var arrCloses=0;
+  for(var j=0;j<repaired.length;j++){var c2=repaired[j];if(c2==='{')opens++;if(c2==='}')closes++;if(c2==='[')arrOpens++;if(c2===']')arrCloses++;}
+  while(arrOpens>arrCloses){repaired+=']';arrCloses++;}
+  while(opens>closes){repaired+='}';closes++;}
+  r=tp(repaired);if(r){console.warn("JSON was truncated but repaired successfully");return r;}
   console.error("JSON parse failed. Raw response:",raw.substring(0,500));
-  throw new Error("JSON parse error. API respons is ongeldig. Check browser console (F12).");
+  throw new Error("JSON parse error. API respons is ongeldig. De respons was waarschijnlijk te lang en werd afgekapt. Probeer het opnieuw.");
 }
 
 /* ── TWO-STEP GENERATE: analyse (keywords only) + genContent (HTML text) ── */
@@ -649,7 +658,7 @@ async function genContent(a, lang) {
   const locNote = lang==="de" ? `Schrijf zoals een native Duitser in de beauty-sector. Gebruik "du/dein".` : lang==="en" ? `Write like a native English speaker for NL-based English shoppers.` : `Schrijf authentiek Nederlands.`;
   const translNote = lang!=="nl" ? `\nVoeg bij elke tekstsectie een "nl" veld toe met een vloeiende Nederlandse vertaling. Voeg ook "metaTitleNl", "metaDescriptionNl", "introTextNl" toe.` : "";
   const p = `Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links: ${lnk||"geen"}\nSITEMAP: ${fullSiteMap}\n\nREGELS: Alle links beginnen met ${cfg.base}. 3-5 interne links. introText 55-60 woorden. H2 body min 80 woorden. Geen opsommingstekens. <strong>keyword</strong>. Kleine letters tenzij eigennamen. Meta description verplicht: ${cfg.freeShipping}. HTML attributen met enkele aanhalingstekens.\n${locNote}${translNote}\n\nRetourneer ALLEEN dit JSON object zonder markdown:\n{"metaTitle":"...","metaDescription":"...","metaKeywords":["kw1"],"introText":"...","mainContent":{"h2_what":{"heading":"...","body":"..."},"h2_hairtype":{"heading":"...","body":"...","h3_tips":{"heading":"...","body":"..."}},"h2_why":{"heading":"...","body":"...","h3_combine":{"heading":"...","body":"..."}},"h2_howto":{"heading":"...","body":"...","h3_daily":{"heading":"...","body":"..."}}},"schemaFAQ":[{"question":"...","answer":"..."}],"aiSnippet":"..."}`;
-  const raw = await claude(p, 8000, false, lang);
+  const raw = await claude(p, 12000, false, lang);
   return xj(raw);
 }
 
