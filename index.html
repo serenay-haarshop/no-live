@@ -659,7 +659,7 @@ async function genContent(a, lang) {
   const lnk = validLinks.map(l=>`${l.label} (${l.url}) [${l.relation||"related"}]`).join(", ");
   const locNote = lang==="de" ? `Schrijf zoals een native Duitser in de beauty-sector. Gebruik "du/dein".` : lang==="en" ? `Write like a native English speaker for NL-based English shoppers.` : `Schrijf authentiek Nederlands.`;
   const translNote = lang!=="nl" ? `\nVoeg bij elke tekstsectie een "nl" veld toe met een vloeiende Nederlandse vertaling. Voeg ook "metaTitleNl", "metaDescriptionNl", "introTextNl" toe.` : "";
-  const p = `Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links (gebruik ALLEEN deze): ${lnk||"geen"}\n\nREGELS: Alle links beginnen met ${cfg.base}. 3-5 interne links. introText 50-60 woorden. Elke H2 body 80-100 woorden. Elke H3 body 50-70 woorden. aiSnippet 60-75 woorden. schemaFAQ exact 3 items, antwoord max 2 zinnen per item. Geen opsommingstekens. <strong>keyword</strong>. Kleine letters tenzij eigennamen. Meta description verplicht: ${cfg.freeShipping}. HTML attributen met enkele aanhalingstekens.\n${locNote}${translNote}\n\nRetourneer ALLEEN dit JSON object zonder markdown:\n{"metaTitle":"...","metaDescription":"...","metaKeywords":["kw1"],"introText":"...","mainContent":{"h2_what":{"heading":"...","body":"..."},"h2_hairtype":{"heading":"...","body":"...","h3_tips":{"heading":"...","body":"..."}},"h2_why":{"heading":"...","body":"...","h3_combine":{"heading":"...","body":"..."}},"h2_howto":{"heading":"...","body":"...","h3_daily":{"heading":"...","body":"..."}}},"aiSnippet":"...","schemaFAQ":[{"question":"...","answer":"..."},{"question":"...","answer":"..."},{"question":"...","answer":"..."}]}`;
+  const p = `Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links (gebruik ALLEEN deze): ${lnk||"geen"}\n\nREGELS:\n- Alle links beginnen met ${cfg.base}. 3-5 interne links.\n- introText 50-60 woorden.\n- Elke H2 body 80-100 woorden. Elke H3 body 50-70 woorden.\n- ALLE headings (H2 en H3) beginnen met een hoofdletter. Grammaticaal correcte Nederlandse zinnen.\n- metaTitle: KORT, max 50 tekens inclusief " | ${cfg.brand}". Format: "Kernwoord + korte USP | ${cfg.brand}". Eindig ALTIJD met " | ${cfg.brand}".\n- aiSnippet: 60-75 woorden, VERPLICHT, mag NIET leeg zijn.\n- schemaFAQ: exact 3 items, antwoord max 2 zinnen.\n- Geen opsommingstekens. <strong>keyword</strong>. Kleine letters in body tenzij eigennamen.\n- Meta description verplicht: ${cfg.freeShipping}.\n- HTML attributen met enkele aanhalingstekens.\n${locNote}${translNote}\n\nRetourneer ALLEEN dit JSON object zonder markdown:\n{"metaTitle":"...","metaDescription":"...","metaKeywords":["kw1"],"introText":"...","mainContent":{"h2_what":{"heading":"...","body":"..."},"h2_hairtype":{"heading":"...","body":"...","h3_tips":{"heading":"...","body":"..."}},"h2_why":{"heading":"...","body":"...","h3_combine":{"heading":"...","body":"..."}},"h2_howto":{"heading":"...","body":"...","h3_daily":{"heading":"...","body":"..."}}},"aiSnippet":"VERPLICHT 60-75 woorden","schemaFAQ":[{"question":"...","answer":"..."},{"question":"...","answer":"..."},{"question":"...","answer":"..."}]}`;
   const raw = await claude(p, 6000, false, lang);
   return xj(raw);
 }
@@ -1082,6 +1082,7 @@ function App(){
   const[magentoProxy,sMagentoProxy]=useState(sessionStorage.getItem("hs_mage_proxy")||"");
   const[magentoShowPayload,sMagentoShowPayload]=useState(false);
   const[showStagingConfirm,sShowStagingConfirm]=useState(false);
+  const[publishConfirm,sPublishConfirm]=useState(null); // null or {envLabel, catId, catLabel}
   const[fbSection,sFbSection]=useState(null); // which section is getting feedback
   const[fbText,sFbText]=useState(""); // feedback text
   const[fbLoading,sFbLoading]=useState(false); // loading state for regen
@@ -1406,7 +1407,7 @@ function App(){
                     const field = showNl ? "introTextNl" : "introText";
                     return<>
                       {editMode==="intro"
-                        ? <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:text}} onInput={function(e){updateC(field,e.currentTarget.innerHTML);}} style={{background:"#fff",border:"2px solid #c4956a",borderRadius:10,padding:"17px 22px",fontSize:15,lineHeight:1.85,color:C.ink,outline:"none",minHeight:60}}/>
+                        ? <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:text}} onBlur={function(e){updateC(field,e.currentTarget.innerHTML);}} style={{background:"#fff",border:"2px solid #c4956a",borderRadius:10,padding:"17px 22px",fontSize:15,lineHeight:1.85,color:C.ink,outline:"none",minHeight:60}}/>
                         : <div className="rich" style={{background:showNl?"#f0f7f4":C.cream,border:`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:"17px 22px",fontSize:15,lineHeight:1.85,color:C.ink}} dangerouslySetInnerHTML={{__html:text}}/>
                       }
                       <div style={{marginTop:8,fontSize:11.5,color:C.ink3}}>{(text||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean).length} woorden</div>
@@ -1441,16 +1442,16 @@ function App(){
                         const h3Body  = showNl ? (h3Obj?.nl?.body||h3Obj?.body)       : h3Obj?.body;
                         return<div style={{flex:1,minWidth:0}}>
                           <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,marginBottom:10}}>
-                            {editMode==="main."+key?<h2 contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:heading}} onInput={function(e){updateC("mainContent."+key+(showNl?".nl.heading":".heading"),e.currentTarget.innerHTML);}} style={{fontSize:17,fontWeight:900,color:C.ink,margin:0,outline:"none",borderBottom:"2px solid #c4956a"}}/>:<h2 style={{fontSize:17,fontWeight:900,color:showNl?"#2d6a4f":C.ink,margin:0}} dangerouslySetInnerHTML={{__html:heading}}/>}
+                            {editMode==="main."+key?<h2 contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:heading}} onBlur={function(e){updateC("mainContent."+key+(showNl?".nl.heading":".heading"),e.currentTarget.innerHTML);}} style={{fontSize:17,fontWeight:900,color:C.ink,margin:0,outline:"none",borderBottom:"2px solid #c4956a"}}/>:<h2 style={{fontSize:17,fontWeight:900,color:showNl?"#2d6a4f":C.ink,margin:0}} dangerouslySetInnerHTML={{__html:heading}}/>}
                             <div style={{display:"flex",gap:6,flexShrink:0}}>
                               {!showNl&&<HtmlBtn code={blockHtml}/>}
                               <CopyBtn text={[heading,body,h3Obj?h3Head+"\n"+h3Body:""].join("\n")} label="Tekst"/>{!showNl&&<EditBtn id={"main."+key} editMode={editMode} sEditMode={sEditMode}/>}
                             </div>
                           </div>
-                                                    {editMode==="main."+key?<div contentEditable suppressContentEditableWarning onInput={function(e){updateC("mainContent."+key+(showNl?".nl.body":".body"),e.currentTarget.innerHTML);}} style={{fontSize:14,lineHeight:1.85,color:C.ink2,background:"#fff",border:"2px solid #c4956a",borderRadius:8,padding:12,outline:"none"}} dangerouslySetInnerHTML={{__html:(body||"").replace(/\n\n/g,"<br/>")}}/>:<div className="rich" style={{fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2,background:showNl?"#f0f7f4":"transparent",borderRadius:8,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:addTargetBlank((body||"").replace(/\n\n/g,"</p><p>"))}}/>}
+                                                    {editMode==="main."+key?<div contentEditable suppressContentEditableWarning onBlur={function(e){updateC("mainContent."+key+(showNl?".nl.body":".body"),e.currentTarget.innerHTML);}} style={{fontSize:14,lineHeight:1.85,color:C.ink2,background:"#fff",border:"2px solid #c4956a",borderRadius:8,padding:12,outline:"none"}} dangerouslySetInnerHTML={{__html:(body||"").replace(/\n\n/g,"<br/>")}}/>:<div className="rich" style={{fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2,background:showNl?"#f0f7f4":"transparent",borderRadius:8,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:addTargetBlank((body||"").replace(/\n\n/g,"</p><p>"))}}/>}
                           {h3Obj&&<div style={{marginTop:15,paddingLeft:17,borderLeft:`3px solid ${showNl?"#b8dccb":C.blush}`}}>
-                            {editMode==="main."+key?<h3 contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:h3Head}} onInput={function(e){updateC("mainContent."+key+"."+h3+(showNl?".nl.heading":".heading"),e.currentTarget.innerHTML);}} style={{fontSize:14,fontWeight:800,color:C.ink2,marginBottom:7,outline:"none",borderBottom:"2px solid #c4956a"}}/>:<h3 style={{fontSize:14,fontWeight:800,color:showNl?"#2d6a4f":C.ink2,marginBottom:7}} dangerouslySetInnerHTML={{__html:h3Head}}/>}
-                            {editMode==="main."+key?<div contentEditable suppressContentEditableWarning onInput={function(e){updateC("mainContent."+key+"."+h3+(showNl?".nl.body":".body"),e.currentTarget.innerHTML);}} style={{fontSize:13.5,lineHeight:1.85,color:C.ink3,background:"#fff",border:"2px solid #c4956a",borderRadius:8,padding:12,outline:"none"}} dangerouslySetInnerHTML={{__html:(h3Body||"").replace(/\n\n/g,"<br/>")}}/>:<div className="rich" style={{fontSize:13.5,lineHeight:1.85,color:showNl?"#2d5a42":C.ink3,background:showNl?"#f0f7f4":"transparent",borderRadius:8,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:addTargetBlank((h3Body||"").replace(/\n\n/g,"</p><p>"))}}/>}
+                            {editMode==="main."+key?<h3 contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:h3Head}} onBlur={function(e){updateC("mainContent."+key+"."+h3+(showNl?".nl.heading":".heading"),e.currentTarget.innerHTML);}} style={{fontSize:14,fontWeight:800,color:C.ink2,marginBottom:7,outline:"none",borderBottom:"2px solid #c4956a"}}/>:<h3 style={{fontSize:14,fontWeight:800,color:showNl?"#2d6a4f":C.ink2,marginBottom:7}} dangerouslySetInnerHTML={{__html:h3Head}}/>}
+                            {editMode==="main."+key?<div contentEditable suppressContentEditableWarning onBlur={function(e){updateC("mainContent."+key+"."+h3+(showNl?".nl.body":".body"),e.currentTarget.innerHTML);}} style={{fontSize:13.5,lineHeight:1.85,color:C.ink3,background:"#fff",border:"2px solid #c4956a",borderRadius:8,padding:12,outline:"none"}} dangerouslySetInnerHTML={{__html:(h3Body||"").replace(/\n\n/g,"<br/>")}}/>:<div className="rich" style={{fontSize:13.5,lineHeight:1.85,color:showNl?"#2d5a42":C.ink3,background:showNl?"#f0f7f4":"transparent",borderRadius:8,padding:showNl?"10px 14px":0}} dangerouslySetInnerHTML={{__html:addTargetBlank((h3Body||"").replace(/\n\n/g,"</p><p>"))}}/>}
                           </div>}
                         </div>;
                       }}</TranslationToggle>
@@ -1485,7 +1486,7 @@ function App(){
                             <div key={lbl} style={{background:showNl?"#f0f7f4":C.cream,border:editMode==="meta"?"2px solid #c4956a":`1px solid ${showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:14}}>
                               <div style={{fontSize:10.5,fontWeight:800,textTransform:"uppercase",letterSpacing:".07em",color:C.ink3,marginBottom:5}}>{lbl}</div>
                               {editMode==="meta"
-                                ? <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:val||""}} onInput={function(e){updateC(field,e.currentTarget.innerText);}} style={{fontSize:13.5,color:C.ink,marginBottom:8,lineHeight:1.5,outline:"none",minHeight:20}}/>
+                                ? <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:val||""}} onBlur={function(e){updateC(field,e.currentTarget.innerText);}} style={{fontSize:13.5,color:C.ink,marginBottom:8,lineHeight:1.5,outline:"none",minHeight:20}}/>
                                 : <div style={{fontSize:13.5,color:showNl?"#2d5a42":C.ink,marginBottom:8,lineHeight:1.5}}>{val}</div>
                               }
                               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -1516,8 +1517,8 @@ function App(){
                     <div key={i} style={{border:`1px solid ${editMode==="faq"?"#c4956a":showNl?"#b8dccb":C.bdr}`,borderRadius:10,padding:15,background:showNl?"#f0f7f4":C.cream}}>
                       {editMode==="faq"
                         ? <>
-                            <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:showNl?(f.questionNl||f.question):f.question}} onInput={function(e){var next=JSON.parse(JSON.stringify(c.schemaFAQ));next[i][showNl?"questionNl":"question"]=e.currentTarget.innerText;updateC("schemaFAQ",next);}} style={{fontWeight:800,fontSize:14,color:C.ink,marginBottom:5,outline:"none",borderBottom:"1px dashed #c4956a",paddingBottom:3}}/>
-                            <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:showNl?(f.answerNl||f.answer):f.answer}} onInput={function(e){var next=JSON.parse(JSON.stringify(c.schemaFAQ));next[i][showNl?"answerNl":"answer"]=e.currentTarget.innerText;updateC("schemaFAQ",next);}} style={{fontSize:13.5,color:C.ink2,lineHeight:1.7,outline:"none"}}/>
+                            <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:showNl?(f.questionNl||f.question):f.question}} onBlur={function(e){var next=JSON.parse(JSON.stringify(c.schemaFAQ));next[i][showNl?"questionNl":"question"]=e.currentTarget.innerText;updateC("schemaFAQ",next);}} style={{fontWeight:800,fontSize:14,color:C.ink,marginBottom:5,outline:"none",borderBottom:"1px dashed #c4956a",paddingBottom:3}}/>
+                            <div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:showNl?(f.answerNl||f.answer):f.answer}} onBlur={function(e){var next=JSON.parse(JSON.stringify(c.schemaFAQ));next[i][showNl?"answerNl":"answer"]=e.currentTarget.innerText;updateC("schemaFAQ",next);}} style={{fontSize:13.5,color:C.ink2,lineHeight:1.7,outline:"none"}}/>
                           </>
                         : <>
                             <div style={{fontWeight:800,fontSize:14,color:showNl?"#2d6a4f":C.ink,marginBottom:5}}>{showNl?(f.questionNl||f.question):f.question}</div>
@@ -1543,7 +1544,7 @@ function App(){
                 <div style={{padding:22,display:"flex",flexDirection:"column",gap:14}}>
                   <TranslationToggle lang={lang}>{showNl=>{
                     const snip = showNl ? (c.aiSnippetNl||c.aiSnippet||"") : (c.aiSnippet||"");
-                        return editMode==="ai"?<div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:snip}} onInput={function(e){updateC(showNl?"aiSnippetNl":"aiSnippet",e.currentTarget.innerHTML);}} style={{background:"#fff",border:"2px solid #c4956a",borderLeft:"4px solid #c4956a",borderRadius:10,padding:"15px 22px",fontSize:14,lineHeight:1.85,color:C.ink2,outline:"none"}}/>:<div style={{background:showNl?"#f0f7f4":"#f0f7f4",border:showNl?"1px solid #b8dccb":"1px solid #b8dccb",borderLeft:"4px solid "+(showNl?"#2d6a4f":"#27ae60"),borderRadius:10,padding:"15px 22px",fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2}} dangerouslySetInnerHTML={{__html:snip}}/>;
+                        return editMode==="ai"?<div contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{__html:snip}} onBlur={function(e){updateC(showNl?"aiSnippetNl":"aiSnippet",e.currentTarget.innerHTML);}} style={{background:"#fff",border:"2px solid #c4956a",borderLeft:"4px solid #c4956a",borderRadius:10,padding:"15px 22px",fontSize:14,lineHeight:1.85,color:C.ink2,outline:"none"}}/>:<div style={{background:showNl?"#f0f7f4":"#f0f7f4",border:showNl?"1px solid #b8dccb":"1px solid #b8dccb",borderLeft:"4px solid "+(showNl?"#2d6a4f":"#27ae60"),borderRadius:10,padding:"15px 22px",fontSize:14,lineHeight:1.85,color:showNl?"#2d5a42":C.ink2}} dangerouslySetInnerHTML={{__html:snip}}/>;
                   }}</TranslationToggle>
                   <div style={{background:C.blush2,border:`1px solid ${C.blush}`,borderRadius:10,padding:"14px 18px"}}>
                     <div style={{fontSize:11.5,fontWeight:800,color:C.ink,marginBottom:6}}>Hoe werkt dit in Magento 2?</div>
@@ -1607,7 +1608,7 @@ function App(){
                         </div>
                       </div>}
                     </div>
-                    <button className="btn btn-dark" style={{width:"100%",marginTop:12,fontSize:13,padding:"12px",justifyContent:"center",position:"relative"}} disabled={!magentoKey||magentoLoading} onClick={async function(){
+                    <button className="btn btn-dark" style={{width:"100%",marginTop:12,fontSize:13,padding:"12px",justifyContent:"center",position:"relative"}} disabled={!magentoKey||magentoLoading} onClick={function(){
                       if(!magentoKey){sMagentoStatus("error:Voer eerst een API key in");return;}
                       var catId=magentoCatId;
                       if(!catId){catId=getCatIdFromUrl(url,lang);}
@@ -1615,29 +1616,52 @@ function App(){
                       var envLabel=magentoHostUrl.includes("staging")?"STAGING":"PRODUCTIE";
                       var mapMatch=getSiteMap(lang).find(function(p){return p.catId===catId;});
                       var catLabel=(magentoCatName||mapMatch&&mapMatch.label||"onbekend");
-                      if(!window.confirm("Publiceren naar "+envLabel+"?\n\nHost: "+magentoHostUrl+"\nCategorie: "+catLabel+" (ID: "+catId+")\nWebsite: "+DOMAIN_CONFIG[lang].magentoCode+"\n\nDit overschrijft de bestaande content!")){return;}
-                      sMagentoLoading(true);sMagentoStatus("loading:Verbinden met "+envLabel+"...");sPushed(false);
-                      try{
-                        var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
-                        var payload=buildMagentoPutPayload(catId,c);
-                        console.log("📤 Publishing to:",host+"/categories/"+catId);
-                        console.log("📦 Payload:",JSON.stringify(payload).substring(0,500));
-                        sMagentoStatus("loading:Payload verzenden naar categorie "+catId+"...");
-                        await magentoFetch(host+"/categories/"+catId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
-                        sPushed(true);sMagentoStatus("success:Succesvol gepubliceerd naar "+catLabel+" (ID: "+catId+") op "+envLabel+"!");
-                      }catch(e){
-                        console.error("❌ Publish error:",e);
-                        var errMsg=e.message||"Onbekende fout";
-                        if(errMsg.includes("Failed to fetch")||errMsg.includes("NetworkError")){
-                          errMsg="CORS fout — de browser blokkeert het verzoek naar "+magentoHostUrl+". Je Magento server moet Access-Control-Allow-Origin headers toestaan voor "+window.location.origin+". Vraag je developer om CORS in te stellen op de Magento server.";
-                        }
-                        sMagentoStatus("error:"+errMsg);
-                      }
-                      sMagentoLoading(false);
+                      sPublishConfirm({envLabel:envLabel,catId:catId,catLabel:catLabel});
                     }}>
                       {magentoLoading&&<span className="spin-a" style={{display:"inline-block",width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",marginRight:8}}/>}
                       {magentoLoading?"Bezig met publiceren...":String.fromCodePoint(0x26A1)+" Publiceer naar Magento 2"}
                     </button>
+
+                    {/* Publish confirmation modal */}
+                    {publishConfirm&&<div style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.5)",backdropFilter:"blur(3px)"}} onClick={e=>{if(e.target===e.currentTarget)sPublishConfirm(null);}}>
+                      <div style={{background:"#fff",borderRadius:16,padding:"36px 40px",maxWidth:480,width:"95%",boxShadow:"0 24px 80px rgba(0,0,0,.25)",fontFamily:"var(--f)"}}>
+                        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}>
+                          <div style={{width:48,height:48,borderRadius:12,background:publishConfirm.envLabel==="STAGING"?"#fff3e0":"#e8f5e9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{publishConfirm.envLabel==="STAGING"?"🧪":"🚀"}</div>
+                          <div style={{fontSize:20,fontWeight:900,color:C.ink,lineHeight:1.3}}>Publiceren naar {publishConfirm.envLabel}?</div>
+                        </div>
+                        <div style={{background:C.cream,border:"1px solid "+C.bdr,borderRadius:10,padding:"14px 18px",marginBottom:20}}>
+                          <div style={{display:"grid",gridTemplateColumns:"auto 1fr",gap:"6px 14px",fontSize:13}}>
+                            <span style={{fontWeight:800,color:C.ink3}}>Host</span><span style={{fontWeight:700,color:C.ink}}>{magentoHostUrl}</span>
+                            <span style={{fontWeight:800,color:C.ink3}}>Categorie</span><span style={{fontWeight:700,color:C.ink}}>{publishConfirm.catLabel} <span style={{color:C.ink3,fontWeight:600}}>(ID: {publishConfirm.catId})</span></span>
+                            <span style={{fontWeight:800,color:C.ink3}}>Website</span><span style={{fontWeight:700,color:C.ink}}>{DOMAIN_CONFIG[lang].magentoCode}</span>
+                          </div>
+                        </div>
+                        <div style={{fontSize:13,color:"#c62828",fontWeight:700,marginBottom:20,background:"#fbe9e7",border:"1px solid #ef9a9a",borderRadius:8,padding:"10px 14px"}}>⚠ Dit overschrijft de bestaande content op deze categoriepagina!</div>
+                        <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+                          <button onClick={function(){sPublishConfirm(null);}} className="btn btn-ghost" style={{fontSize:13,padding:"10px 22px"}}>Annuleer</button>
+                          <button onClick={async function(){
+                            var pc=publishConfirm;sPublishConfirm(null);
+                            sMagentoLoading(true);sMagentoStatus("loading:Verbinden met "+pc.envLabel+"...");sPushed(false);
+                            try{
+                              var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
+                              var payload=buildMagentoPutPayload(pc.catId,c);
+                              console.log("📤 Publishing to:",host+"/categories/"+pc.catId);
+                              sMagentoStatus("loading:Payload verzenden naar categorie "+pc.catId+"...");
+                              await magentoFetch(host+"/categories/"+pc.catId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
+                              sPushed(true);sMagentoStatus("success:Succesvol gepubliceerd naar "+pc.catLabel+" (ID: "+pc.catId+") op "+pc.envLabel+"!");
+                            }catch(e){
+                              console.error("❌ Publish error:",e);
+                              var errMsg=e.message||"Onbekende fout";
+                              if(errMsg.includes("Failed to fetch")||errMsg.includes("NetworkError")){
+                                errMsg="CORS fout — de browser blokkeert het verzoek naar "+magentoHostUrl+". Controleer je CORS proxy URL.";
+                              }
+                              sMagentoStatus("error:"+errMsg);
+                            }
+                            sMagentoLoading(false);
+                          }} className="btn" style={{fontSize:13,padding:"10px 22px",background:C.ink,color:"#fff",fontWeight:800}}>Ja, publiceer nu</button>
+                        </div>
+                      </div>
+                    </div>}
                     {!magentoKey&&<div style={{fontSize:11,color:C.ink3,textAlign:"center",marginTop:8}}>Voer eerst een API key in</div>}
 
                     {/* Status feedback banner */}
