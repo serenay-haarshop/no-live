@@ -918,27 +918,36 @@ function Spin({s=16}){return<svg className="spin-a" width={s} height={s} viewBox
 
 function ProgressBar({active, durationMs=40000}){
   const[pct,sPct]=useState(0);
+  const[done,sDone]=useState(false);
   useEffect(()=>{
-    if(!active){sPct(0);return;}
-    sPct(0);
+    if(!active){if(pct>0)sDone(true);return;}
+    sPct(0);sDone(false);
     const start=Date.now();
     const tick=()=>{
       const elapsed=Date.now()-start;
-      // Ease-out curve: fast start, slows near 90%, never reaches 100 until done
       const p=Math.min(90, Math.round(100*(1-Math.exp(-3.5*elapsed/durationMs))));
       sPct(p);
       if(p<90) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   },[active, durationMs]);
-  if(!active && pct===0) return null;
+  if(!active && !done) return null;
+  if(!active && done) return<div style={{width:"100%",marginTop:10}}>
+    <div style={{height:6,background:"#a5d6a7",borderRadius:3,overflow:"hidden"}}>
+      <div style={{height:"100%",width:"100%",background:"linear-gradient(90deg,#43a047,#66bb6a)",borderRadius:3,transition:"width .3s ease"}}/>
+    </div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:8}}>
+      <span style={{width:22,height:22,borderRadius:"50%",background:"#43a047",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"#fff",fontWeight:900}}>✓</span>
+      <span style={{fontSize:13,fontWeight:800,color:"#2e7d32"}}>Klaar!</span>
+    </div>
+  </div>;
   return<div style={{width:"100%",marginTop:10}}>
     <div style={{height:6,background:"#e8e0d8",borderRadius:3,overflow:"hidden"}}>
-      <div style={{height:"100%",width:`${active?pct:100}%`,background:"linear-gradient(90deg,#c4956a,#e8b87a)",borderRadius:3,transition:active?"none":"width .3s ease"}}/>
+      <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,#c4956a,#e8b87a)",borderRadius:3,transition:"none"}}/>
     </div>
     <div style={{display:"flex",justifyContent:"space-between",marginTop:4,fontSize:11,color:C.ink3}}>
-      <span>{active ? (pct<30?"Keyword research…":pct<65?"Content schrijven…":"Afronden…") : "Klaar ✓"}</span>
-      <span>{active?pct:100}%</span>
+      <span>{pct<30?"Keyword research…":pct<65?"Content schrijven…":"Afronden…"}</span>
+      <span>{pct}%</span>
     </div>
   </div>;
 }
