@@ -519,14 +519,24 @@ function getRelated(url, lang){
     if(!seen.has(p.url)){seen.add(p.url); result.push({label:p.label, url:p.url, relation});}
   };
 
-  // PRIORITEIT: siblings (zelfde niche) > children > parent > cross-category (beperkt)
-  // 1. Siblings — zelfde parent, zelfde niche (max 6)
-  sibs.slice(0,6).forEach(p=>add(p,"sibling"));
-  // 2. Children — subcategorieën (max 4)
-  kids.slice(0,4).forEach(p=>add(p,"child"));
-  // 3. Parent — breadcrumb (1)
+  // Determine the top-level category (niche) of the current URL
+  const topCategory = segs[0] || "";
+
+  // PRIORITEIT: siblings (zelfde niche) > children > same-niche from sitemap > parent > cross-category (max 1)
+  // 1. Siblings — zelfde parent, zelfde niche (max 5)
+  sibs.slice(0,5).forEach(p=>add(p,"sibling"));
+  // 2. Children — subcategorieën (max 3)
+  kids.slice(0,3).forEach(p=>add(p,"child"));
+  // 3. Same top-level category links — andere pagina's in dezelfde niche die niet al sibling/child zijn (max 3)
+  const sameNiche = map.filter(p=>{
+    if(p.url===url || seen.has(p.url)) return false;
+    const pp = p.url.replace(base,"").split("/").filter(Boolean);
+    return pp[0]===topCategory && pp.length<=segs.length+1;
+  });
+  sameNiche.slice(0,3).forEach(p=>add(p,"same-niche"));
+  // 4. Parent — breadcrumb (1)
   if(parent) add(parent, "parent");
-  // 4. Cross-category — max 1, alleen als relevant binnen zelfde niche
+  // 5. Cross-category — max 1, alleen als echt relevant
   crossLinks.slice(0,1).forEach(p=>add(p,"cross-category"));
 
   return result;
@@ -683,7 +693,7 @@ async function genContent(a, lang) {
   const lnk = validLinks.map(l=>`${l.label} (${l.url}) [${l.relation||"related"}]`).join(", ");
   const locNote = lang==="de" ? `Schrijf zoals een native Duitser in de beauty-sector. Gebruik "du/dein".` : lang==="en" ? `Write like a native English speaker for NL-based English shoppers.` : `Schrijf authentiek Nederlands.`;
   const translNote = lang!=="nl" ? `\nVoeg bij elke tekstsectie een "nl" veld toe met een vloeiende Nederlandse vertaling. Voeg ook "metaTitleNl", "metaDescriptionNl", "introTextNl" toe.` : "";
-  const p = `Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links (gebruik ALLEEN deze URLs, link naar pagina's in dezelfde niche/categorie, NIET naar ongerelateerde categorieën): ${lnk||"geen"}\n\nREGELS:\n- Alle links beginnen met ${cfg.base}. Gebruik 3-5 interne links, verspreid over de secties. Link alleen naar gerelateerde categorieën, NIET naar compleet andere productgroepen.\n- introText 50-60 woorden.\n- Elke H2 body 80-100 woorden. Elke H3 body 50-70 woorden.\n- ALLE headings (H2 en H3) beginnen met een hoofdletter. Grammaticaal correcte zinnen.\n- metaTitle: KORT, max 50 tekens inclusief " | ${cfg.brand}". Format: "Kernwoord + korte USP | ${cfg.brand}". Eindig ALTIJD met " | ${cfg.brand}".\n- aiSnippet: VERPLICHT veld, 60-75 woorden. Dit is een verborgen tekst voor AI-zoekmachines. Schrijf een compacte samenvatting van de pagina.\n- schemaFAQ: exact 3 items, antwoord max 2 zinnen per item.\n- Geen opsommingstekens. <strong>keyword</strong>. Kleine letters in body tenzij eigennamen.\n- Meta description verplicht: ${cfg.freeShipping}.\n- HTML attributen met enkele aanhalingstekens.\n${locNote}${translNote}\n\nRetourneer ALLEEN dit JSON object zonder markdown. ALLE velden zijn verplicht:\n{"metaTitle":"max 50 tekens | ${cfg.brand}","metaDescription":"max 155 tekens met ${cfg.freeShipping}","metaKeywords":["kw1","kw2"],"introText":"50-60 woorden met <strong>keyword</strong>","mainContent":{"h2_what":{"heading":"Hoofdletter...","body":"80-100 woorden"},"h2_hairtype":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_tips":{"heading":"Hoofdletter...","body":"50-70 woorden"}},"h2_why":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_combine":{"heading":"Hoofdletter...","body":"50-70 woorden"}},"h2_howto":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_daily":{"heading":"Hoofdletter...","body":"50-70 woorden"}}},"aiSnippet":"VERPLICHT 60-75 woorden samenvatting","schemaFAQ":[{"question":"...","answer":"max 2 zinnen"},{"question":"...","answer":"max 2 zinnen"},{"question":"...","answer":"max 2 zinnen"}]}`;
+  const p = `Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links (gebruik ALLEEN deze URLs, link naar pagina's in dezelfde niche/categorie, NIET naar ongerelateerde categorieën): ${lnk||"geen"}\n\nREGELS:\n- Alle links beginnen met ${cfg.base}. Gebruik 3-5 interne links, verspreid over de secties. Link alleen naar gerelateerde categorieën, NIET naar compleet andere productgroepen.\n- introText 60-75 woorden met het primaire zoekwoord vet in de eerste of tweede zin.\n- Elke H2 body 80-100 woorden. Elke H3 body 50-70 woorden.\n- ALLE headings (H2 en H3) beginnen met een hoofdletter. Grammaticaal correcte zinnen.\n- metaTitle: KORT, max 50 tekens inclusief " | ${cfg.brand}". Format: "Kernwoord + korte USP | ${cfg.brand}". Eindig ALTIJD met " | ${cfg.brand}".\n- aiSnippet: VERPLICHT veld, 60-75 woorden. Dit is een verborgen tekst voor AI-zoekmachines. Schrijf een compacte samenvatting van de pagina.\n- schemaFAQ: exact 3 items, antwoord max 2 zinnen per item.\n- Geen opsommingstekens. <strong>keyword</strong>. Kleine letters in body tenzij eigennamen.\n- Meta description verplicht: ${cfg.freeShipping}.\n- HTML attributen met enkele aanhalingstekens.\n${locNote}${translNote}\n\nRetourneer ALLEEN dit JSON object zonder markdown. ALLE velden zijn verplicht:\n{"metaTitle":"max 50 tekens | ${cfg.brand}","metaDescription":"max 155 tekens met ${cfg.freeShipping}","metaKeywords":["kw1","kw2"],"introText":"50-60 woorden met <strong>keyword</strong>","mainContent":{"h2_what":{"heading":"Hoofdletter...","body":"80-100 woorden"},"h2_hairtype":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_tips":{"heading":"Hoofdletter...","body":"50-70 woorden"}},"h2_why":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_combine":{"heading":"Hoofdletter...","body":"50-70 woorden"}},"h2_howto":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_daily":{"heading":"Hoofdletter...","body":"50-70 woorden"}}},"aiSnippet":"VERPLICHT 60-75 woorden samenvatting","schemaFAQ":[{"question":"...","answer":"max 2 zinnen"},{"question":"...","answer":"max 2 zinnen"},{"question":"...","answer":"max 2 zinnen"}]}`;
   const raw = await claude(p, 6000, false, lang);
   return xj(raw);
 }
@@ -1392,7 +1402,7 @@ function App(){
                     links=contentLinks;
                   }
                   return links.map(function(lnk,i){
-                    var relColors={"parent":["#1a5276","#d4e6f1"],"child":[C.beige,C.blush2],"sibling":["#2d6a4f","#e8f5ee"],"cross-category":["#7d3c98","#f0e6f6"],"in content":["#1565c0","#e3f2fd"]};
+                    var relColors={"parent":["#1a5276","#d4e6f1"],"child":[C.beige,C.blush2],"sibling":["#2d6a4f","#e8f5ee"],"same-niche":["#0d47a1","#e3f2fd"],"cross-category":["#7d3c98","#f0e6f6"],"in content":["#1565c0","#e3f2fd"]};
                     var pair=relColors[(lnk.relation||"").toLowerCase()]||[C.ink3,C.cream];
                     return<div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.cream,border:"1px solid "+C.bdr,borderRadius:10,padding:"10px 15px"}}>
                       <div><div style={{fontSize:13,fontWeight:700,color:C.ink}}>{lnk.label}</div><a href={lnk.url} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:C.beige,textDecoration:"none"}}>{lnk.url}</a></div>
