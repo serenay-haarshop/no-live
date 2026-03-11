@@ -391,6 +391,35 @@ function getCatIdFromUrl(url, lang){
   return match && match.catId ? match.catId : null;
 }
 
+/* Complete Magento category ID lookup — all categories from the Magento admin */
+const MAGENTO_ALL_CATS = [
+  {id:2,name:"Haarshop.nl"},{id:10,name:"Cadeaubonnen"},{id:11,name:"Merken"},{id:12,name:"Haarproducten"},{id:13,name:"Lichaam en Huidverzorging"},{id:14,name:"Make-up"},{id:16,name:"Ontharen"},{id:17,name:"Nagels"},{id:18,name:"Geuren"},{id:19,name:"Man"},{id:20,name:"Haar Tools"},{id:21,name:"Kappersproducten"},{id:22,name:"Nieuw"},{id:23,name:"SALE"},{id:24,name:"TOP"},{id:225,name:"Shampoo"},{id:226,name:"Shampoo Bar"},{id:227,name:"Conditioner"},{id:229,name:"Leave-in Conditioner"},{id:230,name:"Haarmasker"},{id:231,name:"Haar Treatment"},{id:232,name:"Haarolie"},{id:233,name:"Anti-Klit Spray"},{id:234,name:"Thickening Spray"},{id:235,name:"Haarhersteller"},{id:236,name:"Haarkuur"},{id:237,name:"Haar Vitamines"},{id:238,name:"Haar Parfum"},{id:239,name:"Haarwater"},{id:240,name:"Haarverdikker"},{id:241,name:"Pre Shampoo Treatment"},{id:242,name:"Haarverzorging in de Zon"},{id:243,name:"Haarverzorging op Haartype"},{id:244,name:"Haarproducten op Behoefte"},{id:245,name:"Haarstyling & Finishing"},{id:246,name:"Glanzend Haar"},{id:247,name:"Behandeling Haaruitval"},{id:248,name:"Haargroei Pillen"},{id:249,name:"Hoofdhuidproblemen"},{id:250,name:"Haarkleuringen"},{id:251,name:"Hair Extensions"},{id:252,name:"Haaraccessoires"},{id:254,name:"Keratinebehandeling"},{id:255,name:"Keratine Haarverzorging"},{id:257,name:"Voordeelsets & Giftsets"},{id:258,name:"Mini Reisverpakkingen"},{id:259,name:"Pompen"},{id:261,name:"Gezichtsreiniging"},{id:262,name:"Gezichtsverzorging"},{id:263,name:"Lichaamsverzorging"},{id:264,name:"Lipverzorging"},{id:265,name:"Epileren"},{id:274,name:"Acrylnagels"},{id:275,name:"Gelnagels"},{id:276,name:"Shellac / Gellak"},{id:278,name:"Nagellak"},{id:280,name:"Nagelvijl"},{id:282,name:"Nagelverzorging"},{id:283,name:"Manicure"},{id:284,name:"Pedicure"},{id:285,name:"Nagel Accessoires en Tools"},{id:288,name:"Nail Art"},{id:294,name:"Haarproducten Man"},{id:295,name:"Scheerproducten"},{id:296,name:"Baardproducten"},{id:311,name:"Stijltang"},{id:312,name:"Krultang"},{id:313,name:"Krulset"},{id:314,name:"Föhn"},{id:315,name:"Föhnborstel of Krulborstel"},{id:317,name:"Stijlborstel"},{id:318,name:"Tondeuse"},{id:319,name:"Trimmer"},{id:321,name:"Kappersschaar"},{id:322,name:"Kappersmes"},{id:323,name:"Kapperskoffer"},{id:324,name:"Haarborstels"},{id:327,name:"Haarkam"},{id:328,name:"Haarrollers en Wikkels"},{id:329,name:"Droogkap"},{id:330,name:"Mobiele Kapper"},{id:331,name:"Kappersinterieur"},{id:332,name:"Wegwerp Handschoenen"},{id:333,name:"Kappersbenodigdheden"},{id:334,name:"Kappersscharen"},{id:335,name:"Knipbenodigdheden"},{id:336,name:"Haarkleuringen Prof"},{id:337,name:"Kleurbenodigdheden"},{id:338,name:"Permanent Benodigdheden"},{id:339,name:"Oefenhoofden"},{id:340,name:"Schoonheids Benodigheden"},{id:341,name:"Hairextensions Prof"},{id:343,name:"Haar Sale"},{id:350,name:"Nagel Sale"},{id:352,name:"Wenkbrauw Make-up"},{id:353,name:"Gezicht Make-up"},{id:354,name:"Oog Make-up"},{id:355,name:"Lip Make-up"},{id:356,name:"Make-up Accessoires"},{id:357,name:"Oogverzorging"},{id:358,name:"Gezichtsverzorging"},{id:359,name:"Supplementen"},{id:360,name:"Lichaamsverzorging"},{id:361,name:"Tanning"},{id:362,name:"Zonbescherming"},{id:363,name:"Paraffine"},
+  // Styling subcategorieën
+  {id:650,name:"Haarcreme"},{id:651,name:"Krullen Creme"},{id:652,name:"Paste"},{id:653,name:"Wax"},{id:654,name:"Clay & Haar Klei"},{id:655,name:"Gel"},{id:656,name:"Gel Wax"},{id:657,name:"Hairgum"},{id:658,name:"Pommade"},{id:659,name:"Föhnlotion"},{id:660,name:"Haarspray & Haarlak"},{id:661,name:"Heat Protection Spray"},{id:662,name:"Schuimverstevigers"},{id:663,name:"Serum voor je Haar"},{id:664,name:"Vloeibare Verstevigers"},{id:665,name:"Volume Poeder"},
+  // Haarkleuringen sub
+  {id:702,name:"Haarverf"},{id:703,name:"Haarspoelingen"},{id:704,name:"Ontkleuringen - Blondeer Poeders"},{id:705,name:"Waterstof Peroxide"},{id:706,name:"Kleur Opfrissers"},{id:707,name:"Kleurmousse"},
+  // Gezicht/lichaam sub
+  {id:1717,name:"Oogcrème"},{id:1718,name:"Oogserum"},{id:1719,name:"Gezichtsscrub"},{id:1720,name:"Gezichtsreiniger"},{id:1721,name:"Gezichtstoner"},{id:1722,name:"Gezichtscrème"},{id:1723,name:"Gezichtsserum"},{id:1724,name:"Gezichtsmasker"},{id:1725,name:"Peeling Gezicht"},{id:1726,name:"Lippenbalsem"},{id:1727,name:"Handcrème"},{id:1728,name:"Bodyscrub"},{id:1729,name:"Douchegel"},{id:1730,name:"Huidserum"},{id:1731,name:"Bodylotion"},{id:1732,name:"Body Butter"},{id:1733,name:"Huidcrème"},{id:1734,name:"Huidolie"},{id:1735,name:"Deodorant"},{id:1820,name:"Wenkbrauwverf"},
+  // Make-up sub
+  {id:987,name:"Concealer"},{id:988,name:"Foundation"},{id:989,name:"Poeder"},{id:990,name:"Bronzer"},{id:991,name:"Highlighter"},{id:992,name:"Blush"},{id:993,name:"Primer"},{id:994,name:"Oogschaduw"},{id:995,name:"Mascara"},{id:996,name:"Eyeliner"},{id:1000,name:"Lipstick"},{id:1001,name:"Lipgloss"},{id:1002,name:"Lipliner"},
+  // Man sub
+  {id:1618,name:"Body Wash voor Mannen"},{id:1619,name:"Shampoo voor Mannen"},{id:1620,name:"Conditioner voor Mannen"},{id:1623,name:"Haarcrème voor Mannen"},{id:1624,name:"Styling Pasta voor Mannen"},{id:1625,name:"Haarwax voor Mannen"},{id:1626,name:"Haarklei voor Mannen"},{id:1627,name:"Haargel voor Mannen"},{id:1628,name:"Pommade voor Mannen"},{id:1629,name:"Haarspray voor Mannen"},{id:1632,name:"Haarkleuring Voor Mannen"},{id:3067,name:"Skincare voor Mannen"},
+  // Kapper interieur
+  {id:1156,name:"Kappersstoel"},{id:1158,name:"Kapperskruk"},{id:1159,name:"Werkwagen Kapper"},
+  // Haartype pages
+  {id:640,name:"Haarverzorging voor Krullend Haar"},{id:641,name:"Haarverzorging voor Droog Haar"},{id:642,name:"Haarverzorging voor Beschadigd Haar"},{id:643,name:"Haarverzorging voor Gekleurd Haar"},{id:644,name:"Haarverzorging voor Alle Haartypes"},{id:645,name:"Haarverzorging voor Fijn Haar"},{id:646,name:"Haarverzorging voor Kroezend Haar"},{id:647,name:"Haarverzorging voor Vet Haar"},{id:648,name:"Haarverzorging voor Pluizend Haar"},
+  // Conditioner sub
+  {id:566,name:"Conditioner voor Beschadigd Haar"},{id:565,name:"Conditioner voor Droog Haar"},{id:567,name:"Conditioner voor Dun Haar & Haaruitval"},{id:568,name:"Conditioner voor Fijn Haar"},{id:569,name:"Conditioner voor Gekleurd Haar"},{id:582,name:"Conditioner voor Krullend Haar"},{id:563,name:"Zilverconditioner"},
+  // Tanning sub
+  {id:1795,name:"Tanning Spray"},{id:1797,name:"Tanning Mousse"},{id:1798,name:"Tanning Lotion"},
+  // Baby/Kind
+  {id:2985,name:"Baby/Kind"},{id:3007,name:"Kids Haarverzorging"},{id:3008,name:"Kids Styling & Finishing"},{id:3010,name:"Kids Lichaamsverzorging"},
+  // Misc
+  {id:1597,name:"Haartonic"},{id:1598,name:"Haarlotion"},{id:2399,name:"Haarserum"},{id:2445,name:"Nagelpoeder"},{id:2513,name:"Parfum / Body Mist"},{id:2594,name:"Hygiëne"},{id:2596,name:"Wegwerp artikelen"},{id:2632,name:"No Yellow Shampoos"},{id:2704,name:"Black Hair"},{id:2708,name:"CG-producten"},{id:2730,name:"Cadeaus"},{id:2919,name:"Lifestyle"},{id:2980,name:"Bestsellers"},{id:3067,name:"Skincare voor Mannen"},{id:3089,name:"Warmteborstel"},{id:3112,name:"TikTok Trends"},{id:3173,name:"Refill Verpakkingen"},{id:3266,name:"Basecoat en Topcoat"},{id:3317,name:"Multistyler"},
+  // Top merken (brands)
+  {id:26,name:"18.21 Man Made"},{id:31,name:"Alfaparf Milano"},{id:33,name:"Alterna Haircare"},{id:34,name:"American Crew"},{id:3255,name:"Amika"},{id:3156,name:"Annemarie Börlind"},{id:36,name:"BaByliss PRO"},{id:37,name:"Balmain Hair Professional"},{id:2332,name:"Biolage"},{id:47,name:"Biosilk"},{id:2916,name:"Bondi Sands"},{id:2966,name:"Bouclème"},{id:50,name:"Bumble and Bumble"},{id:2683,name:"Cantu"},{id:3233,name:"CeraVe"},{id:53,name:"CHI"},{id:56,name:"CND Creative Nail Design"},{id:2800,name:"Color Wow"},{id:3283,name:"Curlsmith"},{id:63,name:"Davines"},{id:66,name:"Denman"},{id:78,name:"Fanola"},{id:87,name:"Fudge"},{id:89,name:"ghd"},{id:92,name:"Goldwell"},{id:114,name:"Joico"},{id:117,name:"Kérastase"},{id:2946,name:"Kerasilk"},{id:118,name:"Keune"},{id:119,name:"Kevin Murphy"},{id:120,name:"KIS - Haircare"},{id:121,name:"KMS Hair"},{id:123,name:"Label.m"},{id:125,name:"L'Anza"},{id:3129,name:"La Roche-Posay"},{id:129,name:"Living Proof"},{id:130,name:"L'Oréal Professionnel"},{id:2856,name:"MAC Cosmetics"},{id:132,name:"Macadamia"},{id:2982,name:"Maria Nila"},{id:138,name:"Matrix"},{id:140,name:"Max Pro"},{id:142,name:"Mediceuticals"},{id:2840,name:"Medik8"},{id:2826,name:"Milk Shake"},{id:147,name:"Moroccanoil"},{id:151,name:"Nak"},{id:150,name:"Nail Perfect"},{id:154,name:"NIOXIN"},{id:156,name:"Olaplex"},{id:157,name:"Olivia Garden"},{id:2870,name:"OPI"},{id:164,name:"Paul Mitchell"},{id:2434,name:"Payot"},{id:168,name:"Proraso"},{id:169,name:"Pupa Milano"},{id:174,name:"Redken"},{id:2729,name:"REF"},{id:176,name:"Reuzel"},{id:178,name:"Revlon"},{id:180,name:"Royal KIS"},{id:185,name:"Sebastian Professional"},{id:183,name:"Schwarzkopf Professional"},{id:188,name:"Shu Uemura"},{id:192,name:"System Professional"},{id:200,name:"Tangle Teezer"},{id:202,name:"Tigi Haircare"},{id:205,name:"Toppik Hair Fibers"},{id:207,name:"Tweezerman"},{id:3062,name:"Umberto Giannini"},{id:3078,name:"Urban Care"},{id:213,name:"Vichy"},{id:215,name:"Wahl"},{id:216,name:"Wella Professionals"},{id:217,name:"Wella SP"},{id:2651,name:"Shea Moisture"},{id:187,name:"SexyHair"},{id:2666,name:"ShampooBars"},{id:2655,name:"As I Am"},{id:2680,name:"Aunt Jackie's"},{id:2671,name:"Aveda"},{id:2760,name:"K18"},{id:193,name:"Subtil"},{id:2815,name:"Mr. Smith"},{id:3012,name:"Naïf"},{id:3042,name:"Vitakruid"},{id:3104,name:"Weleda"},{id:3105,name:"Zwitsal"},{id:2768,name:"The Insiders"},{id:2903,name:"Waterclouds"},{id:2889,name:"Uppercut"},{id:2958,name:"Artdeco"},{id:3320,name:"Sol de Janeiro"},{id:3230,name:"Sweed Beauty"},{id:3234,name:"Thalgo"},{id:3135,name:"Dado Sens"},{id:2977,name:"Clinique"},{id:3043,name:"Four Reasons"},{id:2665,name:"Eleven Australia"},{id:2631,name:"Leonor Greyl"},{id:111,name:"Jaguar Sölingen"},{id:102,name:"Hercules Sägemann"},{id:2624,name:"E-Kwip"},{id:122,name:"Kyone"},{id:189,name:"Sibel"},{id:60,name:"Comair"},{id:153,name:"Nebur"},{id:201,name:"Termix"},{id:148,name:"Moser"},{id:2709,name:"Monster Clippers"},{id:80,name:"Feather"},{id:175,name:"RefectoCil"},{id:48,name:"Biosmetics"},{id:110,name:"Jacky M."},{id:2714,name:"Ardell"},{id:2876,name:"St. Tropez"},{id:3199,name:"Silk'n"},{id:3100,name:"M2 Beauté"},{id:2435,name:"RevitaLash"},{id:3138,name:"NanoBrow"},{id:3137,name:"Nanoil"},{id:3139,name:"NanoLash"},{id:2605,name:"Neofollics"},{id:70,name:"DS Laboratories"},{id:85,name:"Foligain"},{id:214,name:"Viviscal Professional"},{id:45,name:"Biodermal"},{id:2438,name:"Skeyndor"},{id:158,name:"Oolaboo"},{id:2658,name:"Philip Martins"},{id:166,name:"Piz Buin"},{id:2875,name:"Mermade Hair"},{id:2795,name:"Bellissima"},{id:2925,name:"Hot Tools"},{id:2901,name:"Varis"},{id:67,name:"Diva Professional"},{id:75,name:"ETI"},{id:162,name:"Parlux"},{id:88,name:"GA.MA"},{id:209,name:"Ultron"},{id:3017,name:"Beachwaver"},{id:2702,name:"Red One"},{id:2336,name:"Slick Gorilla"},{id:2335,name:"Pacinos"},{id:127,name:"Layrite"},{id:98,name:"Hairgum"},{id:64,name:"Dear Barber"},{id:39,name:"Barberstation"},{id:62,name:"Dapper Dan"},{id:61,name:"d:fi"},{id:69,name:"Doop"},{id:2681,name:"CHI MAN"},{id:107,name:"Invisibobble"},{id:2851,name:"Litchy"},{id:3018,name:"Infinity Braids"},{id:43,name:"Beauty Pillow"},{id:44,name:"Beautyblender"},{id:29,name:"Ahava"},{id:3285,name:"Beauty of Joseon"},{id:2812,name:"Alpecin"},{id:2814,name:"Plantur39"},{id:2433,name:"Little Green"},{id:3103,name:"Bibs"},{id:221,name:"Yummygums"},{id:194,name:"SugarBearHair"},{id:46,name:"Bio-Oil"},{id:2727,name:"BO.Nail"},{id:191,name:"Splendid Nails"},{id:2440,name:"Upvoted Nails"},{id:2649,name:"Famous Names"},{id:55,name:"Clean and Easy"},{id:2883,name:"Framar"},{id:40,name:"Barbicide"},{id:137,name:"Mason Pearson"},{id:145,name:"MOHI"},{id:3251,name:"UNbrush"},{id:3083,name:"Veganboost"},{id:3073,name:"Imbue"},{id:3063,name:"Climaplex"},{id:3060,name:"Keratain"},{id:3079,name:"Neuma"},{id:2436,name:"SachaJuan"},{id:126,name:"La Riché Directions"},{id:58,name:"Colora Henna"},{id:3164,name:"Mïmare"},{id:2799,name:"Urban Alchemy"},{id:2767,name:"Uniq One"},{id:2611,name:"SEB MAN"},{id:2757,name:"Red Deer"},{id:2865,name:"IMPERIO Cosmetics"},{id:3272,name:"Steilish"},{id:3296,name:"Sabrina Carpenter"},{id:3225,name:"MAE"},{id:3226,name:"O&M"},{id:3218,name:"Osmo"},{id:3222,name:"Juna"},{id:3232,name:"Lola"},{id:3231,name:"Curlygirlmovement"},{id:2716,name:"CurlyEllie"},{id:2640,name:"Biacre"},{id:2639,name:"Roverhair"},{id:2620,name:"Profistar"},{id:2595,name:"Wylera"},{id:182,name:"Sassoon Professional"},{id:115,name:"Kadus Professional"},{id:106,name:"Indola"},{id:186,name:"Senscience"},{id:172,name:"Pureology"},{id:141,name:"Maxliss Keratine"},{id:112,name:"Jean Paul Mynè"},{id:128,name:"Lisap Milano"},{id:2867,name:"Salon B"},{id:2937,name:"Epres"},{id:2950,name:"I.N.O"},{id:2798,name:"Invisible"},{id:2793,name:"Kérastase Genesis Homme"},{id:3041,name:"Beautylash"},{id:3082,name:"Ivybears"},{id:2971,name:"Wimperserum"},{id:2942,name:"Balzy"},{id:2866,name:"Al Bahri"},{id:84,name:"Flow Cosmetics"},{id:2694,name:"Solidu"},{id:2668,name:"Paper & Boo"},{id:2601,name:"Foamie"},{id:51,name:"Calmare"},{id:2715,name:"Lee Stafford"},{id:131,name:"Lockstyler"},{id:165,name:"Perfect Shine"},{id:2333,name:"Coyon"},{id:2662,name:"Trendy Tip"},{id:71,name:"Dux"},{id:2625,name:"Sani"},{id:2899,name:"Elleure"},{id:3095,name:"Bronz'Express"},{id:3099,name:"Sea Magik"},{id:2915,name:"N Brands"},{id:160,name:"Orofluido"},{id:159,name:"Original"},{id:2785,name:"MKS-Eco"},{id:2765,name:"B.R.U.S.H."},{id:38,name:"Bao-med"},{id:2693,name:"Dermalogica"},{id:41,name:"Barburys"},{id:42,name:"BCL SPA"},{id:109,name:"Jack Dean"},{id:196,name:"Swann Morton"},{id:204,name:"Tondeo"},{id:82,name:"Fejic"},{id:212,name:"Valera Professional"},{id:2648,name:"Veta"},{id:2823,name:"So Divine"},{id:2832,name:"Sextoys"},{id:104,name:"ibd Nails"},{id:105,name:"ibp"}
+];
+
 function getRelated(url, lang){
   const cfg = DOMAIN_CONFIG[lang||"nl"];
   const map = getSiteMap(lang||"nl");
@@ -1521,35 +1550,68 @@ function App(){
                   </div>
 
                   <div style={{background:"#fafafa",border:"1px solid "+C.bdr,borderRadius:12,padding:16}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-                      <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3}}>Categorie</div>
-                    </div>
+                    <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:C.ink3,marginBottom:12}}>Categorie</div>
                     {(function(){
                       var autoId=getCatIdFromUrl(url,lang);
                       var autoMatch=autoId?getSiteMap(lang).find(function(p){return p.catId===autoId;}):null;
                       var activeId=magentoCatId||autoId;
                       var activeName=magentoCatId?magentoCatName:(autoMatch?autoMatch.label:"");
+                      var isOverridden=magentoCatId&&magentoCatId!==autoId;
                       return <>
-                        {autoId&&<div style={{background:"#e8f5e9",border:"1px solid #a5d6a7",borderRadius:8,padding:"10px 14px",marginBottom:10}}>
+                        {/* Auto-detected from URL */}
+                        {autoId&&<div style={{background:"#e8f5e9",border:"1px solid #a5d6a7",borderRadius:8,padding:"12px 14px",marginBottom:10}}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                            <div><span style={{fontSize:12,fontWeight:800,color:"#2e7d32"}}>Automatisch herkend:</span>{" "}<span style={{fontSize:13,fontWeight:700,color:"#1b5e20"}}>{autoMatch?autoMatch.label:"Onbekend"}</span>{" "}<span style={{fontSize:11,color:"#4caf50"}}>(ID: {autoId})</span></div>
-                            <span style={{fontSize:10,fontWeight:700,color:"#2e7d32",background:"#c8e6c9",padding:"2px 8px",borderRadius:4}}>Via URL</span>
+                            <div>
+                              <span style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#2e7d32"}}>Automatisch herkend via URL</span>
+                              <div style={{marginTop:4}}><span style={{fontSize:15,fontWeight:900,color:"#1b5e20"}}>{autoMatch?autoMatch.label:"Onbekend"}</span>{" "}<span style={{fontSize:12,color:"#4caf50",fontWeight:600}}>ID: {autoId}</span></div>
+                            </div>
+                            <span style={{fontSize:22}}>✅</span>
                           </div>
                         </div>}
-                        {!autoId&&<div style={{background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:8,padding:"10px 14px",marginBottom:10}}>
-                          <div style={{fontSize:12,fontWeight:700,color:"#e65100"}}>URL niet gevonden in sitemap. Voer handmatig een categorie-ID in:</div>
+                        {!autoId&&<div style={{background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:8,padding:"12px 14px",marginBottom:10}}>
+                          <div style={{fontSize:12,fontWeight:700,color:"#e65100"}}>⚠ URL niet gevonden in sitemap. Zoek hieronder op H1/titel of voer handmatig een ID in.</div>
                         </div>}
-                        {magentoCatId&&magentoCatId!==autoId&&<div style={{background:"#e3f2fd",border:"1px solid #90caf9",borderRadius:8,padding:"10px 14px",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                          <div><span style={{fontSize:12,fontWeight:800,color:"#1565c0"}}>Handmatig overschreven:</span>{" "}<span style={{fontSize:13,fontWeight:700,color:"#0d47a1"}}>{magentoCatName}</span>{" "}<span style={{fontSize:11,color:"#42a5f5"}}>(ID: {magentoCatId})</span></div>
-                          <button onClick={function(){sMagentoCatId(null);sMagentoCatName("");}} style={{fontSize:11,color:"#c62828",background:"none",border:"none",cursor:"pointer",fontFamily:"var(--f)",fontWeight:700}}>Reset</button>
-                        </div>}
-                        <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
-                          <div style={{flex:1}}>
-                            <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:4}}>Handmatig ID overschrijven</div>
-                            <input type="text" value={magentoCatId&&magentoCatId!==autoId?magentoCatId:""} onChange={function(e){var val=e.target.value.replace(/\D/g,"");if(val){sMagentoCatId(parseInt(val));sMagentoCatName("Handmatig ID "+val);}else{sMagentoCatId(null);sMagentoCatName("");}}} placeholder={"Laat leeg voor auto-detect"+(autoId?" (ID: "+autoId+")":"")} style={{fontSize:13}}/>
+
+                        {/* Manual override (shown if overridden) */}
+                        {isOverridden&&<div style={{background:"#e3f2fd",border:"1px solid #90caf9",borderRadius:8,padding:"12px 14px",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                          <div>
+                            <span style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:".06em",color:"#1565c0"}}>Handmatig overschreven</span>
+                            <div style={{marginTop:4}}><span style={{fontSize:15,fontWeight:900,color:"#0d47a1"}}>{magentoCatName}</span>{" "}<span style={{fontSize:12,color:"#42a5f5",fontWeight:600}}>ID: {magentoCatId}</span></div>
                           </div>
+                          <button onClick={function(){sMagentoCatId(null);sMagentoCatName("");sMagentoCatSearch("");}} className="btn btn-sm btn-ghost" style={{fontSize:11}}>Reset naar auto</button>
+                        </div>}
+
+                        {/* H1/Title search box */}
+                        <div style={{marginBottom:10}}>
+                          <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:4}}>Zoek op H1 / categorienaam</div>
+                          <input type="text" value={magentoCatSearch} onChange={function(e){sMagentoCatSearch(e.target.value);}} placeholder="Typ de H1 of paginatitel om te bevestigen..." style={{fontSize:13}}/>
+                          {magentoCatSearch.length>=2&&(function(){
+                            var q=magentoCatSearch.toLowerCase();
+                            var matches=MAGENTO_ALL_CATS.filter(function(cat){return cat.name.toLowerCase().includes(q);}).slice(0,12);
+                            if(matches.length===0)return<div style={{marginTop:6,fontSize:11,color:C.ink3}}>Geen categorieën gevonden voor "{magentoCatSearch}"</div>;
+                            return<div style={{marginTop:6,maxHeight:200,overflowY:"auto",border:"1px solid "+C.bdr,borderRadius:8,background:"#fff"}}>
+                              {matches.map(function(cat){
+                                var isActive=activeId===cat.id;
+                                return<div key={cat.id} onClick={function(){sMagentoCatId(cat.id);sMagentoCatName(cat.name);sMagentoCatSearch("");}} style={{padding:"8px 14px",cursor:"pointer",borderBottom:"1px solid "+C.bdr,fontSize:12,display:"flex",justifyContent:"space-between",alignItems:"center",background:isActive?"#e8f5e9":"#fff",transition:"background .1s"}} onMouseEnter={function(e){if(!isActive)e.currentTarget.style.background=C.blush2;}} onMouseLeave={function(e){if(!isActive)e.currentTarget.style.background="#fff";}}>
+                                  <span style={{fontWeight:700,color:isActive?"#2e7d32":C.ink}}>{cat.name}</span>
+                                  <span style={{fontSize:10,color:isActive?"#4caf50":C.ink3,fontWeight:600}}>ID: {cat.id}</span>
+                                </div>;
+                              })}
+                            </div>;
+                          })()}
                         </div>
-                        <div style={{marginTop:8,fontSize:11,color:C.ink3}}>Publicatie gebruikt: <strong style={{color:C.ink}}>{activeName||"geen"} (ID: {activeId||"?"})</strong></div>
+
+                        {/* Manual ID input */}
+                        <div style={{marginBottom:8}}>
+                          <div style={{fontSize:11,fontWeight:700,color:C.ink2,marginBottom:4}}>Of voer handmatig een categorie-ID in</div>
+                          <input type="text" value={isOverridden?magentoCatId:""} onChange={function(e){var val=e.target.value.replace(/\D/g,"");if(val){sMagentoCatId(parseInt(val));var found=MAGENTO_ALL_CATS.find(function(c){return c.id===parseInt(val);});sMagentoCatName(found?found.name:"Handmatig ID "+val);}else{sMagentoCatId(null);sMagentoCatName("");}}} placeholder={"Laat leeg voor auto-detect"+(autoId?" (ID: "+autoId+")":"")} style={{fontSize:13}}/>
+                        </div>
+
+                        {/* Summary */}
+                        <div style={{background:"#fff",border:"1px solid "+C.bdr,borderRadius:8,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                          <div style={{fontSize:12,color:C.ink3}}>Publicatie gebruikt:</div>
+                          <div style={{fontSize:13,fontWeight:800,color:activeId?C.ink:"#c62828"}}>{activeName||"Geen categorie"} {activeId?"(ID: "+activeId+")":"⚠"}</div>
+                        </div>
                       </>;
                     })()}
                   </div>
