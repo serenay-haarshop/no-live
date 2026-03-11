@@ -446,10 +446,9 @@ function getRelated(url, lang){
     return ps.length===segs.length && ps[segs.length-2]===parentSeg;
   }) : [];
 
-  // cross-category: alleen als er duidelijke routine/gebruikerslogica is
-  // bijv. shampoo ↔ conditioner, haarverzorging ↔ haartools
+  // cross-category: ALLEEN binnen dezelfde niche, max 1-2
   const crossMap = {
-    // NL — subcategorie-niveau koppelingen op basis van haarroutine
+    // Haarverzorging — alleen haar ↔ haar
     "shampoo":["haarverzorging/conditioners","haarverzorging/haarmasker"],
     "conditioners":["haarverzorging/shampoo","haarverzorging/haarmasker"],
     "leave-in-conditioners":["haarverzorging/conditioners","haarverzorging/haarmasker"],
@@ -460,30 +459,55 @@ function getRelated(url, lang){
     "haarstyling":["haarverzorging/shampoo"],
     "haarkleuringen":["haarverzorging/shampoo","haarverzorging/conditioners"],
     "haaraccessoires":["haarverzorging/haarstyling"],
-    // DE — correct URLs from live haarshop.de
+    "alle-voordeelsets":["haarverzorging/shampoo","haarverzorging/haarmasker"],
+    "extensions":["haarverzorging/haaraccessoires"],
+    // Styling sub — alleen styling ↔ styling
+    "krullen-creme":["haarverzorging/haarstyling/wax","haarverzorging/haarstyling/schuimverstevigers"],
+    "styling-creme-wax":["haarverzorging/haarstyling/wax","haarverzorging/haarstyling/haar-paste"],
+    "haar-paste":["haarverzorging/haarstyling/wax","haarverzorging/haarstyling/styling-creme-wax"],
+    "wax":["haarverzorging/haarstyling/haar-paste","haarverzorging/haarstyling/gel"],
+    "gel":["haarverzorging/haarstyling/wax","haarverzorging/haarstyling/pommade"],
+    "pommade":["haarverzorging/haarstyling/gel","haarverzorging/haarstyling/wax"],
+    "volume-poeder":["haarverzorging/haarstyling/gel","haarverzorging/haarstyling/haar-paste"],
+    "schuimverstevigers":["haarverzorging/haarstyling/krullen-creme"],
+    // Huidverzorging — alleen huid ↔ huid
+    "gezicht":["huidverzorging/lichaam","huidverzorging/oogverzorging"],
+    "lichaam":["huidverzorging/gezicht","huidverzorging/tanning"],
+    "tanning":["huidverzorging/lichaam","huidverzorging/ontharen"],
+    "ontharen":["huidverzorging/lichaam"],
+    "oogverzorging":["huidverzorging/gezicht"],
+    // DE
     "conditioner":["haarpflege/shampoo","haarpflege/haarmaske"],
     "haarmaske":["haarpflege/conditioner","haarpflege/leave-in-conditioner"],
     "leave-in-conditioner":["haarpflege/conditioner","haarpflege/haarmaske"],
     "hair-treatment":["haarpflege/haarmaske","haarpflege/kopfhautprobleme"],
     "kopfhautprobleme":["haarpflege/shampoo","haarpflege/hair-treatment"],
     "haarfarben":["haarpflege/shampoo","haarpflege/conditioner"],
+    "gesichtspflege":["beautypflege/korperpflege"],
+    "korperpflege":["beautypflege/gesichtspflege"],
     // EN
     "hair-mask":["hair-care/conditioner","hair-care/hair-oil"],
     "hair-oil":["hair-care/hair-mask","hair-care/leave-in-conditioner"],
     "scalp-care":["hair-care/shampoo","hair-care/treatment"],
     "styling-finishing":["hair-care/shampoo"],
     "hair-coloring":["hair-care/shampoo","hair-care/conditioner"],
-    // PRO (B2B) — professionele routine koppelingen
-    // Verzorging ↔ Kleuring (salonworkflow)
-    "haarkleuringen":["haarverzorging/shampoo","professioneel/kleurbenodigdheden"],
-    "kappers-interieur":["professioneel"],
+    "face-care":["skin-care/body-care"],
+    "body-care":["skin-care/face-care","skin-care/tanning"],
+    // PRO
+    "kappers-interieur":["professioneel/knipbenodigdheden","professioneel/kleurbenodigdheden"],
     "kappers-scharen":["professioneel/knipbenodigdheden"],
-    // Tools ↔ professioneel
+    "knipbenodigdheden":["professioneel/kleurbenodigdheden"],
+    "kleurbenodigdheden":["professioneel/knipbenodigdheden","haarverzorging/haarkleuringen"],
     "stijltangen":["tools/krultangen-warme-fohnborstels","tools/haardrogers"],
-    "tondeuses-trimmers":["tools/trimmers","tools/kappers-scharen"],
-    // Nagels crosslinks
-    "acryl-nagels":["nagels/brisa-gel-nagels","nagels/nagelverzorging"],
-    "shellac":["nagels/manicure","nagels/nagelverzorging"],
+    "tondeuses-trimmers":["tools/trimmers"],
+    "trimmers":["tools/tondeuses-trimmers"],
+    "kammen":["tools/borstels"],
+    "borstels":["tools/kammen"],
+    "acryl-nagels":["nagels/brisa-gel-nagels","nagels/shellac"],
+    "brisa-gel-nagels":["nagels/acryl-nagels","nagels/shellac"],
+    "shellac":["nagels/manicure","nagels/acryl-nagels"],
+    "manicure":["nagels/pedicure","nagels/shellac"],
+    "pedicure":["nagels/manicure"],
   };
   const currentSlug = segs[segs.length-1] || "";
   const crossPaths = crossMap[currentSlug] || [];
@@ -495,15 +519,15 @@ function getRelated(url, lang){
     if(!seen.has(p.url)){seen.add(p.url); result.push({label:p.label, url:p.url, relation});}
   };
 
-  // PRIORITEIT volgens SEO best practice voor categoriepagina's:
-  // 1. Siblings DOMINANT — sterkste semantisch signaal, zelfde intent cluster (2-4)
-  sibs.slice(0,4).forEach(p=>add(p,"sibling"));
-  // 2. Cross-category BEPERKT — alleen bij duidelijke routine/gebruikerslogica (max 2)
-  crossLinks.slice(0,2).forEach(p=>add(p,"cross-category"));
-  // 3. Parent — voor breadcrumb-achtige navigatie (1)
+  // PRIORITEIT: siblings (zelfde niche) > children > parent > cross-category (beperkt)
+  // 1. Siblings — zelfde parent, zelfde niche (max 6)
+  sibs.slice(0,6).forEach(p=>add(p,"sibling"));
+  // 2. Children — subcategorieën (max 4)
+  kids.slice(0,4).forEach(p=>add(p,"child"));
+  // 3. Parent — breadcrumb (1)
   if(parent) add(parent, "parent");
-  // 4. Children — alleen bij brede categoriepagina's die subcategorieën hebben (max 3)
-  kids.slice(0,3).forEach(p=>add(p,"child"));
+  // 4. Cross-category — max 1, alleen als relevant binnen zelfde niche
+  crossLinks.slice(0,1).forEach(p=>add(p,"cross-category"));
 
   return result;
 }
@@ -659,7 +683,7 @@ async function genContent(a, lang) {
   const lnk = validLinks.map(l=>`${l.label} (${l.url}) [${l.relation||"related"}]`).join(", ");
   const locNote = lang==="de" ? `Schrijf zoals een native Duitser in de beauty-sector. Gebruik "du/dein".` : lang==="en" ? `Write like a native English speaker for NL-based English shoppers.` : `Schrijf authentiek Nederlands.`;
   const translNote = lang!=="nl" ? `\nVoeg bij elke tekstsectie een "nl" veld toe met een vloeiende Nederlandse vertaling. Voeg ook "metaTitleNl", "metaDescriptionNl", "introTextNl" toe.` : "";
-  const p = `Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links (gebruik ALLEEN deze): ${lnk||"geen"}\n\nREGELS:\n- Alle links beginnen met ${cfg.base}. 3-5 interne links.\n- introText 50-60 woorden.\n- Elke H2 body 80-100 woorden. Elke H3 body 50-70 woorden.\n- ALLE headings (H2 en H3) beginnen met een hoofdletter. Grammaticaal correcte Nederlandse zinnen.\n- metaTitle: KORT, max 50 tekens inclusief " | ${cfg.brand}". Format: "Kernwoord + korte USP | ${cfg.brand}". Eindig ALTIJD met " | ${cfg.brand}".\n- aiSnippet: 60-75 woorden, VERPLICHT, mag NIET leeg zijn.\n- schemaFAQ: exact 3 items, antwoord max 2 zinnen.\n- Geen opsommingstekens. <strong>keyword</strong>. Kleine letters in body tenzij eigennamen.\n- Meta description verplicht: ${cfg.freeShipping}.\n- HTML attributen met enkele aanhalingstekens.\n${locNote}${translNote}\n\nRetourneer ALLEEN dit JSON object zonder markdown:\n{"metaTitle":"...","metaDescription":"...","metaKeywords":["kw1"],"introText":"...","mainContent":{"h2_what":{"heading":"...","body":"..."},"h2_hairtype":{"heading":"...","body":"...","h3_tips":{"heading":"...","body":"..."}},"h2_why":{"heading":"...","body":"...","h3_combine":{"heading":"...","body":"..."}},"h2_howto":{"heading":"...","body":"...","h3_daily":{"heading":"...","body":"..."}}},"aiSnippet":"VERPLICHT 60-75 woorden","schemaFAQ":[{"question":"...","answer":"..."},{"question":"...","answer":"..."},{"question":"...","answer":"..."}]}`;
+  const p = `Taal: ${ll}\nDomein: ${cfg.brand} (${cfg.base})\nPaginatype: ${a.pageType}\nPrimair zoekwoord: "${pk?.term}"\nSecundaire zoekwoorden: ${sec.join(", ")}\nMerk: ${a.brand||"n.v.t."}\nProducttypes: ${(a.productTypes||[]).join(", ")}\nHaarbehoeften: ${(a.hairNeeds||[]).join(", ")}\n\nInterne links (gebruik ALLEEN deze URLs, link naar pagina's in dezelfde niche/categorie, NIET naar ongerelateerde categorieën): ${lnk||"geen"}\n\nREGELS:\n- Alle links beginnen met ${cfg.base}. Gebruik 3-5 interne links, verspreid over de secties. Link alleen naar gerelateerde categorieën, NIET naar compleet andere productgroepen.\n- introText 50-60 woorden.\n- Elke H2 body 80-100 woorden. Elke H3 body 50-70 woorden.\n- ALLE headings (H2 en H3) beginnen met een hoofdletter. Grammaticaal correcte zinnen.\n- metaTitle: KORT, max 50 tekens inclusief " | ${cfg.brand}". Format: "Kernwoord + korte USP | ${cfg.brand}". Eindig ALTIJD met " | ${cfg.brand}".\n- aiSnippet: VERPLICHT veld, 60-75 woorden. Dit is een verborgen tekst voor AI-zoekmachines. Schrijf een compacte samenvatting van de pagina.\n- schemaFAQ: exact 3 items, antwoord max 2 zinnen per item.\n- Geen opsommingstekens. <strong>keyword</strong>. Kleine letters in body tenzij eigennamen.\n- Meta description verplicht: ${cfg.freeShipping}.\n- HTML attributen met enkele aanhalingstekens.\n${locNote}${translNote}\n\nRetourneer ALLEEN dit JSON object zonder markdown. ALLE velden zijn verplicht:\n{"metaTitle":"max 50 tekens | ${cfg.brand}","metaDescription":"max 155 tekens met ${cfg.freeShipping}","metaKeywords":["kw1","kw2"],"introText":"50-60 woorden met <strong>keyword</strong>","mainContent":{"h2_what":{"heading":"Hoofdletter...","body":"80-100 woorden"},"h2_hairtype":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_tips":{"heading":"Hoofdletter...","body":"50-70 woorden"}},"h2_why":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_combine":{"heading":"Hoofdletter...","body":"50-70 woorden"}},"h2_howto":{"heading":"Hoofdletter...","body":"80-100 woorden","h3_daily":{"heading":"Hoofdletter...","body":"50-70 woorden"}}},"aiSnippet":"VERPLICHT 60-75 woorden samenvatting","schemaFAQ":[{"question":"...","answer":"max 2 zinnen"},{"question":"...","answer":"max 2 zinnen"},{"question":"...","answer":"max 2 zinnen"}]}`;
   const raw = await claude(p, 6000, false, lang);
   return xj(raw);
 }
@@ -825,7 +849,7 @@ function buildHTML(c,a){
 /* ── HTML BLOCK VIEWER ── */
 function HtmlModal({code, onClose}){
   const[copied,sCopied]=useState(false);
-  return<div style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.55)",backdropFilter:"blur(3px)"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+  return<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.55)",backdropFilter:"blur(3px)"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
     <div style={{background:"#fff",borderRadius:16,width:"min(780px,95vw)",maxHeight:"85vh",display:"flex",flexDirection:"column",boxShadow:"0 24px 80px rgba(0,0,0,.3)"}}>
       <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
         <div>
@@ -1108,6 +1132,12 @@ function App(){
       sPhase("generating");sStatus("SEO-content schrijven…");
       const g=await genContent(r,lang);
       if(!g.metaKeywords)g.metaKeywords=[];
+      // Fallback: generate aiSnippet if missing
+      if(!g.aiSnippet||g.aiSnippet.length<20){
+        var pk=r.keywords?.find(k=>k.type==="primary")||r.keywords?.[0];
+        var snippetPrompt="Schrijf een AI search snippet van 60-75 woorden voor een categoriepagina over \""+( pk?.term||"")+"\" op "+DOMAIN_CONFIG[lang].brand+". Het snippet is verborgen op de pagina (display:none) en bedoeld voor Google SGE, ChatGPT en Perplexity. Schrijf in het "+{nl:"Nederlands",de:"Duits",en:"Engels",pro:"Nederlands"}[lang]+". Retourneer ALLEEN de platte tekst, geen JSON, geen aanhalingstekens.";
+        try{g.aiSnippet=await claude(snippetPrompt,300,false,lang);}catch(e2){console.warn("aiSnippet fallback failed:",e2);}
+      }
       sC(g);sHtml(buildHTML(g,r));
       sProgActive(false);sPhase("done");sTab("intro");sPrev(true);
       sessionStorage.setItem("hs_state",JSON.stringify({analysis:r,content:g,url:url.trim(),lang}));
@@ -1590,23 +1620,6 @@ function App(){
                       <button onClick={function(){var prodHost=DOMAIN_CONFIG[lang]?.base||"https://www.haarshop.nl";sMagentoHostUrl(prodHost);sessionStorage.setItem("hs_mage_host",prodHost);sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(!magentoHostUrl.includes("staging")?"#2e7d32":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:!magentoHostUrl.includes("staging")?"#2e7d32":"#fff",color:!magentoHostUrl.includes("staging")?"#fff":C.ink3,transition:"all .15s"}}>Productie</button>
                       <button onClick={function(){sShowStagingConfirm(true);}} style={{fontSize:11,padding:"5px 12px",borderRadius:8,cursor:"pointer",border:"1px solid "+(magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":C.bdr),fontFamily:"var(--f)",fontWeight:700,background:magentoHostUrl==="https://staging.haarshop.nl"?"#e65100":"#fff",color:magentoHostUrl==="https://staging.haarshop.nl"?"#fff":C.ink3,transition:"all .15s"}}>Staging</button>
                       {magentoHostUrl.includes("staging")&&<span style={{fontSize:11,fontWeight:800,color:"#e65100",background:"#fff3e0",border:"1px solid #ffcc80",borderRadius:6,padding:"3px 10px",fontFamily:"var(--f)"}}>STAGING OMGEVING</span>}
-
-                      {/* Staging confirmation modal */}
-                      {showStagingConfirm&&<div style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.5)",backdropFilter:"blur(3px)"}} onClick={e=>{if(e.target===e.currentTarget)sShowStagingConfirm(false);}}>
-                        <div style={{background:"#fff",borderRadius:16,padding:"36px 40px",maxWidth:440,width:"95%",boxShadow:"0 24px 80px rgba(0,0,0,.25)",fontFamily:"var(--f)"}}>
-                          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}>
-                            <div style={{width:48,height:48,borderRadius:12,background:"#fff3e0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>⚠️</div>
-                            <div style={{fontSize:20,fontWeight:900,color:C.ink,lineHeight:1.3}}>Overschakelen naar Staging?</div>
-                          </div>
-                          <div style={{fontSize:14,color:C.ink2,lineHeight:1.7,marginBottom:24}}>
-                            Je schakelt over naar de <strong style={{color:"#e65100"}}>STAGING omgeving</strong> van Haarshop. Dit is de testomgeving — wijzigingen hier zijn <strong>niet zichtbaar</strong> op de live site.
-                          </div>
-                          <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
-                            <button onClick={function(){sShowStagingConfirm(false);}} className="btn btn-ghost" style={{fontSize:13,padding:"10px 22px"}}>Annuleer</button>
-                            <button onClick={function(){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");sShowStagingConfirm(false);}} className="btn" style={{fontSize:13,padding:"10px 22px",background:"#e65100",color:"#fff",fontWeight:800}}>Ja, gebruik Staging</button>
-                          </div>
-                        </div>
-                      </div>}
                     </div>
                     <button className="btn btn-dark" style={{width:"100%",marginTop:12,fontSize:13,padding:"12px",justifyContent:"center",position:"relative"}} disabled={!magentoKey||magentoLoading} onClick={function(){
                       if(!magentoKey){sMagentoStatus("error:Voer eerst een API key in");return;}
@@ -1623,45 +1636,6 @@ function App(){
                     </button>
 
                     {/* Publish confirmation modal */}
-                    {publishConfirm&&<div style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.5)",backdropFilter:"blur(3px)"}} onClick={e=>{if(e.target===e.currentTarget)sPublishConfirm(null);}}>
-                      <div style={{background:"#fff",borderRadius:16,padding:"36px 40px",maxWidth:480,width:"95%",boxShadow:"0 24px 80px rgba(0,0,0,.25)",fontFamily:"var(--f)"}}>
-                        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}>
-                          <div style={{width:48,height:48,borderRadius:12,background:publishConfirm.envLabel==="STAGING"?"#fff3e0":"#e8f5e9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{publishConfirm.envLabel==="STAGING"?"🧪":"🚀"}</div>
-                          <div style={{fontSize:20,fontWeight:900,color:C.ink,lineHeight:1.3}}>Publiceren naar {publishConfirm.envLabel}?</div>
-                        </div>
-                        <div style={{background:C.cream,border:"1px solid "+C.bdr,borderRadius:10,padding:"14px 18px",marginBottom:20}}>
-                          <div style={{display:"grid",gridTemplateColumns:"auto 1fr",gap:"6px 14px",fontSize:13}}>
-                            <span style={{fontWeight:800,color:C.ink3}}>Host</span><span style={{fontWeight:700,color:C.ink}}>{magentoHostUrl}</span>
-                            <span style={{fontWeight:800,color:C.ink3}}>Categorie</span><span style={{fontWeight:700,color:C.ink}}>{publishConfirm.catLabel} <span style={{color:C.ink3,fontWeight:600}}>(ID: {publishConfirm.catId})</span></span>
-                            <span style={{fontWeight:800,color:C.ink3}}>Website</span><span style={{fontWeight:700,color:C.ink}}>{DOMAIN_CONFIG[lang].magentoCode}</span>
-                          </div>
-                        </div>
-                        <div style={{fontSize:13,color:"#c62828",fontWeight:700,marginBottom:20,background:"#fbe9e7",border:"1px solid #ef9a9a",borderRadius:8,padding:"10px 14px"}}>⚠ Dit overschrijft de bestaande content op deze categoriepagina!</div>
-                        <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
-                          <button onClick={function(){sPublishConfirm(null);}} className="btn btn-ghost" style={{fontSize:13,padding:"10px 22px"}}>Annuleer</button>
-                          <button onClick={async function(){
-                            var pc=publishConfirm;sPublishConfirm(null);
-                            sMagentoLoading(true);sMagentoStatus("loading:Verbinden met "+pc.envLabel+"...");sPushed(false);
-                            try{
-                              var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
-                              var payload=buildMagentoPutPayload(pc.catId,c);
-                              console.log("📤 Publishing to:",host+"/categories/"+pc.catId);
-                              sMagentoStatus("loading:Payload verzenden naar categorie "+pc.catId+"...");
-                              await magentoFetch(host+"/categories/"+pc.catId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
-                              sPushed(true);sMagentoStatus("success:Succesvol gepubliceerd naar "+pc.catLabel+" (ID: "+pc.catId+") op "+pc.envLabel+"!");
-                            }catch(e){
-                              console.error("❌ Publish error:",e);
-                              var errMsg=e.message||"Onbekende fout";
-                              if(errMsg.includes("Failed to fetch")||errMsg.includes("NetworkError")){
-                                errMsg="CORS fout — de browser blokkeert het verzoek naar "+magentoHostUrl+". Controleer je CORS proxy URL.";
-                              }
-                              sMagentoStatus("error:"+errMsg);
-                            }
-                            sMagentoLoading(false);
-                          }} className="btn" style={{fontSize:13,padding:"10px 22px",background:C.ink,color:"#fff",fontWeight:800}}>Ja, publiceer nu</button>
-                        </div>
-                      </div>
-                    </div>}
                     {!magentoKey&&<div style={{fontSize:11,color:C.ink3,textAlign:"center",marginTop:8}}>Voer eerst een API key in</div>}
 
                     {/* Status feedback banner */}
@@ -1853,6 +1827,61 @@ function App(){
         </div>
       </div>}
     </main>
+
+    {/* === MODALS — rendered at top level for proper fixed centering === */}
+    {showStagingConfirm&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.5)",backdropFilter:"blur(3px)"}} onClick={e=>{if(e.target===e.currentTarget)sShowStagingConfirm(false);}}>
+      <div style={{background:"#fff",borderRadius:16,padding:"36px 40px",maxWidth:440,width:"95%",boxShadow:"0 24px 80px rgba(0,0,0,.25)",fontFamily:"var(--f)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}>
+          <div style={{width:48,height:48,borderRadius:12,background:"#fff3e0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>⚠️</div>
+          <div style={{fontSize:20,fontWeight:900,color:C.ink,lineHeight:1.3}}>Overschakelen naar Staging?</div>
+        </div>
+        <div style={{fontSize:14,color:C.ink2,lineHeight:1.7,marginBottom:24}}>
+          Je schakelt over naar de <strong style={{color:"#e65100"}}>STAGING omgeving</strong> van Haarshop. Dit is de testomgeving — wijzigingen hier zijn <strong>niet zichtbaar</strong> op de live site.
+        </div>
+        <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+          <button onClick={function(){sShowStagingConfirm(false);}} className="btn btn-ghost" style={{fontSize:13,padding:"10px 22px"}}>Annuleer</button>
+          <button onClick={function(){sMagentoHostUrl("https://staging.haarshop.nl");sessionStorage.setItem("hs_mage_host","https://staging.haarshop.nl");sMagentoCategories(null);sMagentoCatId(null);sMagentoStatus("");sShowStagingConfirm(false);}} className="btn" style={{fontSize:13,padding:"10px 22px",background:"#e65100",color:"#fff",fontWeight:800}}>Ja, gebruik Staging</button>
+        </div>
+      </div>
+    </div>}
+
+    {publishConfirm&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,.5)",backdropFilter:"blur(3px)"}} onClick={e=>{if(e.target===e.currentTarget)sPublishConfirm(null);}}>
+      <div style={{background:"#fff",borderRadius:16,padding:"36px 40px",maxWidth:480,width:"95%",boxShadow:"0 24px 80px rgba(0,0,0,.25)",fontFamily:"var(--f)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}>
+          <div style={{width:48,height:48,borderRadius:12,background:publishConfirm.envLabel==="STAGING"?"#fff3e0":"#e8f5e9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{publishConfirm.envLabel==="STAGING"?"🧪":"🚀"}</div>
+          <div style={{fontSize:20,fontWeight:900,color:C.ink,lineHeight:1.3}}>Publiceren naar {publishConfirm.envLabel}?</div>
+        </div>
+        <div style={{background:C.cream,border:"1px solid "+C.bdr,borderRadius:10,padding:"14px 18px",marginBottom:20}}>
+          <div style={{display:"grid",gridTemplateColumns:"auto 1fr",gap:"6px 14px",fontSize:13}}>
+            <span style={{fontWeight:800,color:C.ink3}}>Host</span><span style={{fontWeight:700,color:C.ink}}>{magentoHostUrl}</span>
+            <span style={{fontWeight:800,color:C.ink3}}>Categorie</span><span style={{fontWeight:700,color:C.ink}}>{publishConfirm.catLabel} <span style={{color:C.ink3,fontWeight:600}}>(ID: {publishConfirm.catId})</span></span>
+            <span style={{fontWeight:800,color:C.ink3}}>Website</span><span style={{fontWeight:700,color:C.ink}}>{DOMAIN_CONFIG[lang].magentoCode}</span>
+          </div>
+        </div>
+        <div style={{fontSize:13,color:"#c62828",fontWeight:700,marginBottom:20,background:"#fbe9e7",border:"1px solid #ef9a9a",borderRadius:8,padding:"10px 14px"}}>⚠ Dit overschrijft de bestaande content op deze categoriepagina!</div>
+        <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+          <button onClick={function(){sPublishConfirm(null);}} className="btn btn-ghost" style={{fontSize:13,padding:"10px 22px"}}>Annuleer</button>
+          <button onClick={async function(){
+            var pc=publishConfirm;sPublishConfirm(null);
+            sMagentoLoading(true);sMagentoStatus("loading:Verbinden met "+pc.envLabel+"...");sPushed(false);
+            try{
+              var host=magentoHostUrl+"/rest/"+DOMAIN_CONFIG[lang].magentoCode+"/V1";
+              var payload=buildMagentoPutPayload(pc.catId,c);
+              console.log("📤 Publishing to:",host+"/categories/"+pc.catId);
+              sMagentoStatus("loading:Payload verzenden naar categorie "+pc.catId+"...");
+              await magentoFetch(host+"/categories/"+pc.catId,magentoKey,{method:"PUT",body:JSON.stringify(payload)});
+              sPushed(true);sMagentoStatus("success:Succesvol gepubliceerd naar "+pc.catLabel+" (ID: "+pc.catId+") op "+pc.envLabel+"!");
+            }catch(e){
+              console.error("❌ Publish error:",e);
+              var errMsg=e.message||"Onbekende fout";
+              if(errMsg.includes("Failed to fetch")||errMsg.includes("NetworkError")){errMsg="CORS fout — controleer je CORS proxy URL.";}
+              sMagentoStatus("error:"+errMsg);
+            }
+            sMagentoLoading(false);
+          }} className="btn" style={{fontSize:13,padding:"10px 22px",background:C.ink,color:"#fff",fontWeight:800}}>Ja, publiceer nu</button>
+        </div>
+      </div>
+    </div>}
 
     {/* Ahrefs notice */}
     <div style={{position:"fixed",bottom:20,right:20,zIndex:300,background:C.ink,color:"#fff",borderRadius:10,padding:"11px 15px",fontSize:12,fontFamily:"var(--f)",maxWidth:230,boxShadow:"0 4px 20px rgba(0,0,0,.2)",lineHeight:1.6}}>
