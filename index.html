@@ -1309,12 +1309,18 @@ function App(){
             ))}
           </div>
         </div>
-        {(phase==="analyzing"||phase==="generating")&&<div style={{position:"fixed",top:58,left:0,right:0,zIndex:199,background:"rgba(255,255,255,.97)",padding:"16px 20px",borderBottom:`1px solid ${C.bdr}`,boxShadow:"0 2px 12px rgba(0,0,0,.08)"}}>
-          <div style={{maxWidth:1400,margin:"0 auto",display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-            <Spin s={16}/>
-            <span style={{fontSize:13,fontWeight:700,color:C.ink}}>{status||"SEO content genereren…"}</span>
+        {(phase==="analyzing"||phase==="generating"||phase==="done")&&<div style={{marginTop:18,background:"#fff",borderRadius:12,padding:"16px 20px",border:"1px solid "+C.bdr}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+            {phase!=="done"&&<Spin s={16}/>}
+            {phase==="done"&&<span style={{width:16,height:16,borderRadius:"50%",background:"#43a047",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:900}}>✓</span>}
+            <span style={{fontSize:13,fontWeight:700,color:phase==="done"?"#2e7d32":C.ink}}>
+              {phase==="analyzing"?"Stap 1/2 — Keyword research en pagina-analyse…":phase==="generating"?"Stap 2/2 — SEO-content schrijven…":"Content succesvol gegenereerd!"}
+            </span>
           </div>
-          <div style={{maxWidth:1400,margin:"0 auto"}}><ProgressBar active={true} durationMs={60000}/></div>
+          {phase==="done"
+            ?<div style={{height:6,background:"#a5d6a7",borderRadius:3}}><div style={{height:"100%",width:"100%",background:"linear-gradient(90deg,#43a047,#66bb6a)",borderRadius:3}}/></div>
+            :<ProgressBar active={true} durationMs={60000}/>
+          }
         </div>}
         {err&&<div style={{marginTop:14,background:"#fef0ef",border:`1px solid #f5c6c2`,borderRadius:10,padding:"12px 18px",fontSize:13,color:C.red,fontWeight:700}}>⚠ {err}</div>}
       </div>
